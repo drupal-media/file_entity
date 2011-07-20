@@ -190,3 +190,10 @@ function file_entity_update_7001() {
   }
   variable_del('file_displays');
 }
+
+/**
+ * Empty update function to trigger a theme registry rebuild.
+ */
+function file_entity_update_7002() {
+  // Do nothing.
+}

@@ -4,3 +4,4 @@ package = Media
 core = 7.x
 dependencies[] = field
 dependencies[] = ctools
+files[] = views/views_plugin_row_file_view.inc

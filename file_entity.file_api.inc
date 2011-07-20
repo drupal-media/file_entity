@@ -97,16 +97,12 @@ function file_info_cache_clear() {
  *   An array in the format expected by drupal_render().
  */
 function file_view_multiple($files, $view_mode = 'default', $weight = 0, $langcode = NULL) {
-  field_attach_prepare_view('file', $files, $view_mode);
-  entity_prepare_view('file', $files);
-
-  $build = array(
-    '#sorted' => TRUE,
-  );
+  field_attach_prepare_view('file', $files, $view_mode, $langcode);
+  entity_prepare_view('file', $files, $langcode);
+  $build = array('#sorted' => TRUE);
   foreach ($files as $file) {
     $build[$file->fid] = file_view($file, $view_mode, $langcode);
-    $build[$file->fid]['#weight'] = $weight;
-    $weight++;
+    $build[$file->fid]['#weight'] = $weight++;
   }
   return $build;
 }
@@ -130,29 +126,77 @@ function file_view($file, $view_mode = 'default', $langcode = NULL) {
     $langcode = $GLOBALS['language_content']->language;
   }
 
-  // Prepare the file object for viewing, in case file_view() was called by
-  // something other than file_view_multiple(). These functions exit quickly if
-  // they've already run, so it's okay to call them even if they've already been
-  // called by file_view_multiple().
-  field_attach_prepare_view('file', array($file->fid => $file), $view_mode);
-  entity_prepare_view('file', array($file->fid => $file));
+  // Populate $file->content with a render() array.
+  file_build_content($file, $view_mode, $langcode);
 
-  // Create the render array with the file itself and with fields.
-  $build = array(
+  $build = $file->content;
+  // We don't need duplicate rendering info in $file->content.
+  unset($file->content);
+
+  $build += array(
+    '#theme' => 'file_entity',
     '#file' => $file,
     '#view_mode' => $view_mode,
     '#language' => $langcode,
   );
-  $build += field_attach_view('file', $file, $view_mode, $langcode);
-  $build['file'] = file_view_file($file, $view_mode, $langcode);
 
-  // Allow modules to add and alter.
-  module_invoke_all('file_view', $file, $view_mode, $langcode);
-  module_invoke_all('entity_view', $file, 'file', $view_mode, $langcode);
+  // Add contextual links for this file, except when the file is already being
+  // displayed on its own page. Modules may alter this behavior (for example,
+  // to restrict contextual links to certain view modes) by implementing
+  // hook_file_view_alter().
+  if (!empty($file->fid) && !($view_mode == 'full' && file_is_page($file))) {
+    $build['#contextual_links']['file'] = array('file', array($file->fid));
+  }
+
+  // Allow modules to modify the structured file.
   $type = 'file';
   drupal_alter(array('file_view', 'entity_view'), $build, $type);
 
   return $build;
+}
+
+/**
+ * Builds a structured array representing the file's content.
+ *
+ * @param $file
+ *   A file object.
+ * @param $view_mode
+ *   View mode, e.g. 'default', 'full', etc.
+ * @param $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ */
+function file_build_content($file, $view_mode = 'default', $langcode = NULL) {
+  if (!isset($langcode)) {
+    $langcode = $GLOBALS['language_content']->language;
+  }
+
+  // Remove previously built content, if exists.
+  $file->content = array();
+
+  // Build fields content.
+  // In case of a multiple view, file_view_multiple() already ran the
+  // 'prepare_view' step. An internal flag prevents the operation from running
+  // twice.
+  field_attach_prepare_view('file', array($file->fid => $file), $view_mode, $langcode);
+  entity_prepare_view('file', array($file->fid => $file), $langcode);
+  $file->content += field_attach_view('file', $file, $view_mode, $langcode);
+
+  $links = array();
+  $file->content['links'] = array(
+    '#theme' => 'links__file',
+    '#pre_render' => array('drupal_pre_render_links'),
+    '#attributes' => array('class' => array('links', 'inline')),
+  );
+  $file->content['links']['file'] = array(
+    '#theme' => 'links__file__file',
+    '#links' => $links,
+    '#attributes' => array('class' => array('links', 'inline')),
+  );
+
+  // Allow modules to make their own additions to the file.
+  module_invoke_all('file_view', $file, $view_mode, $langcode);
+  module_invoke_all('entity_view', $file, 'file', $view_mode, $langcode);
 }
 
 /**
