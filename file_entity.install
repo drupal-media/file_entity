@@ -6,7 +6,7 @@
  */
 
 /**
- * Implement hook_schema_alter().
+ * Implements hook_schema_alter().
  */
 function file_entity_schema_alter(&$schema) {
   $schema['file_managed']['fields']['type'] = array(
@@ -20,44 +20,10 @@ function file_entity_schema_alter(&$schema) {
 }
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function file_entity_schema() {
-  $schema['file_display'] = _file_entity_schema_file_display_7000();
-
-  // Integrate {file_display} with CTools Exportables.
-  // @see help/export.html documentation bundled with the CTools project.
-  $schema['file_display']['export'] = array(
-    'key' => 'name',
-    'key name' => 'Name',
-    'primary key' => 'name',
-    // The {file_display}.status field is used to control whether the display
-    // is active in the display chain. CTools-level disabling is something
-    // different, and it's not yet clear how to interpret it for file displays.
-    // Until that's figured out, prevent CTools-level disabling.
-    'can disable' => FALSE,
-    'default hook' => 'file_default_displays',
-    'identifier' => 'file_display',
-    'api' => array(
-      'owner' => 'file_entity',
-      'api' => 'file_default_displays',
-      'minimum_version' => 1,
-      'current_version' => 1,
-    ),
-  );
-
-  return $schema;
-}
-
-/**
- * {file_display} schema used by file_entity_update_7000().
- *
- * Do not change this schema. When the {file_display} schema changes, create a
- * new one that corresponds to the appropriate update function, and ensure that
- * file_entity_schema() uses the latest one.
- */
-function _file_entity_schema_file_display_7000() {
-  return array(
+  $schema['file_display'] = array(
     'description' => 'Stores configuration options for file displays.',
     'fields' => array(
       // @todo Can be refactored as a compond primary key after
@@ -91,7 +57,29 @@ function _file_entity_schema_file_display_7000() {
       ),
     ),
     'primary key' => array('name'),
+    'export' => array(
+      // Integrate {file_display} with CTools Exportables.
+      // @see help/export.html documentation bundled with the CTools project.
+      'key' => 'name',
+      'key name' => 'Name',
+      'primary key' => 'name',
+      // The {file_display}.status field is used to control whether the display
+      // is active in the display chain. CTools-level disabling is something
+      // different, and it's not yet clear how to interpret it for file displays.
+      // Until that's figured out, prevent CTools-level disabling.
+      'can disable' => FALSE,
+      'default hook' => 'file_default_displays',
+      'identifier' => 'file_display',
+      'api' => array(
+        'owner' => 'file_entity',
+        'api' => 'file_default_displays',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
   );
+
+  return $schema;
 }
 
 /**
@@ -123,10 +111,51 @@ function file_entity_install() {
 }
 
 /**
+ * Implement hook_uninstall().
+ */
+function file_entity_uninstall() {
+  db_drop_field('file_managed', 'type');
+}
+
+/**
  * Create the {file_display} database table.
  */
 function file_entity_update_7000() {
-  db_create_table('file_display', _file_entity_schema_file_display_7000());
+  $schema['file_display'] = array(
+    'description' => 'Stores configuration options for file displays.',
+    'fields' => array(
+      'name' => array(
+        'description' => 'A combined string (FILE_TYPE__VIEW_MODE__FILE_FORMATTER) identifying a file display configuration. For integration with CTools Exportables, stored as a single string rather than as a compound primary key.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Weight of formatter within the display chain for the associated file type and view mode. A file is rendered using the lowest weighted enabled display configuration that matches the file type and view mode and that is capable of displaying the file.',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'The status of the display. (1 = enabled, 0 = disabled)',
+      ),
+      'settings' => array(
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array of name value pairs that store the formatter settings for the display.',
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+
+  db_create_table('file_display', $schema['file_display']);
 }
 
 /**
@@ -160,11 +189,4 @@ function file_entity_update_7001() {
     }
   }
   variable_del('file_displays');
-}
-
-/**
- * Implement hook_uninstall().
- */
-function file_entity_uninstall() {
-  db_drop_field('file_managed', 'type');
 }
