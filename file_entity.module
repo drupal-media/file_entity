@@ -129,6 +129,7 @@ function file_entity_entity_info_alter(&$entity_info) {
       ),
     );
     $entity_info['file']['bundles'][$type] = array_intersect_key($info, drupal_map_assoc(array('label', 'admin')));
+    $entity_info['file']['view callback'] = 'file_view_multiple';
   }
 }
 
