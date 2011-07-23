@@ -401,3 +401,47 @@ function _file_sort_array_by_weight(&$a) {
     $a[$key]['weight'] = $original_weight[$key];
   }
 }
+
+/**
+ * Returns a file object which can be passed to file_save().
+ *
+ * @param $uri
+ *   A string containing the URI, path, or filename.
+ * @param $use_existing
+ *   (Optional) If TRUE and there's an existing file in the {file_managed}
+ *   table with the passed in URI, then that file object is returned.
+ *   Otherwise, a new file object is returned.
+ *
+ * @return
+ *   A file object, or FALSE on error.
+ *
+ * @todo Remove this function when http://drupal.org/node/685818 is fixed.
+ */
+function file_uri_to_object($uri, $use_existing = FALSE) {
+  if ($use_existing) {
+    $query = db_select('file_managed', 'f')
+      ->fields('f', array('fid'))
+      ->condition('uri', $uri)
+      ->execute()
+      ->fetchCol();
+    if (!empty($query)) {
+      $file = file_load(array_shift($query));
+    }
+  }
+  if (!isset($file)) {
+    global $user;
+    $uri = file_stream_wrapper_uri_normalize($uri);
+    $wrapper = file_stream_wrapper_get_instance_by_uri($uri);
+    $file = new StdClass;
+    $file->uid = $user->uid;
+    $file->filename = basename($uri);
+    $file->uri = $uri;
+    $file->filemime = file_get_mimetype($uri);
+    // This is gagged because some uris will not support it.
+    $file->filesize = @filesize($uri);
+    $file->timestamp = REQUEST_TIME;
+    $file->status = FILE_STATUS_PERMANENT;
+    $file->is_new = TRUE;
+  }
+  return $file;
+}
