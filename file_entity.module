@@ -495,3 +495,37 @@ function template_preprocess_file_entity(&$variables) {
   $variables['theme_hook_suggestions'][] = 'file__' . $file->fid;
   $variables['theme_hook_suggestions'][] = 'file__' . $file->fid . '__' . $view_mode;
 }
+
+/**
+ * Returns the file type name of the passed file or file type string.
+ *
+ * @param $file
+ *   A file object or string that indicates the file type to return.
+ *
+ * @return
+ *   The file type name or FALSE if the file type is not found.
+ */
+function file_type_get_name($file) {
+  $type = is_object($file) ? $file->type : $file;
+  $info = entity_get_info('file');
+  return isset($info['bundles'][$type]['label']) ? $info['bundles'][$type]['label'] : FALSE;
+}
+
+/**
+ * Returns a list of available file type names.
+ *
+ * @return
+ *   An array of file type names, keyed by the type.
+ */
+function file_type_get_names() {
+  $names = &drupal_static(__FUNCTION__);
+
+  if (!isset($names)) {
+    $info = entity_get_info('file');
+    foreach ($info['bundles'] as $bundle => $bundle_info) {
+      $names[$bundle] = $bundle_info['label'];
+    }
+  }
+
+  return $names;
+}
