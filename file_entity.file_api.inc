@@ -410,30 +410,27 @@ function _file_sort_array_by_weight(&$a) {
  * @param $use_existing
  *   (Optional) If TRUE and there's an existing file in the {file_managed}
  *   table with the passed in URI, then that file object is returned.
- *   Otherwise, a new file object is returned.
+ *   Otherwise, a new file object is returned. Default is TRUE.
  *
  * @return
  *   A file object, or FALSE on error.
  *
+ * @todo This should probably be named file_load_by_uri($uri, $create_if_not_exists).
  * @todo Remove this function when http://drupal.org/node/685818 is fixed.
  */
-function file_uri_to_object($uri, $use_existing = FALSE) {
+function file_uri_to_object($uri, $use_existing = TRUE) {
+  $file = FALSE;
+  $uri = file_stream_wrapper_uri_normalize($uri);
+
   if ($use_existing) {
-    $query = db_select('file_managed', 'f')
-      ->fields('f', array('fid'))
-      ->condition('uri', $uri)
-      ->execute()
-      ->fetchCol();
-    if (!empty($query)) {
-      $file = file_load(array_shift($query));
-    }
+    // We should always attempt to re-use a file if possible.
+    $files = entity_load('file', FALSE, array('uri' => $uri));
+    $file = !empty($files) ? reset($files) : FALSE;
   }
-  if (!isset($file)) {
-    global $user;
-    $uri = file_stream_wrapper_uri_normalize($uri);
-    $wrapper = file_stream_wrapper_get_instance_by_uri($uri);
-    $file = new StdClass;
-    $file->uid = $user->uid;
+
+  if (empty($file)) {
+    $file = new StdClass();
+    $file->uid = $GLOBALS['user']->uid;
     $file->filename = basename($uri);
     $file->uri = $uri;
     $file->filemime = file_get_mimetype($uri);
@@ -441,7 +438,7 @@ function file_uri_to_object($uri, $use_existing = FALSE) {
     $file->filesize = @filesize($uri);
     $file->timestamp = REQUEST_TIME;
     $file->status = FILE_STATUS_PERMANENT;
-    $file->is_new = TRUE;
   }
+
   return $file;
 }
