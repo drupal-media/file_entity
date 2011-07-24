@@ -34,13 +34,19 @@ function file_info_file_types($file_type = NULL) {
 
 /**
  * Determines the file type of a passed in file object.
+ *
+ * The file type is determined by extracting the 'first' part of the file's
+ * MIME type. For example, a PNG image with a MIME type of 'image/png' will
+ * have a file type of 'image'.
+ *
+ * @link http://www.iana.org/assignments/media-types/index.html IANA list of official MIME media types @endlink
  */
 function file_get_type($file) {
-  foreach (file_info_file_types() as $type => $info) {
-    if (isset($info['claim callback']) && ($function = $info['claim callback']) && function_exists($function) && $function($file, $type)) {
-      return $type;
-    }
+  // Ensure that a MIME type has been determined first.
+  if (empty($file->filemime)) {
+    $file->filemime = file_get_mimetype($file->uri);
   }
+  return substr($file->filemime, 0, strpos($file->filemime, '/'));
 }
 
 /**

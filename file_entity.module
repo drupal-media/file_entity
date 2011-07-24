@@ -175,17 +175,13 @@ function file_entity_field_extra_fields() {
  * Implements hook_file_presave().
  */
 function file_entity_file_presave($file) {
-  // The file type is a bundle key, so can't be NULL. file_entity_schema_alter()
-  // ensures that it isn't NULL after a file_load(). However, file_save() can be
-  // called on a new file object, so we apply the default here as well.
-  if (!isset($file->type)) {
-    $file->type = '';
+  // Always ensure the filemime property is current.
+  if (!empty($file->original) || empty($file->filemime)) {
+    $file->filemime = file_get_mimetype($file->uri);
   }
 
-  // If the file doesn't already have a real type, attempt to assign it one.
-  if ($file->type === '' && ($type = file_get_type($file))) {
-    $file->type = $type;
-  }
+  // Always update file type based on filemime.
+  $file->type = file_get_type($file);
 
   field_attach_presave('file', $file);
 }
@@ -495,18 +491,4 @@ function template_preprocess_file_entity(&$variables) {
   $variables['theme_hook_suggestions'][] = 'file__' . $file->type;
   $variables['theme_hook_suggestions'][] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->filemime);
   $variables['theme_hook_suggestions'][] = 'file__' . $file->fid;
-}
-
-/**
- * Implements hook_file_load().
- */
-function file_entity_file_load(array $files) {
-  foreach ($files as $fid => $file) {
-    // Existing files may have empty file types, so fallback to the first part
-    // of the file's MIME type.
-    // @todo Remove when http://drupal.org/node/1227080 is fixed.
-    if (empty($file->type)) {
-      list($file->type) = explode('/', $file->filemime);
-    }
-  }
 }

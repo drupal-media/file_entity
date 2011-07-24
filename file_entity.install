@@ -108,6 +108,12 @@ function file_entity_install() {
   else {
     db_add_field('file_managed', 'type', $spec, $indexes_new);
   }
+
+  // Update all files with empty types to use the first part of filemime.
+  db_update('file_managed')
+    ->expression('type', "SUBSTRING_INDEX(filemime, '/', 1)")
+    ->condition('type', '')
+    ->execute();
 }
 
 /**
@@ -196,4 +202,17 @@ function file_entity_update_7001() {
  */
 function file_entity_update_7002() {
   // Do nothing.
+}
+
+/**
+ * Update all files with empty types to use the first part of filemime.
+ *
+ * For example, an png image with filemime 'image/png' will be assigned a file
+ * type of 'image'.
+ */
+function file_entity_update_7003() {
+  db_update('file_managed')
+    ->expression('type', "SUBSTRING_INDEX(filemime, '/', 1)")
+    ->condition('type', '')
+    ->execute();
 }
