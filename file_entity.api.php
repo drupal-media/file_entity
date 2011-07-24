@@ -12,8 +12,6 @@
  *   An array whose keys are file type names and whose values are arrays
  *   describing the file type, with the following key/value pairs:
  *   - label: The human-readable name of the file type.
- *   - claim callback: The name of the function that returns if a given file is
- *     of this type. See hook_file_type_TYPE_claim() for details.
  *   - default view callback: (optional) The name of the function that returns a
  *     drupal_render() array for displaying the file. Used when there are no
  *     administrator configured file formatters, or none of the configured ones
@@ -53,16 +51,6 @@ function hook_file_type_info() {
  */
 function hook_file_type_info_alter(&$info) {
   // @todo Add example.
-}
-
-/**
- * @todo Add documentation.
- *
- * Note: This is not really a hook. The function name is manually specified via
- * 'claim callback' in hook_file_type_info(), with this recommended
- * callback name pattern.
- */
-function hook_file_type_TYPE_claim($file, $type) {
 }
 
 /**
