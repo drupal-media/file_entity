@@ -180,6 +180,18 @@ function file_build_content($file, $view_mode = 'default', $langcode = NULL) {
   // Remove previously built content, if exists.
   $file->content = array();
 
+  // Build the actual file display.
+  // @todo Figure out how to clean this crap up.
+  $file->content['file'] = file_view_file($file, $view_mode, $langcode);
+  if (isset($file->content['file'])) {
+    unset($file->content['file']['#file']);
+    unset($file->content['file']['#view_mode']);
+    unset($file->content['file']['#language']);
+  }
+  else {
+    unset($file->content['file']);
+  }
+
   // Build fields content.
   // In case of a multiple view, file_view_multiple() already ran the
   // 'prepare_view' step. An internal flag prevents the operation from running
