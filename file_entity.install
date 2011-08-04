@@ -200,9 +200,7 @@ function file_entity_update_7001() {
 /**
  * Empty update function to trigger a theme registry rebuild.
  */
-function file_entity_update_7002() {
-  // Do nothing.
-}
+function file_entity_update_7002() { }
 
 /**
  * Update all files with empty types to use the first part of filemime.
@@ -216,3 +214,8 @@ function file_entity_update_7003() {
     ->condition('type', '')
     ->execute();
 }
+
+/**
+ * Empty update function to trigger an entity cache rebuild.
+ */
+function file_entity_update_7004() { }

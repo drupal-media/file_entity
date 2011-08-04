@@ -76,7 +76,7 @@ function file_entity_file_display_form($form, &$form_state, $file_type, $view_mo
       '#default_value' => !empty($current_displays[$name]['status']),
       '#description' => isset($formatter['description']) ? $formatter['description'] : NULL,
       '#parents' => array('displays', $name, 'status'),
-      '#weight' => $formatter['weight'] + $i/1000,
+      '#weight' => (isset($formatter['weight']) ? $formatter['weight'] : 0) + ($i / 1000),
     );
     $i++;
   }
@@ -123,7 +123,7 @@ function file_entity_file_display_form($form, &$form_state, $file_type, $view_mo
           '#title' => $formatter['label'],
           '#parents' => array('displays', $name, 'settings'),
           '#group' => 'display_settings',
-          '#weight' => $formatter['weight'] + $i/1000,
+          '#weight' => (isset($formatter['weight']) ? $formatter['weight'] : 0) + ($i / 1000),
         ) + $settings_form;
       }
     }

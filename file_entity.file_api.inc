@@ -19,8 +19,19 @@ function file_info_file_types($file_type = NULL) {
   $info = &drupal_static(__FUNCTION__);
   if (!isset($info)) {
     $info = module_invoke_all('file_type_info');
+
+    // Add support for the standard file types until this can be fully
+    // abstracted out of Media module.
+    $info += array(
+      'application' => array('label' => t('Application (multipurpose)')),
+      'audio' => array('label' => t('Audio')),
+      'image' => array('label' => t('Image')),
+      'text' => array('label' => t('Text')),
+      'video' => array('label' => t('Video')),
+    );
+
     drupal_alter('file_type_info', $info);
-    _file_sort_array_by_weight($info);
+    uasort($info, '_file_entity_sort_weight_label');
   }
   if ($file_type) {
     if (isset($info[$file_type])) {
@@ -66,7 +77,7 @@ function file_info_formatter_types($formatter_type = NULL) {
   if (!isset($info)) {
     $info = module_invoke_all('file_formatter_info');
     drupal_alter('file_formatter_info', $info);
-    _file_sort_array_by_weight($info);
+    uasort($info, '_file_entity_sort_weight_label');
   }
   if ($formatter_type) {
     if (isset($info[$formatter_type])) {
@@ -417,6 +428,22 @@ function _file_sort_array_by_weight(&$a) {
   uasort($a, 'drupal_sort_weight');
   foreach ($a as $key => $item) {
     $a[$key]['weight'] = $original_weight[$key];
+  }
+}
+
+/**
+ * User sort function to sort by weight, then label/name.
+ */
+function _file_entity_sort_weight_label($a, $b) {
+  $a_weight = isset($a['weight']) ? $a['weight'] : 0;
+  $b_weight = isset($b['weight']) ? $b['weight'] : 0;
+  if ($a_weight == $b_weight) {
+    $a_label = isset($a['label']) ? $a['label'] : '';
+    $b_label = isset($b['label']) ? $b['label'] : '';
+    return strcasecmp($a_label, $b_label);
+  }
+  else {
+    return $a_weight < $b_weight ? -1 : 1;
   }
 }
 
