@@ -92,6 +92,9 @@ function file_entity_field_formatter_view($entity_type, $entity, $field, $instan
       $recursion_queue[$id] = $id;
     }
 
+    // Prevent 'empty' fields from causing a WSOD.
+    $items = array_filter($items);
+
     // Check the recursion queue to determine which nodes should be fully
     // displayed, and which nodes will only be displayed as a title.
     $files_display = array();
