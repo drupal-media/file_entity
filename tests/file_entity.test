@@ -1,0 +1,52 @@
+<?php
+
+// Prevent failures since the test bot cannot run dependencies.
+if (!class_exists('TokenTestHelper')) {
+  return;
+}
+
+/**
+ * Test integration for the file_entity module.
+ */
+
+class FileEntityTokenTestCase extends TokenTestHelper {
+  public static function getInfo() {
+    return array(
+      'name' => 'File entity tokens',
+      'description' => 'Test the file entity tokens.',
+      'group' => 'File entity',
+      'dependencies' => array('token')
+    );
+  }
+
+  function setUp($modules = array()) {
+    $modules[] = 'file_entity';
+    parent::setUp($modules);
+  }
+
+  function testFileEntityTokens() {
+    $text_files = $this->drupalGetTestFiles('text');
+    foreach ($text_files as &$file) {
+      $files = file_save($file);
+    }
+    $tokens = array(
+      'type' => 'Text',
+      'type:name' => 'Text',
+      'type:machine-name' => 'text',
+      'type:count' => count($text_files),
+    );
+    $this->assertTokens('file', array('file' => $text_files[0]), $tokens);
+
+    $image_files = $this->drupalGetTestFiles('image');
+    foreach ($image_files as &$file) {
+      $files = file_save($file);
+    }
+    $tokens = array(
+      'type' => 'Image',
+      'type:name' => 'Image',
+      'type:machine-name' => 'image',
+      'type:count' => count($image_files),
+    );
+    $this->assertTokens('file', array('file' => $image_files[0]), $tokens);
+  }
+}
