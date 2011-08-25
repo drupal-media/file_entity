@@ -534,3 +534,15 @@ function file_type_get_names() {
 
   return $names;
 }
+
+/**
+ * Implements hook_file_mimetype_mapping_alter().
+ *
+ * Fix the mimetype assocation for .ogg files to 'audio/ogg' rather than
+ * 'application/ogg' as per http://en.wikipedia.org/wiki/Ogg.
+ *
+ * @todo Remove when http://drupal.org/node/1239376 is fixed in core.
+ */
+function file_entity_file_mimetype_mapping_alter(&$mapping) {
+  $mapping['extensions']['ogg'] = 189;
+}
