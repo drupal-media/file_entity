@@ -200,7 +200,7 @@ function file_entity_update_7001() {
 /**
  * Empty update function to trigger a theme registry rebuild.
  */
-function file_entity_update_7002() { }
+function file_entity_update_7100() { }
 
 /**
  * Update all files with empty types to use the first part of filemime.
@@ -208,7 +208,7 @@ function file_entity_update_7002() { }
  * For example, an png image with filemime 'image/png' will be assigned a file
  * type of 'image'.
  */
-function file_entity_update_7003() {
+function file_entity_update_7101() {
   db_update('file_managed')
     ->expression('type', "SUBSTRING_INDEX(filemime, '/', 1)")
     ->condition('type', '')
@@ -218,4 +218,4 @@ function file_entity_update_7003() {
 /**
  * Empty update function to trigger an entity cache rebuild.
  */
-function file_entity_update_7004() { }
+function file_entity_update_7102() { }
