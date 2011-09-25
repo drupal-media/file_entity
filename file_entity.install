@@ -219,3 +219,17 @@ function file_entity_update_7101() {
  * Empty update function to trigger an entity cache rebuild.
  */
 function file_entity_update_7102() { }
+
+/**
+ * Moving basic view, edit, delete files functionality from Media module.
+ */
+function file_entity_update_7103() {
+  // admin media => admin file
+  db_update('role_permission')
+    ->fields(array(
+      'permission' => 'administer files',
+      'module' => 'file_entity'))
+    ->condition('permission', 'administer media')
+    ->execute();
+
+}
