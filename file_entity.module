@@ -174,7 +174,7 @@ function file_entity_theme() {
   return array(
     'file_entity' => array(
       'render element' => 'elements',
-      'template' => 'file',
+      'template' => 'file_entity',
     ),
     'file_entity_file_type_overview' => array(
       'variables' => array('label' => NULL, 'description' => NULL),
@@ -499,13 +499,13 @@ function file_is_page($file) {
 }
 
 /**
- * Process variables for file.tpl.php
+ * Process variables for file_entity.tpl.php
  *
  * The $variables array contains the following arguments:
  * - $file
  * - $view_mode
  *
- * @see file.tpl.php
+ * @see file_entity.tpl.php
  */
 function template_preprocess_file_entity(&$variables) {
   $view_mode = $variables['view_mode'] = $variables['elements']['#view_mode'];
