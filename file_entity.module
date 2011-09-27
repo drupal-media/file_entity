@@ -686,6 +686,10 @@ function file_entity_multiple_delete_confirm_operation($files) {
   // This function is a form generation function.
   $form = array();
   $form_state = array();
+  // Set the submit handler explicitly because this form is being built
+  // under a different form_id.
+  $form['#submit'] = array();
+  $form['#submit'][] = 'file_entity_multiple_delete_confirm_submit';
   return file_entity_multiple_delete_confirm($form, $form_state, $files);
 }
 

@@ -16,7 +16,8 @@ function file_entity_admin_files($form, &$form_state) {
     // was selected.  Hand off to the callback of the operation at this point
     // which should return a confirm form.
     $operation = $form_state['values']['operation'];
-    return call_user_func_array($operation['callback'], array($form_state['values']['files']));
+    $files = array_keys(array_filter($form_state['values']['files']));
+    return call_user_func_array($operation['callback'], array($files));
   }
 
   $limit = variable_get('file_entity_admin_files_limit', 50);

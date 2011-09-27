@@ -106,9 +106,6 @@ function file_entity_page_delete($file) {
  *   An array of file_ids to delete.
  */
 function file_entity_multiple_delete_confirm($form, &$form_state, $files, $redirect_path = NULL) {
-  $form = array();
-  $files = array_filter($files);
-
   $form['files'] = array('#tree' => TRUE);
   $form['file_titles'] = array('#theme' => 'item_list');
 
@@ -121,7 +118,6 @@ function file_entity_multiple_delete_confirm($form, &$form_state, $files, $redir
     $form['file_titles']['#items'][] = check_plain($file->filename);
   }
   $form['operation'] = array('#type' => 'hidden', '#value' => 'delete');
-  $form['#submit'][] = 'file_entity_multiple_delete_confirm_submit';
 
   $confirm_question = format_plural(count($files),
                                   'Are you sure you want to delete this file?',
@@ -151,7 +147,7 @@ function file_entity_multiple_delete_confirm_submit($form, &$form_state) {
       }
       else {
         $message = t('File @title was deleted', array('@title' => $file->filename));
-        $form_state['redirect'] = '<front>';
+        $form_state['redirect'] = user_access('administer files') ? 'admin/content/file' : '<front>';
         watchdog('file', $message);
         drupal_set_message($message);
       }
