@@ -487,3 +487,26 @@ function file_uri_to_object($uri, $use_existing = TRUE) {
 
   return $file;
 }
+
+/**
+ * A list of operations which can be called on files.
+ *
+ * @return
+ *  An associave array of operations keyed by a system name.
+ *    - label: A string to show in the operations dropdown.
+ *    - callback (string): A callback function to call for the operation. This
+ *        function will be passed an array of file_ids which were selected.
+ *    - confirm (boolean): Whether or not this operation requires a confirm form
+ *        In the case where confirm is set to true, callback should be a function
+ *        which can return a confirm form.
+ */
+function hook_file_operations_info() {
+  $operations = array(
+    'archive_and_email' => array(
+      'label' => t('Archive the selected files and email them'),
+      'callback' => 'file_archiver_confirm_form',
+      'confirm' => TRUE,
+    ),
+  );
+  return $operations;
+}
