@@ -630,14 +630,28 @@ function file_type_get_names() {
 
 /**
  * Implements hook_file_mimetype_mapping_alter().
- *
- * Fix the mimetype assocation for .ogg files to 'audio/ogg' rather than
- * 'application/ogg' as per http://en.wikipedia.org/wiki/Ogg.
- *
- * @todo Remove when http://drupal.org/node/1239376 is fixed in core.
  */
 function file_entity_file_mimetype_mapping_alter(&$mapping) {
-  $mapping['extensions']['ogg'] = 189;
+  // Fix the mimetype assocation for .ogg files to 'audio/ogg' rather than
+  // 'application/ogg' as per http://en.wikipedia.org/wiki/Ogg.
+  // @todo Remove when http://drupal.org/node/1239376 is fixed in core.
+  $new_mappings['ogg'] = 'audio/ogg';
+
+  // Add a missing mapping for .m4v files to 'video/x-m4v' as per
+  // http://en.wikipedia.org/wiki/M4V.
+  // @todo Remove when http://drupal.org/node/1290486 is fixed in core.
+  $new_mappings['m4v'] = 'video/x-m4v';
+
+  foreach ($new_mappings as $extension => $mime_type) {
+    if (!in_array($mime_type, $mapping['mimetypes'])) {
+      // If the mime type does not already exist, add it.
+      $mapping['mimetypes'][] = $mime_type;
+    }
+
+    // Get the index of the mime type and assign the extension to that key.
+    $index = array_search($mime_type, $mapping['mimetypes']);
+    $mapping['extensions'][$extension] = $index;
+  }
 }
 
 /**
