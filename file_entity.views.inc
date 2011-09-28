@@ -16,7 +16,7 @@ function file_entity_views_data() {
     'field' => array(
       'handler' => 'views_handler_field_file_type',
       'click sortable' => TRUE,
-     ),
+    ),
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
