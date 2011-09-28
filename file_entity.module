@@ -214,6 +214,10 @@ function file_entity_entity_info_alter(&$entity_info) {
   $entity_info['file']['fieldable'] = TRUE;
   $entity_info['file']['entity keys']['bundle'] = 'type';
   $entity_info['file']['bundles'] = array();
+  $entity_info['file']['view modes']['full'] = array(
+    'label' => t('File view page'),
+    'custom settings' => FALSE,
+  );
   foreach (file_info_file_types() as $type => $info) {
     $info += array(
       // Provide a default administration path for Field UI, but not if 'admin'

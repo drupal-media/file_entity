@@ -113,7 +113,7 @@ function file_info_cache_clear() {
  * @return
  *   An array in the format expected by drupal_render().
  */
-function file_view_multiple($files, $view_mode = 'default', $weight = 0, $langcode = NULL) {
+function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode = NULL) {
   field_attach_prepare_view('file', $files, $view_mode, $langcode);
   entity_prepare_view('file', $files, $langcode);
   $build = array('#sorted' => TRUE);
@@ -138,7 +138,7 @@ function file_view_multiple($files, $view_mode = 'default', $weight = 0, $langco
  * @return
  *   An array as expected by drupal_render().
  */
-function file_view($file, $view_mode = 'default', $langcode = NULL) {
+function file_view($file, $view_mode = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
     $langcode = $GLOBALS['language_content']->language;
   }
@@ -183,7 +183,7 @@ function file_view($file, $view_mode = 'default', $langcode = NULL) {
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
  */
-function file_build_content($file, $view_mode = 'default', $langcode = NULL) {
+function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
     $langcode = $GLOBALS['language_content']->language;
   }
@@ -244,7 +244,7 @@ function file_build_content($file, $view_mode = 'default', $langcode = NULL) {
  * @return
  *   An array as expected by drupal_render().
  */
-function file_view_file($file, $displays = 'default', $langcode = NULL) {
+function file_view_file($file, $displays = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
     $langcode = $GLOBALS['language_content']->language;
   }
@@ -344,7 +344,7 @@ function file_view_file($file, $displays = 'default', $langcode = NULL) {
  * @see hook_file_formatter_info()
  * @see file_view_file()
  */
-function file_displays($file_type, $view_mode = 'default') {
+function file_displays($file_type, $view_mode) {
   // If the requested view mode isn't configured to use a custom display for its
   // fields, then don't use a custom display for its file either.
   $view_mode_settings = field_view_mode_settings('file', $file_type);

@@ -20,7 +20,7 @@ function file_entity_view_page($file) {
   }
 
   drupal_set_title($file->filename);
-  return file_view($file, 'media_original');
+  return file_view($file, 'full');
 }
 
 /**
@@ -38,8 +38,10 @@ function file_entity_edit($form, $form_state, $file) {
   $form_state['file'] = $file;
   field_attach_form('file', $file, $form, $form_state);
 
-  $form['preview'] = file_view_file($file, 'media_preview');
-  $form['preview']['#weight'] = -10;
+  $form['preview'] = array(
+    '#theme' => 'file_link',
+    '#file' => $file,
+  );
 
   // Add the buttons.
   $form['actions'] = array('#type' => 'actions');
