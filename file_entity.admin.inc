@@ -57,15 +57,13 @@ function file_entity_admin_files($form, &$form_state) {
     'operations' => array('data' => t('Operations')),
   );
 
-  $query = db_select('file_managed', 'f');
+  $query = db_select('file_managed', 'f')->extend('PagerDefault')->extend('TableSort');
   $query->join('users', 'u', 'f.uid = u.uid');
-  $query->extend('PagerDefault')
-    ->extend('TableSort')
-    ->fields('f', array('fid'))
-    ->fields('u', array('uid'))
-    ->condition('f.status', FILE_STATUS_PERMANENT)
-    ->limit($limit)
-    ->orderByHeader($header);
+  $query->fields('f', array('fid'));
+  $query->fields('u', array('uid'));
+  $query->condition('f.status', FILE_STATUS_PERMANENT);
+  $query->limit($limit);
+  $query->orderByHeader($header);
 
   foreach (array_keys(file_entity_get_hidden_stream_wrappers()) as $name) {
     $query->condition('f.uri', $name . '%', 'NOT LIKE');
