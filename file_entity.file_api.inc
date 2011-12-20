@@ -347,28 +347,32 @@ function file_view_file($file, $displays = 'full', $langcode = NULL) {
  * @see file_view_file()
  */
 function file_displays($file_type, $view_mode) {
+  $cache = &drupal_static(__FUNCTION__, array());
+
   // If the requested view mode isn't configured to use a custom display for its
   // fields, then don't use a custom display for its file either.
-  $view_mode_settings = field_view_mode_settings('file', $file_type);
-  if (empty($view_mode_settings[$view_mode]['custom_settings'])) {
-    $view_mode = 'default';
-  }
-
-  // Load the display configurations for the file type and view mode. If none
-  // exist for the view mode, use the default view mode.
   if ($view_mode != 'default') {
+    $view_mode_settings = field_view_mode_settings('file', $file_type);
+    $view_mode = !empty($view_mode_settings[$view_mode]['custom_settings']) ? $view_mode : 'default';
+  }
+
+  if (!isset($cache[$file_type][$view_mode])) {
+    // Load the display configurations for the file type and view mode. If none
+    // exist for the view mode, use the default view mode.
     $displays = file_displays_load($file_type, $view_mode, TRUE);
-  }
-  if (empty($displays)) {
-    $displays = file_displays_load($file_type, 'default', TRUE);
+    if (empty($displays) && $view_mode != 'default') {
+      $cache[$file_type][$view_mode] = file_displays($file_type, 'default');
+    }
+    else {
+      // Convert the display objects to arrays and remove unnecessary keys.
+      foreach ($displays as $formatter_name => $display) {
+        $displays[$formatter_name] = array_intersect_key((array) $display, drupal_map_assoc(array('status', 'weight', 'settings')));
+      }
+      $cache[$file_type][$view_mode] = $displays;
+    }
   }
 
-  // Convert the display objects to arrays and remove unnecessary keys.
-  foreach ($displays as $formatter_name => $display) {
-    $displays[$formatter_name] = array_intersect_key((array) $display, drupal_map_assoc(array('status', 'weight', 'settings')));
-  }
-
-  return $displays;
+  return $cache[$file_type][$view_mode];
 }
 
 /**
