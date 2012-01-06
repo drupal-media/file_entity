@@ -114,13 +114,21 @@ function file_info_cache_clear() {
  *   An array in the format expected by drupal_render().
  */
 function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode = NULL) {
+  if (empty($files)) {
+    return array();
+  }
+
   field_attach_prepare_view('file', $files, $view_mode, $langcode);
   entity_prepare_view('file', $files, $langcode);
-  $build = array('#sorted' => TRUE);
+
+  $build = array();
   foreach ($files as $file) {
     $build[$file->fid] = file_view($file, $view_mode, $langcode);
-    $build[$file->fid]['#weight'] = $weight++;
+    $build[$file->fid]['#weight'] = $weight;
+    $weight++;
   }
+  $build['#sorted'] = TRUE;
+
   return $build;
 }
 
