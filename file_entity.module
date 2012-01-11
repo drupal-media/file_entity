@@ -249,28 +249,27 @@ function file_entity_uri($file) {
  * weighted relative to the fields that are added to file entity bundles.
  */
 function file_entity_field_extra_fields() {
-  $return = array();
-  $info = entity_get_info('file');
-  foreach (array_keys($info['bundles']) as $bundle) {
-    $return['file'][$bundle] = array(
-      'form' => array(
-        'file' => array(
-          'label' => t('File'),
-          'description' => t('File preview'),
-          'weight' => 0,
-        ),
-      ),
-      'display' => array(
-        'file' => array(
-          'label' => t('File'),
-          'description' => t('File display'),
-          'weight' => 0,
-        ),
-      ),
+  $info = array();
+
+  foreach (file_type_get_names() as $type => $name) {
+    $info['file'][$type]['form']['filename'] = array(
+      'label' => t('File name'),
+      'description' => t('File name'),
+      'weight' => -10,
+    );
+    $info['file'][$type]['form']['preview'] = array(
+      'label' => t('File'),
+      'description' => t('File preview'),
+      'weight' => -5,
+    );
+    $info['file'][$type]['display']['file'] = array(
+      'label' => t('File'),
+      'description' => t('File display'),
+      'weight' => 0,
     );
   }
 
-  return $return;
+  return $info;
 }
 
 /**
