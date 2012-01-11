@@ -128,9 +128,9 @@ function file_entity_admin_files($form, &$form_state) {
  * 'Update option' on.
  */
 function file_entity_admin_files_validate($form, &$form_state) {
-  $files = array_filter($form_state['values']['files']);
-  if (count($files) == 0) {
-    form_set_error('', t('Update operation failed: no files were selected.'));
+  // Error if there are no items to select.
+  if (!is_array($form_state['values']['files']) || !count(array_filter($form_state['values']['files']))) {
+    form_set_error('', t('No files selected.'));
   }
 }
 
