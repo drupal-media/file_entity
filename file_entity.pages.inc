@@ -32,9 +32,10 @@ function file_entity_view_page($file) {
 
 /**
  * Menu callback; presents the Media editing form.
+ *
+ * @deprecated Use drupal_get_form('file_entity_edit') yourself.
  */
 function file_entity_page_edit($file) {
-  drupal_set_title(t('<em>Edit @type</em> @title', array('@type' => $file->type, '@title' => $file->filename)), PASS_THROUGH);
   return drupal_get_form('file_entity_edit', $file);
 }
 
@@ -42,6 +43,8 @@ function file_entity_page_edit($file) {
  * Form builder: Builds the edit file form.
  */
 function file_entity_edit($form, &$form_state, $file) {
+  drupal_set_title(t('<em>Edit @type</em> @title', array('@type' => $file->type, '@title' => $file->filename)), PASS_THROUGH);
+
   $form_state['file'] = $file;
 
   $form['#attributes']['class'][] = 'file-form';

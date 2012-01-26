@@ -81,8 +81,8 @@ function file_entity_menu() {
   );
   $items['file/%file/edit'] = array(
     'title' => 'Edit',
-    'page callback' => 'file_entity_page_edit',
-    'page arguments'  => array(1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('file_entity_edit', 1),
     'access callback' => 'file_entity_access',
     'access arguments' => array('edit'),
     'weight' => 0,
