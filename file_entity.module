@@ -263,8 +263,30 @@ function file_entity_entity_info_alter(&$entity_info) {
       ),
     );
     $entity_info['file']['bundles'][$type] = array_intersect_key($info, drupal_map_assoc(array('label', 'admin')));
-    $entity_info['file']['view callback'] = 'file_view_multiple';
   }
+
+  // Ensure some of the Entity API callbacks are supported.
+  $entity_info['file']['creation callback'] = 'entity_metadata_create_object';
+  $entity_info['file']['view callback'] = 'file_view_multiple';
+  $entity_info['file']['edit callback'] = 'file_entity_metadata_form_file';
+}
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function file_entity_entity_property_info() {
+  $info['file']['properties']['type'] = array(
+    'label' => t('File type'),
+    'type' => 'token',
+    'description' => t('The type of the file.'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer files',
+    'options list' => 'file_type_get_names',
+    'required' => TRUE,
+    'schema field' => 'type',
+  );
+
+  return $info;
 }
 
 /**
@@ -273,6 +295,16 @@ function file_entity_entity_info_alter(&$entity_info) {
 function file_entity_uri($file) {
   $uri['path'] = 'file/' . $file->fid;
   return $uri;
+}
+
+/**
+ * Entity API callback to get the form of a file entity.
+ */
+function file_entity_metadata_form_file($file) {
+  // Pre-populate the form-state with the right form include.
+  $form_state['build_info']['args'] = array($file);
+  form_load_include($form_state, 'inc', 'file_entity', 'file_entity.pages');
+  return drupal_build_form('file_entity_edit', $form_state);
 }
 
 /**
