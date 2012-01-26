@@ -64,6 +64,10 @@ function file_entity_menu() {
   );
   // general view, edit, delete for files
   $items['file/%file'] = array(
+    'title callback' => 'entity_label',
+    'title arguments' => array('file', 1),
+    // The page callback also invokes drupal_set_title() in case
+    // the menu router's title is overridden by a menu link.
     'page callback' => 'file_entity_view_page',
     'page arguments' => array(1),
     'access callback' => 'file_entity_access',
@@ -147,6 +151,35 @@ function file_entity_menu() {
       }
     }
   }
+
+  // Optional devel module integration
+  if (module_exists('devel')) {
+    $items['file/%file/devel'] = array(
+      'title' => 'Devel',
+      'page callback' => 'devel_load_object',
+      'page arguments' => array('file', 1),
+      'access arguments' => array('access devel information'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'devel.pages.inc',
+      'file path' => drupal_get_path('module', 'devel'),
+      'weight' => 100,
+    );
+    $items['file/%file/devel/load'] = array(
+      'title' => 'Load',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+    );
+    $items['file/%file/devel/render'] = array(
+      'title' => 'Render',
+      'page callback' => 'devel_render_object',
+      'page arguments' => array('file', 1),
+      'access arguments' => array('access devel information'),
+      'file' => 'devel.pages.inc',
+      'file path' => drupal_get_path('module', 'devel'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 100,
+    );
+  }
+
   return $items;
 }
 
