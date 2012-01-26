@@ -20,6 +20,13 @@ function file_entity_view_page($file) {
   }
 
   drupal_set_title($file->filename);
+
+  $uri = entity_uri('file', $file);
+  // Set the file path as the canonical URL to prevent duplicate content.
+  drupal_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
+  // Set the non-aliased path as a default shortlink.
+  drupal_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
+
   return file_view($file, 'full');
 }
 
@@ -79,6 +86,12 @@ function file_entity_edit($form, &$form_state, $file) {
     '#value' => t('Delete'),
     '#weight' => 10,
     '#submit' => array('file_entity_delete_submit'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => isset($_GET['destination']) ? $_GET['destination'] : 'file/' . $file->fid,
+    '#weight' => 15,
   );
 
   field_attach_form('file', $file, $form, $form_state);
