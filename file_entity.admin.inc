@@ -72,11 +72,11 @@ function file_entity_admin_files($form, &$form_state) {
   // Result array keys are file IDs, values are the file owner's UIDs.
   $result = $query->execute()->fetchAllKeyed();
 
-  // Hide the operations form if there are no files to operate on.
-  $form['options']['#access'] &= !empty($result);
-
   // Load all the file entities.
   $files = $form['#files'] = file_load_multiple(array_keys($result));
+
+  // Hide the operations form if there are no files to operate on.
+  $form['options']['#access'] &= !empty($files);
 
   // Load all the file owner user entities to display usernames.
   $accounts = $form['#accounts'] = user_load_multiple(array_unique($result));
