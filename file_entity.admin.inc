@@ -23,19 +23,19 @@ function file_entity_admin_files($form, &$form_state) {
   $limit = variable_get('file_entity_admin_files_limit', 50);
 
   // Build the 'Update options' form.
-  $form['options'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Update options'),
-    '#attributes' => array('class' => array('container-inline')),
-  );
 
   $options = array();
   $form['#operations'] = module_invoke_all('file_operations_info');
   drupal_alter('file_entity_file_operations', $form['#operations']);
-
   foreach ($form['#operations'] as $operation => $array) {
     $options[$operation] = $array['label'];
   }
+  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update options'),
+    '#attributes' => array('class' => array('container-inline')),
+    '#access' => user_access('administer files') && !empty($options),
+  );
   $form['options']['operation'] = array(
     '#type' => 'select',
     '#title' => t('Operation'),
@@ -69,12 +69,17 @@ function file_entity_admin_files($form, &$form_state) {
     $query->condition('f.uri', $name . '%', 'NOT LIKE');
   }
 
+  // Result array keys are file IDs, values are the file owner's UIDs.
   $result = $query->execute()->fetchAllKeyed();
-  $files = file_load_multiple(array_keys($result));
-  $form['#files'] = $files;
 
-  // This is used to add usernames to the table below.
-  $accounts = user_load_multiple(array_values($result));
+  // Hide the operations form if there are no files to operate on.
+  $form['options']['#access'] &= !empty($result);
+
+  // Load all the file entities.
+  $files = $form['#files'] = file_load_multiple(array_keys($result));
+
+  // Load all the file owner user entities to display usernames.
+  $accounts = $form['#accounts'] = user_load_multiple(array_unique($result));
 
   $destination = drupal_get_destination();
   $options = array();
