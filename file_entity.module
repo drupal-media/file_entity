@@ -494,9 +494,20 @@ function file_entity_file_formatter_file_field_settings($form, &$form_state, $se
  * file_view_file() can try another formatter.
  */
 function file_entity_file_formatter_file_image_view($file, $display, $langcode) {
+  // Prevent PHP notices when trying to read empty files.
+  // @see http://drupal.org/node/681042
+  if (!filesize($file->uri)) {
+    return;
+  }
+
+  // Do not bother proceeding if this file does not have an image mime type.
+  if (strpos($file->filemime, 'image/') !== 0) {
+    return;
+  }
+
   $scheme = file_uri_scheme($file->uri);
   $local_wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_LOCAL);
-  if (isset($local_wrappers[$scheme]) && strpos($file->filemime, 'image/') === 0 && $image = image_load($file->uri)) {
+  if (isset($local_wrappers[$scheme]) && $image = image_load($file->uri)) {
     if (!empty($display['settings']['image_style'])) {
       $element = array(
         '#theme' => 'image_style',
