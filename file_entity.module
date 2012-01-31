@@ -789,17 +789,41 @@ function file_entity_view_mode_label($view_mode, $default = FALSE) {
 }
 
 /**
- * Implements hook_file_operations_info().
+ * Return information about all bulk file operations.
+ *
+ * @see hook_file_operation_info()
+ * @see hook_file_operation_info_alter()
+ *
+ * @todo Add real caching to this function?
  */
-function file_entity_file_operations_info() {
-  $operations = array(
-    'delete' => array(
-      'label' => t('Delete selected files'),
-      'callback' => 'file_entity_multiple_delete_confirm_operation',
-      'confirm' => TRUE,
-    ),
+function file_entity_get_file_operation_info() {
+  $info = &drupal_static(__FUNCTION__);
+
+  if (!isset($info)) {
+    $info = module_invoke_all('file_operation_info');
+
+    // Support the deprecated hooks.
+    // @todo Remove after 2.0 release.
+    $info = drupal_array_merge_deep(module_invoke_all('file_operations_info'), $info);
+    drupal_alter('file_entity_file_operations', $old_info);
+
+    drupal_alter('file_operation_info_alter', $info);
+  }
+
+  return $info;
+}
+
+/**
+ * Implements hook_file_operation_info().
+ */
+function file_entity_file_operation_info() {
+  $info['delete'] = array(
+    'label' => t('Delete selected files'),
+    'callback' => 'file_entity_multiple_delete_confirm_operation',
+    'confirm' => TRUE,
   );
-  return $operations;
+
+  return $info;
 }
 
 /**

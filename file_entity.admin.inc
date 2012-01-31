@@ -25,8 +25,7 @@ function file_entity_admin_files($form, &$form_state) {
   // Build the 'Update options' form.
 
   $options = array();
-  $form['#operations'] = module_invoke_all('file_operations_info');
-  drupal_alter('file_entity_file_operations', $form['#operations']);
+  $form['#operations'] = file_entity_get_file_operation_info();
   foreach ($form['#operations'] as $operation => $array) {
     $options[$operation] = $array['label'];
   }
