@@ -16,6 +16,53 @@ require_once dirname(__FILE__) . '/file_entity.file_api.inc';
 require_once dirname(__FILE__) . '/file_entity.field.inc';
 
 /**
+ * Implements hook_hook_info().
+ */
+function file_entity_hook_info() {
+  $hooks = array(
+    'file_operation_info',
+    'file_operation_info_alter',
+    'file_type_info',
+    'file_type_info_alter',
+    'file_formatter_info',
+    'file_formatter_info_alter',
+    'file_view',
+    'file_view_alter',
+    'file_displays_alter',
+  );
+
+  return array_fill_keys($hooks, array('group' => 'file'));
+}
+
+/**
+ * Implements hook_hook_info_alter().
+ *
+ * Add support for existing core hooks to be located in modulename.file.inc.
+ */
+function file_entity_hook_info_alter(&$info) {
+  $hooks = array(
+    // File API hooks
+    'file_copy',
+    'file_move',
+    'file_validate',
+    // File access
+    'file_download',
+    'file_download_access',
+    'file_download_access_alter',
+    // File entity hooks
+    'file_load',
+    'file_presave',
+    'file_insert',
+    'file_update',
+    'file_delete',
+    // Miscellanious hooks
+    'file_mimetype_mapping_alter',
+    'file_url_alter',
+  );
+  $info += array_fill_keys($hooks, array('group' => 'file'));
+}
+
+/**
  * Implements hook_help().
  */
 function file_entity_help($path, $arg) {
@@ -347,42 +394,6 @@ function file_entity_field_extra_fields() {
   }
 
   return $info;
-}
-
-/**
- * Implements hook_file_presave().
- */
-function file_entity_file_presave($file) {
-  // Always ensure the filemime property is current.
-  if (!empty($file->original) || empty($file->filemime)) {
-    $file->filemime = file_get_mimetype($file->uri);
-  }
-
-  // Always update file type based on filemime.
-  $file->type = file_get_type($file);
-
-  field_attach_presave('file', $file);
-}
-
-/**
- * Implements hook_file_insert().
- */
-function file_entity_file_insert($file) {
-  field_attach_insert('file', $file);
-}
-
-/**
- * Implement hook_file_update().
- */
-function file_entity_file_update($file) {
-  field_attach_update('file', $file);
-}
-
-/**
- * Implements hook_file_delete().
- */
-function file_entity_file_delete($file) {
-  field_attach_delete('file', $file);
 }
 
 /**
@@ -729,41 +740,6 @@ function file_type_get_names() {
 }
 
 /**
- * Implements hook_file_mimetype_mapping_alter().
- */
-function file_entity_file_mimetype_mapping_alter(&$mapping) {
-  // Fix the mime type mapping for ogg.
-  // @todo Remove when http://drupal.org/node/1239376 is fixed in core (7.8).
-  $new_mappings['ogg'] = 'audio/ogg';
-
-  // Add support for m4v.
-  // @todo Remove when http://drupal.org/node/1290486 is fixed in core (7.9).
-  $new_mappings['m4v'] = 'video/x-m4v';
-
-  // Add support for mka and mkv.
-  // @todo Remove when http://drupal.org/node/1293140 is fixed in core.
-  $new_mappings['mka'] = 'audio/x-matroska';
-  $new_mappings['mkv'] = 'video/x-matroska';
-
-  // Add support for weba, webm, and webp.
-  // @todo Remove when http://drupal.org/node/1347624 is fixed in core.
-  $new_mappings['weba'] = 'audio/webm';
-  $new_mappings['webm'] = 'video/webm';
-  $new_mappings['webp'] = 'image/webp';
-
-  foreach ($new_mappings as $extension => $mime_type) {
-    if (!in_array($mime_type, $mapping['mimetypes'])) {
-      // If the mime type does not already exist, add it.
-      $mapping['mimetypes'][] = $mime_type;
-    }
-
-    // Get the index of the mime type and assign the extension to that key.
-    $index = array_search($mime_type, $mapping['mimetypes']);
-    $mapping['extensions'][$extension] = $index;
-  }
-}
-
-/**
  * Return an array of available view modes for file entities.
  */
 function file_entity_view_mode_labels() {
@@ -809,19 +785,6 @@ function file_entity_get_file_operation_info() {
 
     drupal_alter('file_operation_info_alter', $info);
   }
-
-  return $info;
-}
-
-/**
- * Implements hook_file_operation_info().
- */
-function file_entity_file_operation_info() {
-  $info['delete'] = array(
-    'label' => t('Delete selected files'),
-    'callback' => 'file_entity_multiple_delete_confirm_operation',
-    'confirm' => TRUE,
-  );
 
   return $info;
 }

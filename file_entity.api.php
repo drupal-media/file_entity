@@ -136,6 +136,15 @@ function hook_file_view_alter($build, $type) {
  * The callback function receives one initial argument, which is an array of
  * the checked files.
  *
+ * @return
+ *  An associave array of operations keyed by machine name.
+ *    - label: A string to show in the operations dropdown.
+ *    - callback (string): A callback function to call for the operation. This
+ *        function will be passed an array of file_ids which were selected.
+ *    - confirm (boolean): Whether or not this operation requires a confirm form
+ *        In the case where confirm is set to true, callback should be a function
+ *        which can return a confirm form.
+ *
  * @see hook_file_operation_info_alter()
  * @see file_entity_get_file_operation_info()
  */
