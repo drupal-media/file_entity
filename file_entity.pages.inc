@@ -39,8 +39,10 @@ function file_entity_view_page($file) {
  *   A file object from file_load().
  *
  * @see file_entity_menu()
+ *
+ * @todo Rename this form to file_edit_form to ease into core.
  */
-function file_edit_form($form, &$form_state, $file) {
+function file_entity_edit($form, &$form_state, $file) {
   drupal_set_title(t('<em>Edit @type</em> @title', array('@type' => $file->type, '@title' => $file->filename)), PASS_THROUGH);
 
   $form_state['file'] = $file;
@@ -80,13 +82,13 @@ function file_edit_form($form, &$form_state, $file) {
     '#type' => 'submit',
     '#value' => t('Save'),
     '#weight' => 5,
-    '#submit' => array('file_edit_form_submit'),
+    '#submit' => array('file_entity_edit_submit'),
   );
   $form['actions']['delete'] = array(
     '#type' => 'submit',
     '#value' => t('Delete'),
     '#weight' => 10,
-    '#submit' => array('file_edit_form_delete_submit'),
+    '#submit' => array('file_entity_edit_delete_submit'),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
@@ -101,16 +103,16 @@ function file_edit_form($form, &$form_state, $file) {
 }
 
 /**
- * Form validation handler for file_edit_form().
+ * Form validation handler for file_entity_edit().
  */
-function file_edit_form_validate($form, &$form_state) {
+function file_entity_edit_validate($form, &$form_state) {
   entity_form_field_validate('file', $form, $form_state);
 }
 
 /**
- * Form submission handler for the 'Save' button for file_edit_form().
+ * Form submission handler for the 'Save' button for file_entity_edit().
  */
-function file_edit_form_submit($form, &$form_state) {
+function file_entity_edit_submit($form, &$form_state) {
   $file = $form_state['file'];
   entity_form_submit_build_entity('file', $file, $form, $form_state);
   file_save($file);
@@ -120,7 +122,7 @@ function file_edit_form_submit($form, &$form_state) {
 /**
  * Form submission handler for the 'Delete' button for file_entity_edit().
  */
-function file_edit_form_delete_submit($form, &$form_state) {
+function file_entity_edit_delete_submit($form, &$form_state) {
   $fid = $form_state['values']['fid'];
   $destination = array();
   if (isset($_GET['destination'])) {
@@ -140,7 +142,7 @@ function file_edit_form_delete_submit($form, &$form_state) {
  *
  * @see file_entity_menu()
  */
-function file_delete_form($form, &$form_state, $file) {
+function file_entity_delete($form, &$form_state, $file) {
   $form_state['file'] = $file;
 
   $form['fid'] = array(
@@ -164,9 +166,9 @@ function file_delete_form($form, &$form_state, $file) {
 }
 
 /**
- * Form submission handler for file_delete_form().
+ * Form submission handler for file_entity_delete().
  */
-function file_delete_form_submit($form, &$form_state) {
+function file_entity_delete_submit($form, &$form_state) {
   if ($form_state['values']['confirm'] && $file = file_load($form_state['values']['fid'])) {
     // Use file_delete_multiple() rather than file_delete() since we want to
     // avoid unwanted validation and usage checking.
@@ -187,6 +189,8 @@ function file_delete_form_submit($form, &$form_state) {
  *
  * @param array $files
  *   An array of file objects.
+ *
+ * @todo Rename this form to file_delete_form to ease into core.
  */
 function file_multiple_delete_form($form, &$form_state, array $files) {
   $form['files'] = array(
@@ -251,7 +255,7 @@ function file_multiple_delete_form_submit($form, &$form_state) {
  * Page callback for the file edit form.
  *
  * @deprecated
- *   Use drupal_get_form('file_edit_form')
+ *   Use drupal_get_form('file_entity_edit')
  */
 function file_entity_page_edit($file) {
   return drupal_get_form('file_entity_edit', $file);
@@ -261,8 +265,8 @@ function file_entity_page_edit($file) {
  * Page callback for the file deletion confirmation form.
  *
  * @deprecated
- *   Use drupal_get_form('file_delete_form')
+ *   Use drupal_get_form('file_entity_delete')
  */
 function file_entity_page_delete($file) {
-  return drupal_get_form('file_delete_form');
+  return drupal_get_form('file_entity_delete');
 }

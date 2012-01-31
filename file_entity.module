@@ -129,7 +129,7 @@ function file_entity_menu() {
   $items['file/%file/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_edit_form', 1),
+    'page arguments' => array('file_entity_edit', 1),
     'access callback' => 'file_entity_access',
     'access arguments' => array('edit'),
     'weight' => 0,
@@ -140,7 +140,7 @@ function file_entity_menu() {
   $items['file/%file/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
-    'page arguments'  => array('file_delete_form', 1),
+    'page arguments'  => array('file_entity_delete', 1),
     'access callback' => 'file_entity_access',
     'access arguments' => array('edit'),
     'weight' => 1,
@@ -363,7 +363,7 @@ function file_entity_metadata_form_file($file) {
   // Pre-populate the form-state with the right form include.
   $form_state['build_info']['args'] = array($file);
   form_load_include($form_state, 'inc', 'file_entity', 'file_entity.pages');
-  return drupal_build_form('file_edit_form', $form_state);
+  return drupal_build_form('file_entity_edit', $form_state);
 }
 
 /**
