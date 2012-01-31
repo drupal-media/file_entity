@@ -13,7 +13,7 @@ require_once dirname(__FILE__) . '/file_entity.pages.inc';
 function file_entity_admin_files($form, &$form_state) {
   if (!empty($form_state['values']['operation'])) {
     // The form is being rebuilt because an operation requiring confirmation
-    // was selected.  Hand off to the callback of the operation at this point
+    // was selected. Hand off to the callback of the operation at this point
     // which should return a confirm form.
     $operation = $form_state['values']['operation'];
     $files = array_keys(array_filter($form_state['values']['files']));
@@ -145,17 +145,18 @@ function file_entity_admin_files_submit($form, &$form_state) {
   $operations = $form['#operations'];
   $operation = $operations[$form_state['values']['operation']];
 
-  // In the case of an operation which needs confirmation, rebuild the form.
+  // Filter out unchecked nodes
+  $files = &$form_state['values']['files'];
+  $files = array_filter($files);
+
   if (!empty($operation['confirm'])) {
+    // In the case of an operation which needs confirmation, rebuild the form.
     $form_state['rebuild'] = TRUE;
     $form_state['values']['operation'] = $operation;
     return;
   }
-
-  // Filter out unchecked nodes
-  $files = array_filter($form_state['values']['files']);
-  if ($function = $operation['callback']) {
-    // Add in callback arguments if present.
+  elseif ($function = $operation['callback']) {
+    // Run the callback without confirmation.
     if (isset($operation['callback arguments'])) {
       $args = array_merge(array($files), $operation['callback arguments']);
     }

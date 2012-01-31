@@ -129,7 +129,7 @@ function file_entity_menu() {
   $items['file/%file/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_edit', 1),
+    'page arguments' => array('file_edit_form', 1),
     'access callback' => 'file_entity_access',
     'access arguments' => array('edit'),
     'weight' => 0,
@@ -139,8 +139,8 @@ function file_entity_menu() {
   );
   $items['file/%file/delete'] = array(
     'title' => 'Delete',
-    'page callback' => 'file_entity_page_delete',
-    'page arguments'  => array(1),
+    'page callback' => 'drupal_get_form',
+    'page arguments'  => array('file_delete_form', 1),
     'access callback' => 'file_entity_access',
     'access arguments' => array('edit'),
     'weight' => 1,
@@ -363,7 +363,7 @@ function file_entity_metadata_form_file($file) {
   // Pre-populate the form-state with the right form include.
   $form_state['build_info']['args'] = array($file);
   form_load_include($form_state, 'inc', 'file_entity', 'file_entity.pages');
-  return drupal_build_form('file_entity_edit', $form_state);
+  return drupal_build_form('file_edit_form', $form_state);
 }
 
 /**
@@ -796,15 +796,16 @@ function file_entity_get_file_operation_info() {
  *   An array of file_ids to delete.
  * @return type
  */
-function file_entity_multiple_delete_confirm_operation($files) {
+function file_entity_multiple_delete_confirm_operation($fids) {
   // This function is a form generation function.
   $form = array();
   $form_state = array();
   // Set the submit handler explicitly because this form is being built
   // under a different form_id.
   $form['#submit'] = array();
-  $form['#submit'][] = 'file_entity_multiple_delete_confirm_submit';
-  return file_entity_multiple_delete_confirm($form, $form_state, $files);
+  $form['#submit'][] = 'file_multiple_delete_form_submit';
+  $files = file_load_multiple($fids);
+  return file_multiple_delete_form($form, $form_state, $files);
 }
 
 /**
