@@ -178,6 +178,18 @@ function file_entity_menu() {
       'type' => MENU_LOCAL_TASK,
       'weight' => 100,
     );
+    if (module_exists('token')) {
+      $items['file/%file/devel/token'] = array(
+        'title' => 'Tokens',
+        'page callback' => 'token_devel_token_object',
+        'page arguments' => array('file', 1),
+        'access arguments' => array('access devel information'),
+        'type' => MENU_LOCAL_TASK,
+        'file' => 'token.pages.inc',
+        'file path' => drupal_get_path('module', 'token'),
+        'weight' => 5,
+      );
+    }
   }
 
   return $items;
