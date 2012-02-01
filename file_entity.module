@@ -140,7 +140,7 @@ function file_entity_menu() {
   $items['file/%file/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
-    'page arguments'  => array('file_entity_delete', 1),
+    'page arguments'  => array('file_delete_form', 1),
     'access callback' => 'file_entity_access',
     'access arguments' => array('edit'),
     'weight' => 1,

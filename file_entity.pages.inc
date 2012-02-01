@@ -142,7 +142,7 @@ function file_entity_edit_delete_submit($form, &$form_state) {
  *
  * @see file_entity_menu()
  */
-function file_entity_delete($form, &$form_state, $file) {
+function file_delete_form($form, &$form_state, $file) {
   $form_state['file'] = $file;
 
   $form['fid'] = array(
@@ -166,9 +166,9 @@ function file_entity_delete($form, &$form_state, $file) {
 }
 
 /**
- * Form submission handler for file_entity_delete().
+ * Form submission handler for file_delete_form().
  */
-function file_entity_delete_submit($form, &$form_state) {
+function file_delete_form_submit($form, &$form_state) {
   if ($form_state['values']['confirm'] && $file = file_load($form_state['values']['fid'])) {
     // Use file_delete_multiple() rather than file_delete() since we want to
     // avoid unwanted validation and usage checking.
@@ -265,8 +265,8 @@ function file_entity_page_edit($file) {
  * Page callback for the file deletion confirmation form.
  *
  * @deprecated
- *   Use drupal_get_form('file_entity_delete')
+ *   Use drupal_get_form('file_delete_form')
  */
 function file_entity_page_delete($file) {
-  return drupal_get_form('file_entity_delete');
+  return drupal_get_form('file_delete_form');
 }
