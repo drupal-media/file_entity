@@ -818,3 +818,37 @@ function file_entity_multiple_delete_confirm_operation($fids) {
 function file_entity_get_hidden_stream_wrappers() {
   return array_diff_key(file_get_stream_wrappers(STREAM_WRAPPERS_ALL), file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE));
 }
+
+/**
+ * Clear the field cache for any entities referencing a specific file.
+ *
+ * @param object $file
+ *   A file object.
+ */
+function file_entity_invalidate_field_caches($file) {
+  $entity_types = &drupal_static(__FUNCTION__);
+
+  // Gather the list of entity types which support field caching.
+  if (!isset($entity_types)) {
+    $entity_types = array();
+    foreach (entity_get_info() as $entity_type => $entity_info) {
+      if (!empty($entity_info['fieldable']) && !empty($entity_info['field cache'])) {
+        $entity_types[] = $entity_type;
+      }
+    }
+  }
+
+  // If no entity types support field caching, then there is no work to be done.
+  if (empty($entity_types)) {
+    return;
+  }
+
+  $records = db_query("SELECT DISTINCT type, id FROM {file_usage} WHERE fid = :fid AND type IN (:types) AND id > 0", array(':fid' => $file->fid, ':types' => $entity_types))->fetchAll();
+  if (!empty($records)) {
+    $cids = array();
+    foreach ($records as $record) {
+      $cids[] = 'field:' . $record->type . ':' . $record->id;
+    }
+    cache_clear_all($cids, 'cache_field');
+  }
+}
