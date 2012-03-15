@@ -85,6 +85,8 @@ function file_entity_access($op) {
  */
 function file_entity_menu() {
   // File Configuration
+  // @todo Move this back to admin/config/media/file-types in Drupal 8 if
+  // MENU_MAX_DEPTH is increased to a value higher than 9.
   $items['admin/structure/file-types'] = array(
     'title' => 'File types',
     'description' => 'Manage settings for the type of files used on your site.',
