@@ -522,7 +522,7 @@ function file_entity_file_formatter_file_field_settings($form, &$form_state, $se
 function file_entity_file_formatter_file_image_view($file, $display, $langcode) {
   // Prevent PHP notices when trying to read empty files.
   // @see http://drupal.org/node/681042
-  if (!filesize($file->uri)) {
+  if (!$file->filesize) {
     return;
   }
 
