@@ -109,6 +109,108 @@ class FileEntityUnitTestCase extends FileEntityTestHelper {
   }
 }
 
+class FileEntityReplaceTestCase extends FileEntityTestHelper {
+  public static function getInfo() {
+    return array(
+      'name' => 'File entity replace tests',
+      'description' => 'Test file replace functionality.',
+      'group' => 'File entity',
+    );
+  }
+
+  function testReplaceFile() {
+    // Create and save a file.
+    $filepath = $this->randomName();
+    $scheme = file_default_scheme();
+    $filepath = $scheme . '://' . $filepath . '.txt';
+    $contents = $this->randomName();
+
+    file_put_contents($filepath, $contents);
+    $this->assertTrue(is_file($filepath), t('The %file file exists on the disk.', array('%file' => $filepath)), 'Create test file');
+
+    $file = new stdClass();
+    $file->uri = $filepath;
+    $file->filename = drupal_basename($file->uri);
+    $file->filemime = 'text/plain';
+    $file->type = 'application';
+    $file->uid = 1;
+    $file->timestamp = REQUEST_TIME;
+    $file->filesize = filesize($file->uri);
+    $file->status = 0;
+    // Write the record directly rather than calling file_save() so we don't
+    // invoke the hooks.
+    $this->assertNotIdentical(drupal_write_record('file_managed', $file), FALSE, t('Local file was added to the database.'), 'Create test file');
+
+    // Create a user with file edit permissions.
+    $user = $this->drupalCreateUser(array('edit file'));
+    $this->drupalLogin($user);
+
+    // Test that the Upload widget appears for a local file.
+    $this->drupalGet('file/' . $file->fid . '/edit');
+    $this->assertText('Replace File', 'Replace File widget is available for local file.');
+
+    // Create a non-local file record.
+    $file2 = new stdClass();
+    $file2->uri = 'oembed://' . $this->randomName();
+    $file2->filename = drupal_basename($file2->uri);
+    $file2->filemime = 'image/oembed';
+    $file2->type = 'image';
+    $file2->uid = 1;
+    $file2->timestamp = REQUEST_TIME;
+    $file2->filesize = 0;
+    $file2->status = 0;
+    // Write the record directly rather than calling file_save() so we don't
+    // invoke the hooks.
+    $this->assertNotIdentical(drupal_write_record('file_managed', $file2), FALSE, t('Non-local file was added to the database.'), 'Create test file');    
+
+    // Test that Upload widget does not appear for non-local file.
+    $this->drupalGet('file/' . $file2->fid . '/edit');
+    $this->assertNoText('Replace File', 'Replace File widget is not available for non-local file.');    
+
+    // Edit local file from above.
+    $edit = array();
+    $edit['filename'] = $file->filename;
+    $this->drupalPost('file/' . $file->fid . '/edit', $edit, t('Save'));
+    // Test that file saves without uploading a file.
+    $this->assertRaw(t('File %title has been updated.', array('%title' => $edit['filename'])), t('File was updated without file upload.'));
+
+    // Get a new file.
+    $txtfile = current($this->drupalGetTestFiles('text'));
+    $edit['files[upload]'] = drupal_realpath($txtfile->uri);
+
+    // Save filename and filesize.
+    $original_filename = $file->filename;
+    $original_filesize = $file->filesize;
+
+    $this->drupalPost('file/' . $file->fid . '/edit', $edit, t('Save'));
+    // Test that file saves with uploading a file.
+    $this->assertRaw(t('File %title has been updated.', array('%title' => $edit['filename'])), t('File was updated with file upload.'));
+
+    // Load file.
+    $file = file_load($file->fid);
+
+    // Test that file has same name as previously.
+    $this->assertEqual($original_filename, $file->filename, t('File did not change filename.'));
+
+    // Test that file did change, via filesize.
+    $this->assertNotEqual($original_filesize, $file->filesize, t('File changed.'));
+
+    // Test that database has filesize of uploaded file.
+    $this->assertEqual(filesize(drupal_realpath($txtfile->uri)), $file->filesize, t('Filesize matches.'));
+
+    // Test the the contents of file and uploaded file are the same.
+    $this->assertEqual(file_get_contents(drupal_realpath($txtfile->uri)), file_get_contents(drupal_realpath($file->uri)), t('File contents match.'));
+
+    // Get an image file.
+    $image = current($this->drupalGetTestFiles('image'));
+    $edit['files[upload]'] = drupal_realpath($image->uri);
+
+    // Test that validation works.
+    $this->drupalPost('file/' . $file->fid . '/edit', $edit, t('Save'));
+    $this->assertRaw(t('The specified file %file could not be uploaded. Only files with the following extensions are allowed:', array('%file' => $image->filename)), 'File validation works, upload failed correctly.');
+  }
+}
+
 class FileEntityTokenTestCase extends FileEntityTestHelper {
   public static function getInfo() {
     return array(

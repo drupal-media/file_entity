@@ -258,6 +258,31 @@ function file_entity_edit($form, &$form_state, $file) {
     '#weight' => -10,
   );
 
+
+  // Replace file functionality.
+
+  // Only if local file.
+  if (file_entity_file_is_local($file)) {
+    // Set up file upload validators.
+    $validators = (isset($form['#validators'])) ? $form['#validators'] : array();
+
+    // This is a general file edit form, this file could be used in various fields,
+    // so there is no config to grab from to use to validate.
+    // Allowing only to replace files with the same extension and use php's directives for file size.
+    $validators['file_validate_extensions'] = array(pathinfo($file->uri, PATHINFO_EXTENSION));
+    $validators['file_validate_size'] = array(file_upload_max_size());
+
+    $form['#validators'] = $validators;
+
+    // Add the upload widget.
+    $form['upload'] = array(
+      '#type' => 'file',
+      '#title' => t('Replace File'),
+      '#description' => theme('file_upload_help', array('description' => t('This file will replace the current file. The old file will be deleted.'), 'upload_validators' => $validators)),
+      '#upload_validators' => $validators,
+    );
+  }
+
   $form['preview'] = array(
     '#theme' => 'file_link',
     '#file' => $file,
@@ -294,6 +319,22 @@ function file_entity_edit($form, &$form_state, $file) {
  * Form validation handler for file_entity_edit().
  */
 function file_entity_edit_validate($form, &$form_state) {
+  if (isset($form_state['values']['upload'])) {
+    // Save the file as a temporary file.
+    $file = file_save_upload('upload', $form['#validators']);
+
+    if ($file === NULL) {
+      // No file uploaded, just return.
+      return;
+    }
+    elseif ($file === FALSE) {
+      form_set_error('upload', t('File upload error.'));
+    }
+    else {
+      $form_state['values']['upload'] = $file;
+    }
+  }
+
   entity_form_field_validate('file', $form, $form_state);
 }
 
@@ -302,8 +343,26 @@ function file_entity_edit_validate($form, &$form_state) {
  */
 function file_entity_edit_submit($form, &$form_state) {
   $file = $form_state['file'];
+
+  // Make sure a file was uploaded.
+  if (!empty($form_state['values']['upload'])) {
+    $upload = $form_state['values']['upload'];
+    // Move file from temp to permanent home.
+    $uri = file_unmanaged_copy($upload->uri, $file->uri, FILE_EXISTS_REPLACE);
+    // Check for failure.
+    if ($uri) {
+      // Succes, flush image styles for this file.
+      image_path_flush($file->uri);
+    }
+    else {
+      // Failure, set error message.
+      drupal_set_message(t('File %file failed to upload.', array('%file' => $upload->uri)), 'error');
+    }
+  }
+
   entity_form_submit_build_entity('file', $file, $form, $form_state);
   file_save($file);
+  drupal_set_message(t('File %title has been updated.', array('%title' => $file->filename)));
   $form_state['redirect'] = 'file/' . $file->fid;
 }
 
