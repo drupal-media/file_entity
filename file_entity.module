@@ -112,6 +112,21 @@ function file_entity_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   // general view, edit, delete for files
+  $items['file/add'] = array(
+    'title' => 'Add file',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('file_entity_add_upload'),
+    'access arguments' => array('administer files'),
+    'file' => 'file_entity.pages.inc',
+  );
+  if (module_exists('plupload') && module_exists('multiform')) {
+    $items['file/add']['page arguments'] = array('file_entity_add_upload_multiple');
+  }
+  $items['file/add/upload'] = array(
+    'title' => 'Upload',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
   $items['file/%file'] = array(
     'title callback' => 'entity_label',
     'title arguments' => array('file', 1),
