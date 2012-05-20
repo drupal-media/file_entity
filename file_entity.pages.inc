@@ -65,10 +65,13 @@ function file_entity_add_upload($form, &$form_state, $params = array()) {
   $form['#validators'] = $validators;
 
   $form['upload'] = array(
-    '#type' => 'file',
+    '#type' => 'managed_file',
     '#title' => t('Upload a new file'),
     '#description' => theme('file_upload_help', array('description' => '', 'upload_validators' => $validators)),
+    '#upload_location' => file_entity_upload_destination_uri($params),
     '#upload_validators' => $validators,
+    '#progress_indicator' => 'bar',
+    '#required' => TRUE,
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -77,65 +80,25 @@ function file_entity_add_upload($form, &$form_state, $params = array()) {
     '#value' => t('Submit'),
   );
 
+  form_load_include($form_state, 'inc', 'file_entity', 'file_entity.pages');
+
   return $form;
-}
-
-/**
- * Validate the generic file upload with the global media settings.
- */
-function file_entity_add_upload_validate($form, &$form_state) {
-  // Save the file as a temporary file.
-  $file = file_save_upload('upload', $form['#validators']);
-
-  if ($file === NULL) {
-    form_set_error('upload', t("No file appears to have been selected."));
-  }
-  elseif ($file === FALSE) {
-    form_set_error('upload', t('File upload error.'));
-  }
-  else {
-    $form_state['values']['upload'] = $file;
-  }
 }
 
 /**
  * Upload a file.
  */
 function file_entity_add_upload_submit($form, &$form_state) {
-  $params = isset($form_state['build_info']['args'][0]) ? $form_state['build_info']['args'][0] : array();
-  $file = $form_state['values']['upload'];
-
-  // The media browser widget does not use the 'display' field.
-  $file->display = TRUE;
-
-  // Change the file status from temporary to permanent.
-  $file->status = FILE_STATUS_PERMANENT;
-
-  // Determine what URI scheme this file should use.
-  $scheme = !empty($params['uri_scheme']) && file_stream_wrapper_valid_scheme($params['uri_scheme']) ? $params['uri_scheme'] : file_default_scheme();
-  $scheme .= '://';
-
-  // Prepare the file's subdirectory path.
-  $directory = '';
-  if (!empty($params['file_directory'])) {
-    $directory = token_replace($params['file_directory']) . '/';
-
-    // If the directory isn't writable, or doesn't exist and can't be created,
-    // the upload will fail.
-    $prepare_directory = file_stream_wrapper_uri_normalize($scheme . $directory);
-    if (!file_prepare_directory($prepare_directory, FILE_CREATE_DIRECTORY)) {
-      drupal_set_message(t('The file directory @dir does not exist or is not writable. Please contact an administrator.', array('@dir' => $prepare_directory)), 'error');
-      return;
-    }
-  }
-
-  // Compose the file's permanent destination.
-  $destination = file_stream_wrapper_uri_normalize($scheme . $directory . $file->filename);
-
-  // Save the uploaded file to the permanent location.
-  $file = file_move($file, $destination, FILE_EXISTS_RENAME);
+  $file = file_load($form_state['values']['upload']);
 
   if ($file) {
+    // The media browser widget does not use the 'display' field.
+    $file->display = TRUE;
+
+    // Change the file from temporary to permanent.
+    $file->status = FILE_STATUS_PERMANENT;
+    file_save($file);
+
     $form_state['file'] = $file;
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
   }
@@ -157,6 +120,34 @@ function file_entity_add_upload_submit($form, &$form_state) {
     $form_state['redirect'] = 'admin/content/file';
   }
 }
+
+/**
+ * Determines the upload location for the file add upload form.
+ *
+ * @param array $params
+ *   An array of parameters from the media browser.
+ * @param array $data
+ *   (optional) An array of token objects to pass to token_replace().
+ *
+ * @return
+ *   A file directory URI with tokens replaced.
+ *
+ * @see token_replace()
+ */
+function file_entity_upload_destination_uri(array $params, array $data = array()) {
+  $params += array(
+    'uri_scheme' => file_default_scheme(),
+    'file_directory' => '',
+  );
+
+  $destination = trim($params['file_directory'], '/');
+
+  // Replace tokens.
+  $destination = token_replace($destination, $data);
+
+  return $params['uri_scheme'] . '://' . $destination;
+}
+
 
 function file_entity_add_upload_multiple($form, &$form_state, $params = array()) {
   $form = file_entity_add_upload($form, $form_state, $params);
