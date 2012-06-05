@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Supports file operations including View, Edit, and Delete.
@@ -34,32 +35,32 @@ function file_entity_view_page($file) {
  * Form callback for adding media via an upload form.
  * @todo: should use the AJAX uploader
  */
-function file_entity_add_upload($form, &$form_state, $params = array()) {
+function file_entity_add_upload($form, &$form_state, array $options = array()) {
   // Set up file upload validators.
   $validators = array();
 
   // Validate file extensions. If there are no file extensions in $params and
   // there are no Media defaults, there is no file extension validation.
-  if (!empty($params['file_extensions'])) {
-    $validators['file_validate_extensions'] = array($params['file_extensions']);
+  if (!empty($options['file_extensions'])) {
+    $validators['file_validate_extensions'] = array($options['file_extensions']);
   }
   else {
-    $validators['file_validate_extensions'] = array('jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp');
+    $validators['file_validate_extensions'] = array(FILE_DEFAULT_ALLOWED_EXTENSIONS);
   }
 
   // Validate file size but do not allow anything higher than file_upload_max_size().
   $max_filesize = file_upload_max_size();
-  if (!empty($params['max_filesize']) && $params['max_filesize'] < $max_filesize) {
-    $validators['file_validate_size'] = array(parse_size($params['max_filesize']));
+  if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
+    $validators['file_validate_size'] = array(parse_size($options['max_filesize']));
   }
   else {
     $validators['file_validate_size'] = array($max_filesize);
   }
 
   // Add image validators.
-  $params += array('min_resolution' => 0, 'max_resolution' => 0);
-  if ($params['min_resolution'] || $params['max_resolution']) {
-    $validators['file_validate_image_resolution'] = array($params['max_resolution'], $params['min_resolution']);
+  $options += array('min_resolution' => 0, 'max_resolution' => 0);
+  if ($options['min_resolution'] || $options['max_resolution']) {
+    $validators['file_validate_image_resolution'] = array($options['max_resolution'], $options['min_resolution']);
   }
 
   $form['#validators'] = $validators;
@@ -67,11 +68,11 @@ function file_entity_add_upload($form, &$form_state, $params = array()) {
   $form['upload'] = array(
     '#type' => 'managed_file',
     '#title' => t('Upload a new file'),
-    '#description' => theme('file_upload_help', array('description' => '', 'upload_validators' => $validators)),
-    '#upload_location' => file_entity_upload_destination_uri($params),
+    '#upload_location' => file_entity_upload_destination_uri($options),
     '#upload_validators' => $validators,
     '#progress_indicator' => 'bar',
     '#required' => TRUE,
+    '#pre_render' => array('file_managed_file_pre_render', 'file_entity_managed_file_pre_render'),
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -83,6 +84,21 @@ function file_entity_add_upload($form, &$form_state, $params = array()) {
   form_load_include($form_state, 'inc', 'file_entity', 'file_entity.pages');
 
   return $form;
+}
+
+/**
+ * Pre-render callback for adding validation descriptions to managed file elements.
+ */
+function file_entity_managed_file_pre_render($element) {
+  if (!empty($element['#upload_validators'])) {
+    if (!isset($element['#description'])) {
+      $element['#description'] = '';
+    }
+    if ($element['#description'] !== FALSE) {
+      $element['#description'] = theme('file_upload_help', array('description' => $element['#description'], 'upload_validators' => $element['#upload_validators']));
+    }
+  }
+  return $element;
 }
 
 /**
