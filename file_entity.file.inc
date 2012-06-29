@@ -51,7 +51,14 @@ function file_entity_file_update($file) {
   cache_clear_all();
 
   // Get and store image dimensions.
-  file_entity_image_dimensions($file, TRUE);
+  if ($file->type == 'image') {
+    file_entity_image_dimensions($file, TRUE);
+
+    // If the image dimensions have changed
+    if ($file->image_dimensions != $file->original->image_dimensions) {
+      _file_entity_update_image_field_dimensions($file);
+    }
+  }
 }
 
 /**
@@ -192,5 +199,47 @@ function file_entity_image_dimensions($file, $force = FALSE) {
       'width' => NULL,
       'height' => NULL,
     );
+  }
+}
+
+/**
+ * Update the image dimensions stored in any image fields for a file.
+ *
+ * @param object $file
+ *   A file object that is an image.
+ *
+ * @see http://drupal.org/node/1448124
+ */
+function _file_entity_update_image_field_dimensions($file) {
+  // Find all image field enabled on the site.
+  $image_fields = array();
+  foreach (field_info_fields() as $field) {
+    if ($field['type'] == 'image') {
+      $image_fields[] = $field['field_name'];
+    }
+  }
+
+  foreach ($image_fields as $image_field) {
+    $query = new EntityFieldQuery();
+    $query->fieldCondition($image_field, 'fid', $file->fid);
+    $results = $query->execute();
+
+    foreach ($results as $entity_type => $entities) {
+      $entities = entity_load($entity_type, array_keys($entities));
+      foreach ($entities as $entity) {
+        foreach ($entity->{$image_field} as $langcode => $items) {
+          foreach ($items as $delta => $item) {
+            if ($item['fid'] == $file->fid) {
+              $entity->{$image_field}[$langcode][$delta]['width'] = $file->image_dimensions['width'];
+              $entity->{$image_field}[$langcode][$delta]['height'] = $file->image_dimensions['height'];
+            }
+          }
+        }
+
+        // Ensure that file_field_update() will not trigger additional usage.
+        unset($entity->revision);
+        field_attach_update($entity_type, $entity);
+      }
+    }
   }
 }
