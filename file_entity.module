@@ -7,8 +7,10 @@
 
 /**
  * The default list of file extensions allowed by file_save_upload().
+ *
+ * Adds support for docx, xlsx, pptx and ppsx.
  */
-define('FILE_DEFAULT_ALLOWED_EXTENSIONS', 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp');
+define('FILE_DEFAULT_ALLOWED_EXTENSIONS', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp');
 
 /**
  * As part of extending Drupal core's file entity API, this module adds some
