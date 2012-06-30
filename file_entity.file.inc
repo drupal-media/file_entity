@@ -34,6 +34,8 @@ function file_entity_file_insert($file) {
   cache_clear_all();
 
   // Get and store image dimensions.
+  // @todo We should fetch image dimensions in file_entity_file_presave and
+  // then save them in this hook.
   file_entity_image_dimensions($file, TRUE);
 }
 
@@ -50,14 +52,20 @@ function file_entity_file_update($file) {
   // Clear the page and block caches.
   cache_clear_all();
 
-  // Get and store image dimensions.
-  if ($file->type == 'image') {
-    file_entity_image_dimensions($file, TRUE);
+  // Reset the image dimensions for a file.
+  // @todo We should fetch image dimensions in file_entity_file_presave and
+  // then save them in this hook.
+  file_entity_image_dimensions($file, TRUE);
 
-    // If the image dimensions have changed
+  if ($file->type == 'image' && module_exists('image')) {
+    // If the image dimensions have changed, update any image field references
+    // to this file and flush image style derivatives.
     if ($file->image_dimensions != $file->original->image_dimensions) {
       _file_entity_update_image_field_dimensions($file);
     }
+
+    // Flush image style derivatives whenever an image is updated.
+    image_path_flush($file->uri);
   }
 }
 

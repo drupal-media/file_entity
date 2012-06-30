@@ -36,43 +36,14 @@ function file_entity_view_page($file) {
  * @todo: should use the AJAX uploader
  */
 function file_entity_add_upload($form, &$form_state, array $options = array()) {
-  // Set up file upload validators.
-  $validators = array();
-
-  // Validate file extensions. If there are no file extensions in $params and
-  // there are no Media defaults, there is no file extension validation.
-  if (!empty($options['file_extensions'])) {
-    $validators['file_validate_extensions'] = array($options['file_extensions']);
-  }
-  else {
-    $validators['file_validate_extensions'] = array(FILE_DEFAULT_ALLOWED_EXTENSIONS);
-  }
-
-  // Validate file size but do not allow anything higher than file_upload_max_size().
-  $max_filesize = file_upload_max_size();
-  if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
-    $validators['file_validate_size'] = array(parse_size($options['max_filesize']));
-  }
-  else {
-    $validators['file_validate_size'] = array($max_filesize);
-  }
-
-  // Add image validators.
-  $options += array('min_resolution' => 0, 'max_resolution' => 0);
-  if ($options['min_resolution'] || $options['max_resolution']) {
-    $validators['file_validate_image_resolution'] = array($options['max_resolution'], $options['min_resolution']);
-  }
-
-  $form['#validators'] = $validators;
-
   $form['upload'] = array(
     '#type' => 'managed_file',
     '#title' => t('Upload a new file'),
     '#upload_location' => file_entity_upload_destination_uri($options),
-    '#upload_validators' => $validators,
+    '#upload_validators' => file_entity_get_upload_validators($options),
     '#progress_indicator' => 'bar',
     '#required' => TRUE,
-    '#pre_render' => array('file_managed_file_pre_render', 'file_entity_managed_file_pre_render'),
+    '#pre_render' => array('file_managed_file_pre_render', 'file_entity_upload_validators_pre_render'),
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -84,21 +55,6 @@ function file_entity_add_upload($form, &$form_state, array $options = array()) {
   form_load_include($form_state, 'inc', 'file_entity', 'file_entity.pages');
 
   return $form;
-}
-
-/**
- * Pre-render callback for adding validation descriptions to managed file elements.
- */
-function file_entity_managed_file_pre_render($element) {
-  if (!empty($element['#upload_validators'])) {
-    if (!isset($element['#description'])) {
-      $element['#description'] = '';
-    }
-    if ($element['#description'] !== FALSE) {
-      $element['#description'] = theme('file_upload_help', array('description' => $element['#description'], 'upload_validators' => $element['#upload_validators']));
-    }
-  }
-  return $element;
 }
 
 /**
@@ -258,28 +214,19 @@ function file_entity_edit($form, &$form_state, $file) {
     '#weight' => -10,
   );
 
-
-  // Replace file functionality.
-
-  // Only if local file.
+  // Add a 'replace this file' upload field if the file is a local file only.
   if (file_entity_file_is_local($file)) {
-    // Set up file upload validators.
-    $validators = (isset($form['#validators'])) ? $form['#validators'] : array();
+    // Set up replacement file validation.
+    $replacement_options = array();
+    // The replacement file must have the same extension as the original file.
+    $replacement_options['file_extensions'] = pathinfo($file->uri, PATHINFO_EXTENSION);
 
-    // This is a general file edit form, this file could be used in various fields,
-    // so there is no config to grab from to use to validate.
-    // Allowing only to replace files with the same extension and use php's directives for file size.
-    $validators['file_validate_extensions'] = array(pathinfo($file->uri, PATHINFO_EXTENSION));
-    $validators['file_validate_size'] = array(file_upload_max_size());
-
-    $form['#validators'] = $validators;
-
-    // Add the upload widget.
-    $form['upload'] = array(
+    $form['replace_upload'] = array(
       '#type' => 'file',
-      '#title' => t('Replace File'),
-      '#description' => theme('file_upload_help', array('description' => t('This file will replace the current file. The old file will be deleted.'), 'upload_validators' => $validators)),
-      '#upload_validators' => $validators,
+      '#title' => t('Replace file'),
+      '#description' => t('This file will replace the existing file. This action cannot be undone.'),
+      '#upload_validators' => file_entity_get_upload_validators($replacement_options),
+      '#pre_render' => array('file_entity_upload_validators_pre_render'),
     );
   }
 
@@ -319,22 +266,21 @@ function file_entity_edit($form, &$form_state, $file) {
  * Form validation handler for file_entity_edit().
  */
 function file_entity_edit_validate($form, &$form_state) {
-  if (isset($form_state['values']['upload'])) {
+  // Handle the replacement file if uploaded.
+  if (isset($form_state['values']['replace_upload'])) {
     // Save the file as a temporary file.
-    $file = file_save_upload('upload', $form['#validators']);
-
-    if ($file === NULL) {
-      // No file uploaded, just return.
-      return;
+    $file = file_save_upload('replace_upload', $form['replace_upload']['#upload_validators']);
+    if (!empty($file)) {
+      // Put the temporary file in form_values so we can save it on submit.
+      $form_state['values']['replace_upload'] = $file;
     }
     elseif ($file === FALSE) {
-      form_set_error('upload', t('File upload error.'));
-    }
-    else {
-      $form_state['values']['upload'] = $file;
+      // File uploaded failed.
+      form_set_error('replace_upload', t('The replacement file could not be uploaded.'));
     }
   }
 
+  // Run entity form validation.
   entity_form_field_validate('file', $form, $form_state);
 }
 
@@ -344,25 +290,24 @@ function file_entity_edit_validate($form, &$form_state) {
 function file_entity_edit_submit($form, &$form_state) {
   $file = $form_state['file'];
 
-  // Make sure a file was uploaded.
-  if (!empty($form_state['values']['upload'])) {
-    $upload = $form_state['values']['upload'];
+  // Check if a replacement file has been uploaded.
+  if (!empty($form_state['values']['replace_upload'])) {
+    $replacement = $form_state['values']['replace_upload'];
     // Move file from temp to permanent home.
-    $uri = file_unmanaged_copy($upload->uri, $file->uri, FILE_EXISTS_REPLACE);
-    // Check for failure.
-    if ($uri) {
-      // Succes, flush image styles for this file.
-      image_path_flush($file->uri);
-    }
-    else {
-      // Failure, set error message.
-      drupal_set_message(t('File %file failed to upload.', array('%file' => $upload->uri)), 'error');
-    }
+    file_unmanaged_copy($replacement->uri, $file->uri, FILE_EXISTS_REPLACE);
   }
 
+  // Run entity form submit handling and save the file.
   entity_form_submit_build_entity('file', $file, $form, $form_state);
   file_save($file);
-  drupal_set_message(t('File %title has been updated.', array('%title' => $file->filename)));
+
+  $args = array(
+    '@type' => file_type_get_name($file),
+    '%title' => entity_label('file', $file),
+  );
+  watchdog('file', '@type: updated %title.', $args);
+  drupal_set_message(t('@type %title has been updated.', $args));
+
   $form_state['redirect'] = 'file/' . $file->fid;
 }
 
@@ -420,6 +365,7 @@ function file_delete_form_submit($form, &$form_state) {
     // Use file_delete_multiple() rather than file_delete() since we want to
     // avoid unwanted validation and usage checking.
     file_delete_multiple(array($file->fid));
+
     $args = array(
       '@type' => file_type_get_name($file),
       '%title' => entity_label('file', $file),
@@ -516,4 +462,45 @@ function file_entity_page_edit($file) {
  */
 function file_entity_page_delete($file) {
   return drupal_get_form('file_delete_form');
+}
+
+/**
+ * Retrieves the upload validators for a file.
+ *
+ * @param array $options
+ *   (optional) An array of options for file validation.
+ *
+ * @return array
+ *   An array suitable for passing to file_save_upload() or for a managed_file
+ *   or upload element's '#upload_validators' property.
+ */
+function file_entity_get_upload_validators(array $options = array()) {
+  // Set up file upload validators.
+  $validators = array();
+
+  // Validate file extensions. If there are no file extensions in $params and
+  // there are no Media defaults, there is no file extension validation.
+  if (!empty($options['file_extensions'])) {
+    $validators['file_validate_extensions'] = array($options['file_extensions']);
+  }
+  else {
+    $validators['file_validate_extensions'] = array(FILE_DEFAULT_ALLOWED_EXTENSIONS);
+  }
+
+  // Validate file size but do not allow anything higher than file_upload_max_size().
+  $max_filesize = file_upload_max_size();
+  if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
+    $validators['file_validate_size'] = array(parse_size($options['max_filesize']));
+  }
+  else {
+    $validators['file_validate_size'] = array($max_filesize);
+  }
+
+  // Add image validators.
+  $options += array('min_resolution' => 0, 'max_resolution' => 0);
+  if ($options['min_resolution'] || $options['max_resolution']) {
+    $validators['file_validate_image_resolution'] = array($options['max_resolution'], $options['min_resolution']);
+  }
+
+  return $validators;
 }
