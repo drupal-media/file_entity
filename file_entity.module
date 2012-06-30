@@ -307,6 +307,8 @@ function file_entity_permission() {
  */
 function file_entity_admin_paths() {
   $paths = array(
+    'file/add' => TRUE,
+    'file/add/*' => TRUE,
     'file/*/edit' => TRUE,
     'file/*/delete' => TRUE,
   );
