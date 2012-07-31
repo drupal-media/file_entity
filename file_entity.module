@@ -122,7 +122,7 @@ function file_entity_menu() {
   $items['file/add'] = array(
     'title' => 'Add file',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_add_upload'),
+    'page arguments' => array('file_entity_add_upload', array()),
     'access arguments' => array('administer files'),
     'file' => 'file_entity.pages.inc',
   );
