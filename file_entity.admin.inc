@@ -93,9 +93,13 @@ function file_entity_admin_files($form, &$form_state) {
 
     // Show a warning for files that do not exist.
     if (@!file_exists($file->uri)) {
-      $options[$file->fid]['#attributes']['class'][] = 'warning';
-      $scheme = file_uri_scheme($file->uri);
-      $options[$file->fid]['#attributes']['title'] = t('File does not exist or the stream wrapper for @scheme files is missing.', array('@scheme' => $scheme));
+      $options[$file->fid]['#attributes']['class'][] = 'error';
+      if (!file_stream_wrapper_get_instance_by_uri($file->uri)) {
+        $options[$file->fid]['#attributes']['title'] = t('The stream wrapper for @scheme files is missing.', array('@scheme' => file_uri_scheme($file->uri)));
+      }
+      else {
+        $options[$file->fid]['#attributes']['title'] = t('The file does not exist.');
+      }
     }
 
     $options[$file->fid]['operations'] = array(
