@@ -448,19 +448,17 @@ function file_entity_file_formatter_info() {
 
   // Allow file field formatters to be reused for displaying the file entity's
   // file pseudo-field.
-  if (module_exists('file')) {
-    foreach (field_info_formatter_types() as $field_formatter_type => $field_formatter_info) {
-      if (in_array('file', $field_formatter_info['field types'])) {
-        $formatters['file_field_' . $field_formatter_type] = array(
-          'label' => $field_formatter_info['label'],
-          'view callback' => 'file_entity_file_formatter_file_field_view',
+  foreach (field_info_formatter_types() as $field_formatter_type => $field_formatter_info) {
+    if (in_array('file', $field_formatter_info['field types'])) {
+      $formatters['file_field_' . $field_formatter_type] = array(
+        'label' => $field_formatter_info['label'],
+        'view callback' => 'file_entity_file_formatter_file_field_view',
+      );
+      if (!empty($field_formatter_info['settings'])) {
+        $formatters['file_field_' . $field_formatter_type] += array(
+          'default settings' => $field_formatter_info['settings'],
+          'settings callback' => 'file_entity_file_formatter_file_field_settings',
         );
-        if (isset($field_formatter_info['settings'])) {
-          $formatters['file_field_' . $field_formatter_type] += array(
-            'default settings' => $field_formatter_info['settings'],
-            'settings callback' => 'file_entity_file_formatter_file_field_settings',
-          );
-        }
       }
     }
   }
