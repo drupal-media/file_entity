@@ -253,7 +253,8 @@ function file_entity_edit($form, &$form_state, $file) {
     '#weight' => 15,
   );
 
-  field_attach_form('file', $file, $form, $form_state);
+  $langcode = function_exists('entity_language') ? entity_language('file', $file) : NULL;
+  field_attach_form('file', $file, $form, $form_state, $langcode);
 
   return $form;
 }
