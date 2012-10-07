@@ -63,6 +63,8 @@ function file_entity_admin_files($form, &$form_state) {
   $query->condition('f.status', FILE_STATUS_PERMANENT);
   $query->limit($limit);
   $query->orderByHeader($header);
+  $query->addTag('admin_files');
+  $query->addMetaData('form_state', $form_state);
 
   foreach (array_keys(file_entity_get_hidden_stream_wrappers()) as $name) {
     $query->condition('f.uri', $name . '%', 'NOT LIKE');
