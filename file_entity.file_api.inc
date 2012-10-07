@@ -308,16 +308,22 @@ function file_view_file($file, $displays = 'full', $langcode = NULL) {
     }
   }
 
-  // If a render element was returned by a formatter or the file type's default
-  // view callback, add some defaults to it and return it.
-  if (isset($element)) {
-    $element += array(
+  // As a last resort, fall back to showing a link to the file.
+  if (!isset($element)) {
+    $element = array(
+      '#theme' => 'file_link',
       '#file' => $file,
-      '#view_mode' => $view_mode,
-      '#language' => $langcode,
     );
-    return $element;
   }
+
+  // Add defaults and return the element.
+  $element += array(
+    '#file' => $file,
+    '#view_mode' => $view_mode,
+    '#language' => $langcode,
+  );
+
+  return $element;
 }
 
 /**

@@ -230,11 +230,7 @@ function file_entity_edit($form, &$form_state, $file) {
     );
   }
 
-  $form['preview'] = array(
-    '#theme' => 'file_link',
-    '#file' => $file,
-    '#weight' => -5,
-  );
+  $form['preview'] = file_view_file($file, 'preview');
 
   // Add the buttons.
   $form['actions'] = array('#type' => 'actions');

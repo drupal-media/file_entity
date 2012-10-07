@@ -77,6 +77,10 @@ function file_entity_help($path, $arg) {
     case 'admin/structure/file-types':
       $output = '<p>' . t('When a file is uploaded to this website, it is assigned one of the following types, based on what kind of file it is.') . '</p>';
       return $output;
+    case 'admin/structure/file-types/manage/%/display/preview':
+    case 'admin/structure/file-types/manage/%/file-display/preview':
+      drupal_set_message(t('Some modules rely on the Preview view mode to function correctly. Changing these settings may break parts of your site.'), 'warning');
+      break;
   }
 }
 
@@ -351,10 +355,21 @@ function file_entity_entity_info_alter(&$entity_info) {
   $entity_info['file']['entity keys']['bundle'] = 'type';
   $entity_info['file']['bundles'] = array();
   $entity_info['file']['uri callback'] = 'file_entity_uri';
-  $entity_info['file']['view modes']['full'] = array(
-    'label' => t('Full'),
-    'custom settings' => FALSE,
+  $entity_info['file']['view modes'] += array(
+    'teaser' => array(
+      'label' => t('Teaser'),
+      'custom settings' => TRUE,
+    ),
+    'full' => array(
+      'label' => t('Full content'),
+      'custom settings' => FALSE,
+    ),
+    'preview' => array(
+      'label' => t('Preview'),
+      'custom settings' => TRUE,
+    ),
   );
+
   foreach (file_info_file_types() as $type => $info) {
     $info += array(
       // Provide a default administration path for Field UI, but not if 'admin'
