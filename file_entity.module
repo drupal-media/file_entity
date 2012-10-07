@@ -36,6 +36,8 @@ function file_entity_hook_info() {
     'file_view',
     'file_view_alter',
     'file_displays_alter',
+    'file_type',
+    'file_type_alter',
   );
 
   return array_fill_keys($hooks, array('group' => 'file'));
@@ -105,7 +107,7 @@ function file_entity_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'file_entity.admin.inc',
   );
-  $items['admin/structure/file-types/manage/%'] = array(
+  $items['admin/structure/file-types/manage/%file_type'] = array(
     'title' => 'Manage file types',
     'description' => 'Manage settings for the type of files used on your site.',
   );
@@ -196,6 +198,21 @@ function file_entity_menu() {
       // configured as a wildcard (multiple file types sharing the same menu
       // router path).
       $file_type_argument = isset($bundle_info['admin']['bundle argument']) ? $bundle_info['admin']['bundle argument'] : $file_type;
+
+      $items[$path] = array(
+        'title' => 'Edit file type',
+        'title callback' => 'file_type_get_name',
+        'title arguments' => array(4),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('file_entity_file_type_form', $file_type_argument),
+        'file' => 'file_entity.admin.inc',
+      ) + $access;
+
+      // Add the 'File type settings' tab.
+      $items["$path/edit"] = array(
+        'title' => 'Edit',
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+      );
 
       // Add the 'Manage file display' tab.
       $items["$path/file-display"] = array(
@@ -346,13 +363,16 @@ function file_entity_theme() {
 /**
  * Implements hook_entity_info_alter().
  *
- * Extends the core file entity to be fieldable. Modules can define file types
- * via hook_file_type_info(). For each defined type, create a bundle, so that
- * fields can be configured per file type.
+ * Extends the core file entity to be fieldable. The file type is used as the
+ * bundle key. File types are implemented as CTools exportables, so modules can
+ * define default file types via hook_file_default_types(), and the
+ * administrator can override the default types or add custom ones via
+ * admin/structure/file-types.
  */
 function file_entity_entity_info_alter(&$entity_info) {
   $entity_info['file']['fieldable'] = TRUE;
   $entity_info['file']['entity keys']['bundle'] = 'type';
+  $entity_info['file']['bundle keys']['bundle'] = 'type';
   $entity_info['file']['bundles'] = array();
   $entity_info['file']['uri callback'] = 'file_entity_uri';
   $entity_info['file']['view modes'] += array(
@@ -370,17 +390,15 @@ function file_entity_entity_info_alter(&$entity_info) {
     ),
   );
 
-  foreach (file_info_file_types() as $type => $info) {
-    $info += array(
-      // Provide a default administration path for Field UI, but not if 'admin'
-      // has been explicitly set to NULL.
+  foreach (file_type_get_enabled_types() as $type) {
+    $entity_info['file']['bundles'][$type->type] = array(
+      'label' => $type->label,
       'admin' => array(
-        'path' => 'admin/structure/file-types/manage/%',
-        'real path' => 'admin/structure/file-types/manage/' . $type,
+        'path' => 'admin/structure/file-types/manage/%file_type',
+        'real path' => 'admin/structure/file-types/manage/' . $type->type,
         'bundle argument' => 4,
       ),
     );
-    $entity_info['file']['bundles'][$type] = array_intersect_key($info, drupal_map_assoc(array('label', 'admin')));
   }
 
   // Ensure some of the Entity API callbacks are supported.
@@ -633,7 +651,7 @@ function file_entity_file_formatter_file_image_settings($form, &$form_state, $se
 function _file_entity_view_mode_menu_access($file_type, $view_mode, $access_callback) {
   // Deny access if the view mode isn't configured to use custom display
   // settings.
-  $view_mode_settings = field_view_mode_settings('file', $file_type);
+  $view_mode_settings = field_view_mode_settings('file', $file_type->type);
   $visibility = ($view_mode == 'default') || !empty($view_mode_settings[$view_mode]['custom_settings']);
   if (!$visibility) {
     return FALSE;
@@ -874,6 +892,95 @@ function file_entity_multiple_delete_confirm_operation($fids) {
  */
 function file_entity_get_hidden_stream_wrappers() {
   return array_diff_key(file_get_stream_wrappers(STREAM_WRAPPERS_ALL), file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE));
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function file_entity_ctools_plugin_api($owner, $api) {
+  if ($owner == 'file_entity' && $api == 'file_type') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implements hook_file_default_types().
+ */
+function file_entity_file_default_types() {
+  $types = array();
+
+  // Image.
+  $types['image'] = (object) array(
+    'api_version' => 1,
+    'type' => 'image',
+    'label' => t('Image'),
+    'description' => t('An <em>Image</em> file is a still visual.'),
+    'mimetypes' => array(
+      'image/jpeg',
+      'image/gif',
+      'image/png',
+    ),
+    'streams' => array(
+      'public',
+    ),
+  );
+
+  // Video.
+  $types['video'] = (object) array(
+    'api_version' => 1,
+    'type' => 'video',
+    'label' => t('Video'),
+    'description' => t('A <em>Video</em> file is a moving visual recording.'),
+    'mimetypes' => array(
+      'video/quicktime',
+      'video/mp4',
+      'video/x-msvideo',
+      'video/ogg',
+    ),
+    'streams' => array(
+      'public',
+    ),
+  );
+
+  // Audio.
+  $types['audio'] = (object) array(
+    'api_version' => 1,
+    'type' => 'audio',
+    'label' => t('Audio'),
+    'description' => t('An <em>Audio</em> file is a sound recording.'),
+    'mimetypes' => array(
+      'audio/mpeg',
+      'audio/x-ms-wma',
+      'audio/x-wav',
+      'audio/ogg',
+    ),
+    'streams' => array(
+      'public',
+    ),
+  );
+
+  // Document.
+  $types['document'] = (object) array(
+    'api_version' => 1,
+    'type' => 'document',
+    'label' => t('Document'),
+    'description' => t('A <em>Document</em> file is written information.'),
+    'mimetypes' => array(
+      'text/plain',
+      'application/msword',
+      'application/vnd.ms-excel',
+      'application/pdf',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.oasis.opendocument.text',
+      'application/vnd.oasis.opendocument.spreadsheet',
+      'application/vnd.oasis.opendocument.presentation',
+    ),
+    'streams' => array(
+      'public',
+    ),
+  );
+
+  return $types;
 }
 
 /**
