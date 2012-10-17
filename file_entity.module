@@ -452,22 +452,24 @@ function file_entity_metadata_form_file($file) {
 function file_entity_field_extra_fields() {
   $info = array();
 
-  foreach (file_type_get_names() as $type => $name) {
-    $info['file'][$type]['form']['filename'] = array(
-      'label' => t('File name'),
-      'description' => t('File name'),
-      'weight' => -10,
-    );
-    $info['file'][$type]['form']['preview'] = array(
-      'label' => t('File'),
-      'description' => t('File preview'),
-      'weight' => -5,
-    );
-    $info['file'][$type]['display']['file'] = array(
-      'label' => t('File'),
-      'description' => t('File display'),
-      'weight' => 0,
-    );
+  if ($file_type_names = file_type_get_names()) {
+    foreach ($file_type_names as $type => $name) {
+      $info['file'][$type]['form']['filename'] = array(
+        'label' => t('File name'),
+        'description' => t('File name'),
+        'weight' => -10,
+      );
+      $info['file'][$type]['form']['preview'] = array(
+        'label' => t('File'),
+        'description' => t('File preview'),
+        'weight' => -5,
+      );
+      $info['file'][$type]['display']['file'] = array(
+        'label' => t('File'),
+        'description' => t('File display'),
+        'weight' => 0,
+      );
+    }
   }
 
   return $info;
