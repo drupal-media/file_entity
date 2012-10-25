@@ -79,17 +79,24 @@ function file_entity_add_upload_submit($form, &$form_state) {
     return;
   }
 
-  // Redirect to the file edit page after submission.
-  if (file_entity_access('edit')) {
+  // Figure out destination.
+  if (isset($_GET['destination'])) {
+    $destination = drupal_get_destination();
+    unset($_GET['destination']);
+  }
+  elseif (user_access('administer files')) {
     $destination = array('destination' => 'admin/content/file');
-    if (isset($_GET['destination'])) {
-      $destination = drupal_get_destination();
-      unset($_GET['destination']);
-    }
+  }
+  else {
+    $destination = array('destination' => 'file/' . $file->fid);
+  }
+
+  // Redirect to the file edit page after submission.
+  if (file_entity_access('update', $file)) {
     $form_state['redirect'] = array('file/' . $file->fid . '/edit', array('query' => $destination));
   }
   else {
-    $form_state['redirect'] = 'admin/content/file';
+    $form_state['redirect'] = $destination['destination'];
   }
 }
 
@@ -163,7 +170,7 @@ function file_entity_add_upload_multiple_submit($form, &$form_state) {
   }
 
   // Redirect to the file edit page.
-  if (file_entity_access('edit') && module_exists('multiform')) {
+  if (file_entity_access('update', $file) && module_exists('multiform')) {
     $destination = array('destination' => 'admin/content/file');
     if (isset($_GET['destination'])) {
       $destination = drupal_get_destination();
@@ -301,7 +308,7 @@ function file_entity_edit_submit($form, &$form_state) {
   file_save($file);
 
   $args = array(
-    '@type' => file_type_get_name($file),
+    '@type' => file_entity_type_get_name($file),
     '%title' => entity_label('file', $file),
   );
   watchdog('file', '@type: updated %title.', $args);
@@ -366,7 +373,7 @@ function file_delete_form_submit($form, &$form_state) {
     file_delete_multiple(array($file->fid));
 
     $args = array(
-      '@type' => file_type_get_name($file),
+      '@type' => file_entity_type_get_name($file),
       '%title' => entity_label('file', $file),
     );
     watchdog('file', '@type: deleted %title.', $args);
@@ -483,7 +490,7 @@ function file_entity_get_upload_validators(array $options = array()) {
     $validators['file_validate_extensions'] = array($options['file_extensions']);
   }
   else {
-    $validators['file_validate_extensions'] = array(FILE_DEFAULT_ALLOWED_EXTENSIONS);
+    $validators['file_validate_extensions'] = array(FILE_ENTITY_DEFAULT_ALLOWED_EXTENSIONS);
   }
 
   // Validate file size but do not allow anything higher than file_upload_max_size().
