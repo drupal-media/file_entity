@@ -465,6 +465,7 @@ function file_entity_entity_info_alter(&$entity_info) {
   $entity_info['file']['creation callback'] = 'entity_metadata_create_object';
   $entity_info['file']['view callback'] = 'file_view_multiple';
   $entity_info['file']['edit callback'] = 'file_entity_metadata_form_file';
+  $entity_info['file']['access callback'] = 'file_entity_access';
 }
 
 /**
