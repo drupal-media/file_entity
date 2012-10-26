@@ -340,7 +340,7 @@ function file_entity_edit_delete_submit($form, &$form_state) {
  *
  * @see file_entity_menu()
  */
-function file_delete_form($form, &$form_state, $file) {
+function file_entity_delete_form($form, &$form_state, $file) {
   $form_state['file'] = $file;
 
   $form['fid'] = array(
@@ -364,9 +364,9 @@ function file_delete_form($form, &$form_state, $file) {
 }
 
 /**
- * Form submission handler for file_delete_form().
+ * Form submission handler for file_entity_delete_form().
  */
-function file_delete_form_submit($form, &$form_state) {
+function file_entity_delete_form_submit($form, &$form_state) {
   if ($form_state['values']['confirm'] && $file = file_load($form_state['values']['fid'])) {
     // Use file_delete_multiple() rather than file_delete() since we want to
     // avoid unwanted validation and usage checking.
@@ -388,10 +388,8 @@ function file_delete_form_submit($form, &$form_state) {
  *
  * @param array $files
  *   An array of file objects.
- *
- * @todo Rename this form to file_delete_form to ease into core.
  */
-function file_multiple_delete_form($form, &$form_state, array $files) {
+function file_entity_multiple_delete_form($form, &$form_state, array $files) {
   $form['files'] = array(
     '#prefix' => '<ul>',
     '#suffix' => '</ul>',
@@ -437,9 +435,9 @@ function file_multiple_delete_form($form, &$form_state, array $files) {
 }
 
 /**
- * Form submission handler for file_multiple_delete_form().
+ * Form submission handler for file_entity_multiple_delete_form().
  */
-function file_multiple_delete_form_submit($form, &$form_state) {
+function file_entity_multiple_delete_form_submit($form, &$form_state) {
   if ($form_state['values']['confirm'] && $fids = array_keys($form_state['values']['files'])) {
     file_delete_multiple($fids);
     $count = count($fids);
@@ -464,10 +462,10 @@ function file_entity_page_edit($file) {
  * Page callback for the file deletion confirmation form.
  *
  * @deprecated
- *   Use drupal_get_form('file_delete_form')
+ *   Use drupal_get_form('file_entity_delete_form')
  */
 function file_entity_page_delete($file) {
-  return drupal_get_form('file_delete_form');
+  return drupal_get_form('file_entity_delete_form');
 }
 
 /**

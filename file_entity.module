@@ -182,7 +182,7 @@ function file_entity_menu() {
   $items['file/%file/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
-    'page arguments'  => array('file_delete_form', 1),
+    'page arguments'  => array('file_entity_delete_form', 1),
     'access callback' => 'file_entity_access',
     'access arguments' => array('delete', 1),
     'weight' => 1,
@@ -941,9 +941,9 @@ function file_entity_multiple_delete_confirm_operation($fids) {
   // Set the submit handler explicitly because this form is being built
   // under a different form_id.
   $form['#submit'] = array();
-  $form['#submit'][] = 'file_multiple_delete_form_submit';
+  $form['#submit'][] = 'file_entity_multiple_delete_form_submit';
   $files = file_load_multiple($fids);
-  return file_multiple_delete_form($form, $form_state, $files);
+  return file_entity_multiple_delete_form($form, $form_state, $files);
 }
 
 /**

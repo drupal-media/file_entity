@@ -304,10 +304,6 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     );
   }
 
-  function setUp() {
-    parent::setUp();
-  }
-
   /**
    * Asserts file_entity_access correctly grants or denies access.
    */
