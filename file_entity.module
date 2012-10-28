@@ -810,6 +810,9 @@ function template_preprocess_file_entity(&$variables) {
   // Make the field variables available with the appropriate language.
   field_attach_preprocess('file', $file, $variables['content'], $variables);
 
+  // Attach the file object to the content element.
+  $variables['content']['file']['#file'] = $file;
+
   // Display post information only on certain file types.
   if (variable_get('file_submitted_' . $file->type, FALSE)) {
     $variables['display_submitted'] = TRUE;
