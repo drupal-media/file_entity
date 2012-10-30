@@ -1070,16 +1070,16 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
 
   // $file may be either an object or a file type. Since file types cannot be
   // an integer, use either fid or type as the static cache id.
-  $fid = is_object($file) ? $file->fid : $file;
+  $cache_id = is_object($file) ? $file->fid : $file;
 
   // If we've already checked access for this file, user and op, return from
   // cache.
-  if (isset($rights[$account->uid][$fid][$op])) {
-    return $rights[$account->uid][$fid][$op];
+  if (isset($rights[$account->uid][$cache_id][$op])) {
+    return $rights[$account->uid][$cache_id][$op];
   }
 
   if (user_access('bypass file access', $account)) {
-    return $rights[$account->uid][$fid][$op] = TRUE;
+    return $rights[$account->uid][$cache_id][$op] = TRUE;
   }
 
   // We grant access to the file if both of the following conditions are met:
@@ -1087,10 +1087,10 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
   // - At least one module says to grant access.
   $access = module_invoke_all('file_entity_access', $op, $file, $account);
   if (in_array(FILE_ENTITY_ACCESS_DENY, $access, TRUE)) {
-    return $rights[$account->uid][$fid][$op] = FALSE;
+    return $rights[$account->uid][$cache_id][$op] = FALSE;
   }
   elseif (in_array(FILE_ENTITY_ACCESS_ALLOW, $access, TRUE)) {
-    return $rights[$account->uid][$fid][$op] = TRUE;
+    return $rights[$account->uid][$cache_id][$op] = TRUE;
   }
 
 
@@ -1103,17 +1103,17 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
       // For private files, users can view their own private files if the
       // user is not anonymous, and has the 'view own private files' permission.
       if (!empty($account->uid) && $file->uid == $account->uid && user_access('view own private files', $account)) {
-        return $rights[$account->uid][$fid][$op] = TRUE;
+        return $rights[$account->uid][$cache_id][$op] = TRUE;
       }
     }
     elseif ($file->status == FILE_STATUS_PERMANENT && $file->uid == $account->uid && user_access('view own files', $account)) {
       // For non-private files, allow to see if user owns the file.
-      return $rights[$account->uid][$fid][$op] = TRUE;
+      return $rights[$account->uid][$cache_id][$op] = TRUE;
     }
     elseif ($file->status == FILE_STATUS_PERMANENT && user_access('view files', $account)) {
       // For non-private files, users can view if they have the 'view files'
       // permission.
-      return $rights[$account->uid][$fid][$op] = TRUE;
+      return $rights[$account->uid][$cache_id][$op] = TRUE;
     }
   }
 
@@ -1124,7 +1124,6 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
  * Implements hook_file_entity_access().
  */
 function file_entity_file_entity_access($op, $file, $account) {
-  $type = is_string($file) ? $file : $file->type;
   $grants = array();
 
   // If the file URI is invalid, deny access.
@@ -1139,18 +1138,18 @@ function file_entity_file_entity_access($op, $file, $account) {
   }
 
   if ($op == 'update') {
-    if (user_access('edit any files', $account) || (user_access('edit own files', $account) && ($account->uid == $file->uid))) {
+    if (user_access('edit any files', $account) || (is_object($file) && user_access('edit own files', $account) && ($account->uid == $file->uid))) {
       return FILE_ENTITY_ACCESS_ALLOW;
     }
   }
 
   if ($op == 'delete') {
-    if (user_access('delete any files', $account) || (user_access('delete own files', $account) && ($account->uid == $file->uid))) {
+    if (user_access('delete any files', $account) || (is_object($file) && user_access('delete own files', $account) && ($account->uid == $file->uid))) {
       return FILE_ENTITY_ACCESS_ALLOW;
     }
   }
 
-  if ($op == 'view' && file_uri_scheme($file->uri) == 'private') {
+  if ($op == 'view' && is_object($file) && file_uri_scheme($file->uri) == 'private') {
     // When viewing private files, we can only invoke hook_file_download()
     // if the $account user objet matches the current user.
     if ($GLOBALS['user']->uid == $account->uid) {
