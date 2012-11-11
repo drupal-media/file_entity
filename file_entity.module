@@ -168,6 +168,16 @@ function file_entity_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  $items['file/%file/usage'] = array(
+    'title' => 'Usage',
+    'page callback' => 'file_entity_usage_page',
+    'page arguments' => array(1),
+    'access callback' => 'file_entity_access',
+    'access arguments' => array('update', 1),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE,
+    'file' => 'file_entity.pages.inc',
+  );
   $items['file/%file/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'drupal_get_form',
@@ -391,6 +401,7 @@ function file_entity_admin_paths() {
     'file/add' => TRUE,
     'file/add/*' => TRUE,
     'file/*/edit' => TRUE,
+    'file/*/usage' => TRUE,
     'file/*/delete' => TRUE,
   );
   return $paths;
@@ -416,7 +427,7 @@ function file_entity_theme() {
     'file_entity_file_link' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL),
       'file' => 'file_entity.theme.inc',
-    )
+    ),
   );
 }
 
