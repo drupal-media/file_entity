@@ -573,10 +573,23 @@ function file_entity_file_formatter_info() {
   if (module_exists('image')) {
     $formatters['file_image'] = array(
       'label' => t('Image'),
-      'default settings' => array('image_style' => ''),
+      'default settings' => array(
+        'image_style' => '',
+        'alt' => '',
+        'title' => ''
+      ),
       'view callback' => 'file_entity_file_formatter_file_image_view',
       'settings callback' => 'file_entity_file_formatter_file_image_settings',
     );
+    // Provide default token values.
+    if (module_exists('token')) {
+      $formatters['file_image']['default settings']['alt'] = '[file:field_file_image_alt_text]';
+      $formatters['file_image']['default settings']['title'] = '[file:field_file_image_title_text]';
+    }
+    elseif (module_exists('entity_token')) {
+      $formatters['file_image']['default settings']['alt'] = '[file:field-file-image-alt-text]';
+      $formatters['file_image']['default settings']['title'] = '[file:field-file-image-title-text]';
+    }
   }
 
   return $formatters;
@@ -677,6 +690,13 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
   }
 
   if (file_entity_file_is_local($file) && isset($file->image_dimensions)) {
+    // We don't sanitize here.
+    // @see http://drupal.org/node/1553094#comment-6257382
+    // Theme function will take care of escaping.
+    $replace_options = array(
+      'clear' => 1,
+      'sanitize' => 0,
+    );
     if (!empty($display['settings']['image_style'])) {
       $element = array(
         '#theme' => 'image_style',
@@ -684,6 +704,8 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
         '#path' => $file->uri,
         '#width' => $file->image_dimensions['width'],
         '#height' => $file->image_dimensions['height'],
+        '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
+        '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
       );
     }
     else {
@@ -692,6 +714,8 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
         '#path' => $file->uri,
         '#width' => $file->image_dimensions['width'],
         '#height' => $file->image_dimensions['height'],
+        '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
+        '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
       );
     }
     return $element;
@@ -712,6 +736,33 @@ function file_entity_file_formatter_file_image_settings($form, &$form_state, $se
     '#default_value' => $settings['image_style'],
     '#empty_option' => t('None (original image)'),
   );
+
+  // For image files we allow the alt attribute (required in HTML).
+  $element['alt'] = array(
+    '#title' => t('Alt attribute'),
+    '#description' => t('The text to use as value for the <em>img</em> tag <em>alt</em> attribute.'),
+    '#type' => 'textfield',
+    '#default_value' => $settings['alt'],
+  );
+
+  // Allow the setting of the title attribute.
+  $element['title'] = array(
+    '#title' => t('Title attribute'),
+    '#description' => t('The text to use as value for the <em>img</em> tag <em>title</em> attribute.'),
+    '#type' => 'textfield',
+    '#default_value' => $settings['title'],
+  );
+
+  if (module_exists('token')) {
+    $element['alt']['#description'] .= t('This field supports tokens.');
+    $element['title']['#description'] .= t('This field supports tokens.');
+    $element['tokens'] = array(
+      '#theme' => 'token_tree',
+      '#token_types' => array('file'),
+      '#dialog' => TRUE,
+    );
+  }
+
   return $element;
 }
 
