@@ -689,7 +689,7 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
     return;
   }
 
-  if (file_entity_file_is_local($file) && isset($file->image_dimensions)) {
+  if (file_entity_file_is_readable($file) && isset($file->image_dimensions)) {
     // We don't sanitize here.
     // @see http://drupal.org/node/1553094#comment-6257382
     // Theme function will take care of escaping.
@@ -720,6 +720,21 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
     }
     return $element;
   }
+}
+
+/**
+ * Check if a file entity is readable or not.
+ *
+ * @param object $file
+ *   A file entity object from file_load().
+ *
+ * @return boolean
+ *   TRUE if the file is using a readable stream wrapper, or FALSE otherwise.
+ */
+function file_entity_file_is_readable($file) {
+  $scheme = file_uri_scheme($file->uri);
+  $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_READ);
+  return !empty($wrappers[$scheme]);
 }
 
 /**
