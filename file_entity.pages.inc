@@ -32,10 +32,32 @@ function file_entity_view_page($file) {
 }
 
 /**
- * Form callback for adding media via an upload form.
- * @todo: should use the AJAX uploader
+ * Form callback for adding a file via an upload form.
+ *
+ * This is a multi step form which has 1-3 pages:
+ * - Upload file
+ * - Choose filetype
+ *   If there is only one candidate (based on mimetype) we will skip this step.
+ * - Edit fields
+ *   Skip this step if there are no fields on this entity type.
  */
 function file_entity_add_upload($form, &$form_state, array $options = array()) {
+  $step = (isset($form_state['step']) && in_array($form_state['step'], array(1, 2, 3))) ? $form_state['step'] : 1;
+  $form['#step'] = $step;
+  switch ($step) {
+    case 1:
+      return file_entity_add_upload_step_upload($form, $form_state, $options);
+    case 2:
+      return file_entity_add_upload_step_filetype($form, $form_state, $options);
+    case 3:
+      return file_entity_add_upload_step_fields($form, $form_state, $options);
+  }
+}
+
+/**
+ * Generate form fields for the first step in the add file wizard.
+ */
+function file_entity_add_upload_step_upload($form, &$form_state, array $options = array()) {
   $form['upload'] = array(
     '#type' => 'managed_file',
     '#title' => t('Upload a new file'),
@@ -44,15 +66,67 @@ function file_entity_add_upload($form, &$form_state, array $options = array()) {
     '#progress_indicator' => 'bar',
     '#required' => TRUE,
     '#pre_render' => array('file_managed_file_pre_render', 'file_entity_upload_validators_pre_render'),
+    '#default_value' => isset($form_state['storage']['upload']) ? $form_state['storage']['upload'] : NULL,
   );
 
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions']['next'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Next'),
   );
 
   form_load_include($form_state, 'inc', 'file_entity', 'file_entity.pages');
+
+  return $form;
+}
+
+/**
+ * Generate form fields for the second step in the add file wizard.
+ */
+function file_entity_add_upload_step_filetype($form, &$form_state, array $options = array()) {
+  $file = file_load($form_state['storage']['upload']);
+
+  $form['type'] = array(
+    '#type' => 'radios',
+    '#title' => t('File type'),
+    '#options' => file_entity_get_filetype_candidates($file),
+    '#default_value' => isset($form_state['storage']['type']) ? $form_state['storage']['type'] : NULL,
+    '#required' => TRUE,
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['previous'] = array(
+    '#type' => 'submit',
+    '#value' => t('Previous'),
+  );
+  $form['actions']['next'] = array(
+    '#type' => 'submit',
+    '#value' => t('Next'),
+  );
+
+  return $form;
+}
+
+/**
+ * Generate form fields for the third step in the add file wizard.
+ */
+function file_entity_add_upload_step_fields($form, &$form_state, array $options = array()) {
+  // Load the file and overwrite the filetype set on the previous screen.
+  $file = file_load($form_state['storage']['upload']);
+  $file->type = $form_state['storage']['type'];
+
+  // Add fields.
+  field_attach_form('file', $file, $form, $form_state);
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['previous'] = array(
+    '#type' => 'submit',
+    '#value' => t('Previous'),
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
 
   return $form;
 }
@@ -116,45 +190,114 @@ function file_entity_usage_page($file) {
 }
 
 /**
- * Upload a file.
+ * Get the candidate filetypes for a given file.
+ *
+ * Only filetypes for which the user has access to create entities are returned.
+ *
+ * @param array $file
+ *   An upload file array from form_state.
+ *
+ * @return array
+ *   An array of file type bundles that support the file's mime type.
+ */
+function file_entity_get_filetype_candidates($file) {
+  $types = module_invoke_all('file_type', $file);
+  drupal_alter('file_type', $types, $file);
+  $candidates = array();
+  foreach ($types as $type) {
+    $file->type = $type;
+    if (file_entity_access('create', $file)) {
+      $candidates[$type] = file_entity_type_get_name($file);
+    }
+  }
+  return $candidates;
+}
+
+/**
+ * Submit handler for the add file form.
  */
 function file_entity_add_upload_submit($form, &$form_state) {
-  $file = file_load($form_state['values']['upload']);
+  $form_state['storage'] = isset($form_state['storage']) ? $form_state['storage'] : array();
+  $form_state['storage'] = array_merge($form_state['storage'], $form_state['values']);
 
-  if ($file) {
-    // The media browser widget does not use the 'display' field.
-    $file->display = TRUE;
+  // This var is set to TRUE when we are ready to save the file.
+  $save = FALSE;
+  $trigger = $form_state['triggering_element']['#id'];
 
-    // Change the file from temporary to permanent.
-    $file->status = FILE_STATUS_PERMANENT;
-    file_save($file);
-
-    $form_state['file'] = $file;
-    drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
-  }
-  else {
-    drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
-    return;
-  }
-
-  // Figure out destination.
-  if (isset($_GET['destination'])) {
-    $destination = drupal_get_destination();
-    unset($_GET['destination']);
-  }
-  elseif (user_access('administer files')) {
-    $destination = array('destination' => 'admin/content/file');
-  }
-  else {
-    $destination = array('destination' => 'file/' . $file->fid);
+  // We have the file, check if we can skip step 2.
+  // The next step is step 2 when we are on step 1 and clicking "next" or
+  // when we are on step 3 and clicking "previous".
+  if (($form['#step'] == 1 && $trigger == 'edit-next') || ($form['#step'] == 3 && $trigger == 'edit-previous')) {
+    $file = file_load($form_state['storage']['upload']);
+    $candidates = file_entity_get_filetype_candidates($file);
+    if (count($candidates) == 1) {
+      $candidates_keys = array_keys($candidates);
+      // There is only one possible filetype for this file. Skip the second page.
+      $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
+      $form_state['storage']['type'] = reset($candidates_keys);
+    }
   }
 
-  // Redirect to the file edit page after submission.
-  if (file_entity_access('update', $file)) {
-    $form_state['redirect'] = array('file/' . $file->fid . '/edit', array('query' => $destination));
+  // We have the filetype, check if we can skip step 3.
+  if (($form['#step'] == 2 && $trigger == 'edit-next')) {
+    $file = file_load($form_state['storage']['upload']);
+    if (!field_info_instances('file', $form_state['storage']['type'])) {
+      // This filetype doesn't have fields, save the file.
+      $save = TRUE;
+    }
   }
-  else {
+
+  switch ($trigger) {
+    case 'edit-next':
+      $form_state['step'] = $form['#step'] + 1;
+      break;
+    case 'edit-previous':
+      $form_state['step'] = $form['#step'] - 1;
+      break;
+    case 'edit-submit':
+      $save = TRUE;
+      break;
+  }
+
+  if ($save) {
+    $file = file_load($form_state['storage']['upload']);
+    if ($file) {
+      $file->type = $form_state['storage']['type'];
+      $file->display = TRUE;
+
+      // Change the file from temporary to permanent.
+      $file->status = FILE_STATUS_PERMANENT;
+
+      // Save the form fields.
+      // Keep in mind that the values for the Field API fields must be in
+      // $form_state['values'] and not in ['storage']. This is true as long as
+      // the fields are on the last page of the multi step form.
+      entity_form_submit_build_entity('file', $file, $form, $form_state);
+
+      file_save($file);
+      $form_state['file'] = $file;
+      drupal_set_message(t('The file @name was uploaded.', array('@name' => $file->filename)));
+    }
+    else {
+      drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
+      return;
+    }
+
+    // Figure out destination.
+    if (isset($_GET['destination'])) {
+      $destination = drupal_get_destination();
+      unset($_GET['destination']);
+    }
+    elseif (user_access('administer files')) {
+      $destination = array('destination' => 'admin/content/file');
+    }
+    else {
+      $destination = array('destination' => 'file/' . $file->fid);
+    }
     $form_state['redirect'] = $destination['destination'];
+  }
+  else {
+    $form_state['rebuild'] = TRUE;
   }
 }
 
@@ -184,7 +327,6 @@ function file_entity_upload_destination_uri(array $params, array $data = array()
 
   return $params['uri_scheme'] . '://' . $destination;
 }
-
 
 function file_entity_add_upload_multiple($form, &$form_state, $params = array()) {
   $form = file_entity_add_upload($form, $form_state, $params);
@@ -504,7 +646,6 @@ function file_entity_multiple_delete_form_submit($form, &$form_state) {
   }
   $form_state['redirect'] = 'admin/content/file';
 }
-
 
 /**
  * Page callback for the file edit form.

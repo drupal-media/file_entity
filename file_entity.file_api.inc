@@ -50,6 +50,9 @@ function file_info_cache_clear() {
 
   // Clear the formatter type cache, managed by file_info_formatter_types().
   drupal_static_reset('file_info_formatter_types');
+
+  // Clear file type caches
+  drupal_static_reset('file_type_get_names');
 }
 
 /**

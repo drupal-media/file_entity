@@ -291,7 +291,114 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
   function testViewModesAssigned() {
   }
 
+  /**
+   * Make sure candidates are presented in the case of multiple
+   * file types.
+   */
+  function testTypeWithCandidates() {
+    // Create multiple file types with the same mime types.
+    $types = array(
+      'image1' => $this->createFileType(array('type' => 'image1', 'label' => 'Image 1')),
+      'image2' => $this->createFileType(array('type' => 'image2', 'label' => 'Image 2'))
+    );
 
+    // Attach a text field to one of the file types.
+    $field = array(
+      'field_name' => drupal_strtolower($this->randomName()),
+      'type' => 'text',
+      'settings' => array(
+        'max_length' => 255,
+      )
+    );
+    field_create_field($field);
+    $instance = array(
+      'field_name' => $field['field_name'],
+      'entity_type' => 'file',
+      'bundle' => 'image2',
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'text_default',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+
+    // Create a user with file creation access.
+    $user = $this->drupalCreateUser(array('create files'));
+    $this->drupalLogin($user);
+
+    // Step 1: Upload file
+    $file = reset($this->files['image']);
+    $edit = array();
+    $edit['files[upload]'] = drupal_realpath($file->uri);
+    $this->drupalPost('file/add', $edit, t('Next'));
+
+    // Step 2: Select file type candidate
+    $this->assertText('Image 1', 'File candidate list item found.');
+    $this->assertText('Image 2', 'File candidate list item found.');
+    $edit = array();
+    $edit['type'] = 'image2';
+    $this->drupalPost(NULL, $edit, t('Next'));
+
+    // Step 3: Complete field widgets
+    $langcode = LANGUAGE_NONE;
+    $edit = array();
+    $edit["{$field['field_name']}[$langcode][0][value]"] = $this->randomName();
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertText(t('The file @name was uploaded.', array('@name' => $file->filename)), 'File was uploaded.');
+    $this->assertText($field['field_name'], 'File text field was found.');
+  }
+
+  /**
+   * Make sure no candidates appear when only one mime type is available.
+   * NOTE: Depends on file_entity.module default 'image' type.
+   */
+  function testTypeWithoutCandidates() {
+    // Attach a text field to the default image file type.
+    $field = array(
+      'field_name' => drupal_strtolower($this->randomName()),
+      'type' => 'text',
+      'settings' => array(
+        'max_length' => 255,
+      )
+    );
+    field_create_field($field);
+    $instance = array(
+      'field_name' => $field['field_name'],
+      'entity_type' => 'file',
+      'bundle' => 'image',
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'text_default',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+
+    // Create a user with file creation access.
+    $user = $this->drupalCreateUser(array('create files'));
+    $this->drupalLogin($user);
+
+    // Step 1: Upload file
+    $file = reset($this->files['image']);
+    $edit = array();
+    $edit['files[upload]'] = drupal_realpath($file->uri);
+    $this->drupalPost('file/add', $edit, t('Next'));
+
+    // Step 2: Complete field widgets
+    $langcode = LANGUAGE_NONE;
+    $edit = array();
+    $edit["{$field['field_name']}[$langcode][0][value]"] = $this->randomName();
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertText(t('The file @name was uploaded.', array('@name' => $file->filename)), 'File was uploaded.');
+    $this->assertText($field['field_name'], 'File text field was found.');
+  }
 }
 
 class FileEntityAccessTestCase extends FileEntityTestHelper {
