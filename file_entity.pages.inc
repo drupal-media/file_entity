@@ -687,7 +687,7 @@ function file_entity_get_upload_validators(array $options = array()) {
     $validators['file_validate_extensions'] = array($options['file_extensions']);
   }
   else {
-    $validators['file_validate_extensions'] = array(FILE_ENTITY_DEFAULT_ALLOWED_EXTENSIONS);
+    $validators['file_validate_extensions'] = array(variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp'));
   }
 
   // Validate file size but do not allow anything higher than file_upload_max_size().

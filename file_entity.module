@@ -6,13 +6,6 @@
  */
 
 /**
- * The default list of file extensions allowed by file_save_upload().
- *
- * Adds support for docx, xlsx, pptx and ppsx.
- */
-define('FILE_ENTITY_DEFAULT_ALLOWED_EXTENSIONS', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp');
-
-/**
  * Modules should return this value from hook_file_entity_access() to allow
  * access to a file.
  */
