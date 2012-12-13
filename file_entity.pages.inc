@@ -331,11 +331,26 @@ function file_entity_upload_destination_uri(array $params, array $data = array()
 function file_entity_add_upload_multiple($form, &$form_state, $params = array()) {
   $form = file_entity_add_upload($form, $form_state, $params);
   unset($form['upload']['#title']);
-  // The validators will be set from plupload anyway.  This isn't pretty, but don't
-  // it to show up twice.
+  // The validators will be set from plupload anyway. This isn't pretty,
+  // but don't allow it to show up twice.
   unset($form['upload']['#description']);
 
   $form['upload']['#type'] = 'plupload';
+
+  // Ensure that we call the plupload_element_pre_render function.
+  // If it isn't called, it doesn't set the JS settings that transfers the
+  // list of allowed file extentions to the PLUpload widget.
+  // We override the 'file_entity_upload_validators_pre_render' setting if it
+  // exists, because both pre-render hooks adds the upload-help with list of
+  // allowed file extensions.
+  $index = array_search('file_entity_upload_validators_pre_render', $form['upload']['#pre_render']);
+  if ($index !== FALSE) {
+    $form['upload']['#pre_render'][$index] = 'plupload_element_pre_render';
+  }
+  else {
+    $form['upload']['#pre_render'][] = 'plupload_element_pre_render';
+  }
+
   $form['submit']['#value'] = t('Start upload');
   return $form;
 }
