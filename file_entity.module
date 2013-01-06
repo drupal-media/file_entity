@@ -1124,7 +1124,7 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
   $rights = &drupal_static(__FUNCTION__, array());
 
   if (!$file && !in_array($op, array('view', 'update', 'delete', 'create'), TRUE)) {
-    // If there was no file to check against, or the $op was not one of the
+    // If there was no file to check against, and the $op was not one of the
     // supported ones, we return access denied.
     return FALSE;
   }
