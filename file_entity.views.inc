@@ -41,6 +41,48 @@ function file_entity_views_data() {
     ),
   );
 
+  // View link.
+  $data['file_managed']['link'] = array(
+    'title' => t('Link'),
+    'help' => t('Provide a simple link to the file entity.'),
+    'field' => array(
+      'handler' => 'views_handler_field_file_link',
+      'click sortable' => TRUE,
+      'real field' => 'fid',
+      'additional fields' => array(
+        'fid',
+      ),
+    ),
+  );
+
+  // Edit link.
+  $data['file_managed']['edit'] = array(
+    'title' => t('Edit link'),
+    'help' => t('Provide a simple link to edit the file entity.'),
+    'field' => array(
+      'handler' => 'views_handler_field_file_link_edit',
+      'click sortable' => TRUE,
+      'real field' => 'fid',
+      'additional fields' => array(
+        'fid',
+      ),
+    ),
+  );
+
+  // Delete link.
+  $data['file_managed']['delete'] = array(
+    'title' => t('Delete link'),
+    'help' => t('Provide a simple link to delete the file entity.'),
+    'field' => array(
+      'handler' => 'views_handler_field_file_link_delete',
+      'click sortable' => TRUE,
+      'real field' => 'fid',
+      'additional fields' => array(
+        'fid',
+      ),
+    ),
+  );
+
   return $data;
 }
 
