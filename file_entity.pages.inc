@@ -385,16 +385,19 @@ function file_entity_add_upload_multiple_submit($form, &$form_state) {
   }
 
   // Redirect to the file edit page.
-  if (file_entity_access('update', $file) && module_exists('multiform')) {
-    $destination = array('destination' => 'admin/content/file');
+  if (file_entity_access('update', $file) && module_exists('multiform') && module_exists('media')) {
+    $destination = array();
     if (isset($_GET['destination'])) {
       $destination = drupal_get_destination();
       unset($_GET['destination']);
     }
+    elseif (user_access('administer files')) {
+      $destination = array('destination' => 'admin/content/file');
+    }
     $form_state['redirect'] = array('admin/content/file/edit-multiple/' . implode(' ', array_keys($form_state['files'])), array('query' => $destination));
   }
   else {
-    $form_state['redirect'] = 'admin/content/file';
+    $form_state['redirect'] = user_access('administer files') ? 'admin/content/file' : '<front>';
   }
 }
 
