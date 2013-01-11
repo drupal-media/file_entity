@@ -469,6 +469,34 @@ function file_entity_entity_info_alter(&$entity_info) {
   $entity_info['file']['creation callback'] = 'entity_metadata_create_object';
   $entity_info['file']['view callback'] = 'file_view_multiple';
   $entity_info['file']['edit callback'] = 'file_entity_metadata_form_file';
+
+  // Add integration with the Title module for file name replacement support.
+  $entity_info['file']['field replacement'] = array(
+    'filename' => array(
+      'field' => array(
+        'type' => 'text',
+        'cardinality' => 1,
+        'translatable' => TRUE,
+      ),
+      'instance' => array(
+        'label' => t('File name'),
+        'description' => t('A field replacing file name.'),
+        'required' => TRUE,
+        'settings' => array(
+          'text_processing' => 0,
+        ),
+        'widget' => array(
+          'weight' => -5,
+        ),
+        'display' => array(
+          'default' => array(
+            'type' => 'hidden',
+          ),
+        ),
+      ),
+      'preprocess_key' => 'filename',
+    ),
+  );
 }
 
 /**
