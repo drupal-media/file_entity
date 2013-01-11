@@ -260,6 +260,18 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
   }
 
   /**
+   * Test admin pages access and functionality.
+   */
+  function testAdminPages() {
+    // Create a user with file type administration access.
+    $user = $this->drupalCreateUser(array('administer file types'));
+    $this->drupalLogin($user);
+
+    $this->drupalGet('admin/structure/file-types');
+    $this->assertResponse(200, 'File types admin page is accessible');
+  }
+
+  /**
    * Test creating a new type. Basic CRUD.
    */
   function testCreate() {
