@@ -465,6 +465,9 @@ function file_entity_entity_info_alter(&$entity_info) {
     );
   }
 
+  // Enable Metatag support.
+  $entity_info['file']['metatags'] = TRUE;
+
   // Ensure some of the Entity API callbacks are supported.
   $entity_info['file']['creation callback'] = 'entity_metadata_create_object';
   $entity_info['file']['view callback'] = 'file_view_multiple';
