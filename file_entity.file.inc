@@ -57,9 +57,6 @@ function file_entity_file_insert($file) {
   // Clear any related field caches.
   file_entity_invalidate_field_caches($file);
 
-  // Clear the page and block caches.
-  cache_clear_all();
-
   // Get and store image dimensions.
   // @todo We should fetch image dimensions in file_entity_file_presave and
   // then save them in this hook.
@@ -75,9 +72,6 @@ function file_entity_file_update($file) {
 
   // Clear any related field caches.
   file_entity_invalidate_field_caches($file);
-
-  // Clear the page and block caches.
-  cache_clear_all();
 
   // Reset the image dimensions for a file.
   // @todo We should fetch image dimensions in file_entity_file_presave and
@@ -105,9 +99,6 @@ function file_entity_file_delete($file) {
   // This is safe to call since the file's records from the usage table have
   // not yet been deleted.
   file_entity_invalidate_field_caches($file);
-
-  // Clear the page and block caches.
-  cache_clear_all();
 
   // Delete image dimensions from the {image_dimensions} table
   db_query('DELETE FROM {image_dimensions} WHERE fid = :fid', array(':fid' => $file->fid));

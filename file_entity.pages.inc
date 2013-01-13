@@ -299,6 +299,9 @@ function file_entity_add_upload_submit($form, &$form_state) {
   else {
     $form_state['rebuild'] = TRUE;
   }
+
+  // Clear the page and block caches.
+  cache_clear_all();
 }
 
 /**
@@ -399,6 +402,9 @@ function file_entity_add_upload_multiple_submit($form, &$form_state) {
   else {
     $form_state['redirect'] = user_access('administer files') ? 'admin/content/file' : '<front>';
   }
+
+  // Clear the page and block caches.
+  cache_clear_all();
 }
 
 /**
@@ -533,6 +539,9 @@ function file_entity_edit_submit($form, &$form_state) {
   drupal_set_message(t('@type %title has been updated.', $args));
 
   $form_state['redirect'] = 'file/' . $file->fid;
+
+  // Clear the page and block caches.
+  cache_clear_all();
 }
 
 /**
@@ -546,6 +555,9 @@ function file_entity_edit_delete_submit($form, &$form_state) {
     unset($_GET['destination']);
   }
   $form_state['redirect'] = array('file/' . $fid . '/delete', array('query' => $destination));
+
+  // Clear the page and block caches.
+  cache_clear_all();
 }
 
 /**
@@ -599,6 +611,9 @@ function file_entity_delete_form_submit($form, &$form_state) {
   }
 
   $form_state['redirect'] = '<front>';
+
+  // Clear the page and block caches.
+  cache_clear_all();
 }
 
 /**
@@ -663,6 +678,9 @@ function file_entity_multiple_delete_form_submit($form, &$form_state) {
     drupal_set_message(format_plural($count, 'Deleted one file.', 'Deleted @count files.'));
   }
   $form_state['redirect'] = 'admin/content/file';
+
+  // Clear the page and block caches.
+  cache_clear_all();
 }
 
 /**
