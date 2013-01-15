@@ -186,6 +186,18 @@ function hook_query_file_entity_access_alter(QueryAlterableInterface $query) {
 }
 
 /**
+ * Alter file download headers.
+ *
+ * @param $headers
+ *   Array of download headers.
+ */
+function hook_file_download_headers_alter(&$headers) {
+  // Instead of being powered by PHP, tell the world this resource was powered
+  // by your custom module!
+  $headers['X-Powered-By'] = 'My Module';
+}
+
+/**
  * Decides which file type (bundle) should be assigned to a file entity.
  *
  * @param $file

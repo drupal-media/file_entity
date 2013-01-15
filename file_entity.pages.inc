@@ -32,6 +32,27 @@ function file_entity_view_page($file) {
 }
 
 /**
+ * Menu callback; download a single file entity.
+ */
+function file_entity_download_page($file) {
+  $headers = array(
+    'Content-Type' => 'force-download',
+    'Content-Disposition' => 'attachment; filename="' . $file->filename . '"',
+    'Content-Length' => $file->filesize,
+    'Content-Transfer-Encoding' => 'binary',
+    'Pragma' => 'no-cache',
+    'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+    'Expires' => '0',
+    'Accept-Ranges' => 'bytes',
+  );
+
+  // Let other modules alter the download headers.
+  drupal_alter('file_download_headers', $headers);
+
+  file_transfer($file->uri, $headers);
+}
+
+/**
  * Form callback for adding a file via an upload form.
  *
  * This is a multi step form which has 1-3 pages:

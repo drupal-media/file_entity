@@ -442,7 +442,7 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     // Ensures user with 'bypass file access' permission can do everything.
     $web_user = $this->drupalCreateUser(array('bypass file access'));
     $this->assertFileEntityAccess(array('create' => TRUE), NULL, $web_user);
-    $this->assertFileEntityAccess(array('view' => TRUE, 'update' => TRUE, 'delete' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(array('view' => TRUE, 'download' => TRUE, 'update' => TRUE, 'delete' => TRUE), $file, $web_user);
 
     // User cannot 'view files'.
     $web_user = $this->drupalCreateUser(array('create files'));
@@ -457,6 +457,14 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $file->status = FILE_STATUS_PERMANENT;
     file_save($file);
     $this->assertFileEntityAccess(array('view' => TRUE), $file, $web_user);
+
+    // User can download own files but no other files.
+    $web_user = $this->drupalCreateUser(array('create files', 'download own files'));
+    $this->assertFileEntityAccess(array('download' => FALSE), $file, $web_user);
+    $file->uid = $web_user->uid;
+    $file->status = FILE_STATUS_PERMANENT;
+    file_save($file);
+    $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
 
     // User can update own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own files'));
@@ -478,6 +486,10 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $web_user = $this->drupalCreateUser(array('create files', 'view files'));
     $this->assertFileEntityAccess(array('view' => TRUE), $file, $web_user);
 
+    // User can download any file.
+    $web_user = $this->drupalCreateUser(array('create files', 'download any files'));
+    $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
+
     // User can edit any file.
     $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any files'));
     $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
@@ -492,6 +504,7 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
    * In this test we aim to prove the permissions work in the following pages:
    *  file/add
    *  file/%/view
+   *  file/%/download
    *  file/%/edit
    *  file/%/delete
    */
@@ -518,6 +531,15 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->fid}/view");
     $this->assertResponse(200, 'Users with access can access the file view page');
+
+    $web_user = $this->drupalCreateUser(array());
+    $this->drupalLogin($web_user);
+    $this->drupalGet("file/{$file->fid}/download");
+    $this->assertResponse(403, 'Users without access can not download the file');
+    $web_user = $this->drupalCreateUser(array('download any files'));
+    $this->drupalLogin($web_user);
+    $this->drupalGet("file/{$file->fid}/download");
+    $this->assertResponse(200, 'Users with access can download the file');
 
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
