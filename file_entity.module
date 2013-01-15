@@ -454,19 +454,17 @@ function file_entity_entity_info_alter(&$entity_info) {
   $entity_info['file']['bundle keys']['bundle'] = 'type';
   $entity_info['file']['bundles'] = array();
   $entity_info['file']['uri callback'] = 'file_entity_uri';
-  $entity_info['file']['view modes'] += array(
-    'teaser' => array(
-      'label' => t('Teaser'),
-      'custom settings' => TRUE,
-    ),
-    'full' => array(
-      'label' => t('Full content'),
-      'custom settings' => FALSE,
-    ),
-    'preview' => array(
-      'label' => t('Preview'),
-      'custom settings' => TRUE,
-    ),
+  $entity_info['file']['view modes']['teaser'] = array(
+    'label' => t('Teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['file']['view modes']['full'] = array(
+    'label' => t('Full content'),
+    'custom settings' => FALSE,
+  );
+  $entity_info['file']['view modes']['preview'] = array(
+    'label' => t('Preview'),
+    'custom settings' => TRUE,
   );
 
   foreach (file_type_get_enabled_types() as $type) {
