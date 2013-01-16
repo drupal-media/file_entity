@@ -83,6 +83,20 @@ function file_entity_views_data() {
     ),
   );
 
+  // Download link.
+  $data['file_managed']['download'] = array(
+    'title' => t('Download link'),
+    'help' => t('Provide a simple link to download the file entity.'),
+    'field' => array(
+      'handler' => 'views_handler_field_file_link_download',
+      'click sortable' => TRUE,
+      'real field' => 'fid',
+      'additional fields' => array(
+        'fid',
+      ),
+    ),
+  );
+
   return $data;
 }
 
