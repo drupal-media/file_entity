@@ -220,7 +220,7 @@ class FileEntityAdminTestCase extends FileEntityTestHelper {
     // Test that the default sort by file_managed.timestamp DESC actually fires properly.
     $files_query = db_select('file_managed', 'fm')
       ->fields('fm', array('fid'))
-      ->orderBy('timestamp', 'ASC')
+      ->orderBy('timestamp', 'DESC')
       ->execute()
       ->fetchCol();
 
