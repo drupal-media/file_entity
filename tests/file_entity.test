@@ -11,11 +11,9 @@ class FileEntityTestHelper extends DrupalWebTestCase {
   function setUp($modules = array()) {
     $modules[] = 'file_entity';
     parent::setUp($modules);
-
-    $this->setUpFiles();
   }
 
-  function setUpFiles() {
+  protected function setUpFiles() {
     $types = array('text', 'image');
     foreach ($types as $type) {
       foreach ($this->drupalGetTestFiles($type) as $file) {
@@ -39,6 +37,57 @@ class FileEntityTestHelper extends DrupalWebTestCase {
     file_type_save($type);
     return $type;
   }
+
+  protected function createFileEntity($settings = array()) {
+    $file = new stdClass();
+
+    // Populate defaults array.
+    $settings += array(
+      'filepath' => 'Файл для тестирования ' . $this->randomName(), // Prefix with non-latin characters to ensure that all file-related tests work with international filenames.
+      'filemime' => 'text/plain',
+      'uid' => 1,
+      'timestamp' => REQUEST_TIME,
+      'status' => FILE_STATUS_PERMANENT,
+      'contents' => "file_put_contents() doesn't seem to appreciate empty strings so let's put in some data.",
+      'scheme' => file_default_scheme(),
+      'type' => NULL,
+    );
+
+    $filepath = $settings['scheme'] . '://' . $settings['filepath'];
+
+    file_put_contents($filepath, $settings['contents']);
+    $this->assertTrue(is_file($filepath), t('The test file exists on the disk.'), 'Create test file');
+
+    $file = new stdClass();
+    $file->uri = $filepath;
+    $file->filename = drupal_basename($file->uri);
+    $file->filemime = $settings['filemime'];
+    $file->uid = $settings['uid'];
+    $file->timestamp = $settings['timestamp'];
+    $file->filesize = filesize($file->uri);
+    $file->status = $settings['status'];
+    $file->type = $settings['type'];
+
+    // The file type is used as a bundle key, and therefore, must not be NULL.
+    if (!isset($file->type)) {
+      $file->type = FILE_TYPE_NONE;
+    }
+
+    // If the file isn't already assigned a real type, determine what type should
+    // be assigned to it.
+    if ($file->type === FILE_TYPE_NONE) {
+      $type = file_get_type($file);
+      if (isset($type)) {
+        $file->type = $type;
+      }
+    }
+
+    // Write the record directly rather than calling file_save() so we don't
+    // invoke the hooks.
+    $this->assertNotIdentical(drupal_write_record('file_managed', $file), FALSE, t('The file was added to the database.'), 'Create test file');
+
+    return $file;
+  }
 }
 
 class FileEntityUnitTestCase extends FileEntityTestHelper {
@@ -48,6 +97,11 @@ class FileEntityUnitTestCase extends FileEntityTestHelper {
       'description' => 'Test basic file entity funcitonality.',
       'group' => 'File entity',
     );
+  }
+
+  function setUp() {
+    parent::setUp();
+    parent::setUpFiles();
   }
 
   /**
@@ -125,6 +179,153 @@ class FileEntityUnitTestCase extends FileEntityTestHelper {
   }
 }
 
+/**
+ * Test file administration page functionality.
+ */
+class FileEntityAdminTestCase extends FileEntityTestHelper {
+  public static function getInfo() {
+    return array(
+      'name' => 'File administration',
+      'description' => 'Test file administration page functionality.',
+      'group' => 'File entity',
+    );
+  }
+
+  function setUp() {
+    parent::setUp();
+
+    // Remove the "view files" permission which is set
+    // by default for all users so we can test this permission
+    // correctly.
+    $roles = user_roles();
+    foreach ($roles as $rid => $role) {
+      user_role_revoke_permissions($rid, array('view files'));
+    }
+
+    $this->admin_user = $this->drupalCreateUser(array('administer files', 'bypass file access'));
+    $this->base_user_1 = $this->drupalCreateUser(array('administer files'));
+    $this->base_user_2 = $this->drupalCreateUser(array('administer files', 'view own private files'));
+    $this->base_user_3 = $this->drupalCreateUser(array('administer files', 'edit any files', 'delete any files'));
+  }
+
+  /**
+   * Tests that the table sorting works on the files admin pages.
+   */
+  function testFilesAdminSort() {
+    $this->drupalLogin($this->admin_user);
+    foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $prefix) {
+      $this->createFileEntity(array('filepath' => $prefix . $this->randomName(6)));
+    }
+
+    // Test that the default sort by file_managed.timestamp DESC actually fires properly.
+    $files_query = db_select('file_managed', 'fm')
+      ->fields('fm', array('fid'))
+      ->orderBy('timestamp', 'ASC')
+      ->execute()
+      ->fetchCol();
+
+    $files_form = array();
+    $this->drupalGet('admin/content/file');
+    foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
+      $files_form[] = $input;
+    }
+    $this->assertEqual($files_query, $files_form, 'Files are sorted in the form according to the default query.');
+
+    // Compare the rendered HTML node list to a query for the files ordered by
+    // filename to account for possible database-dependent sort order.
+    $files_query = db_select('file_managed', 'fm')
+      ->fields('fm', array('fid'))
+      ->orderBy('filename')
+      ->execute()
+      ->fetchCol();
+
+    $files_form = array();
+    $this->drupalGet('admin/content/file', array('query' => array('sort' => 'asc', 'order' => 'Title')));
+    foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
+      $files_form[] = $input;
+    }
+    $this->assertEqual($files_query, $files_form, 'Files are sorted in the form the same as they are in the query.');
+  }
+
+  /**
+   * Tests files overview with different user permissions.
+   */
+  function testFilesAdminPages() {
+    $this->drupalLogin($this->admin_user);
+
+    $files['public_image'] = $this->createFileEntity(array('scheme' => 'public', 'uid' => $this->base_user_1->uid, 'type' => 'image'));
+    $files['public_document'] = $this->createFileEntity(array('scheme' => 'public', 'uid' => $this->base_user_2->uid, 'type' => 'document'));
+    $files['private_image'] = $this->createFileEntity(array('scheme' => 'private', 'uid' => $this->base_user_1->uid, 'type' => 'image'));
+    $files['private_document'] = $this->createFileEntity(array('scheme' => 'private', 'uid' => $this->base_user_2->uid, 'type' => 'document'));
+
+    // Verify view, edit, and delete links for any file.
+    $this->drupalGet('admin/content/file');
+    $this->assertResponse(200);
+    foreach ($files as $file) {
+      $this->assertLinkByHref('file/' . $file->fid);
+      $this->assertLinkByHref('file/' . $file->fid . '/edit');
+      $this->assertLinkByHref('file/' . $file->fid . '/delete');
+      // Verify tableselect.
+      $this->assertFieldByName('files[' . $file->fid . ']', '', t('Tableselect found.'));
+    }
+
+    // Verify no operation links are displayed for regular users.
+    $this->drupalLogout();
+    $this->drupalLogin($this->base_user_1);
+    $this->drupalGet('admin/content/file');
+    $this->assertResponse(200);
+    $this->assertLinkByHref('file/' . $files['public_image']->fid);
+    $this->assertLinkByHref('file/' . $files['public_document']->fid);
+    $this->assertNoLinkByHref('file/' . $files['public_image']->fid . '/edit');
+    $this->assertNoLinkByHref('file/' . $files['public_image']->fid . '/delete');
+    $this->assertNoLinkByHref('file/' . $files['public_document']->fid . '/edit');
+    $this->assertNoLinkByHref('file/' . $files['public_document']->fid . '/delete');
+
+    // Verify no tableselect.
+    $this->assertNoFieldByName('files[' . $files['public_image']->fid . ']', '', t('No tableselect found.'));
+
+    // Verify private file is displayed with permission.
+    $this->drupalLogout();
+    $this->drupalLogin($this->base_user_2);
+    $this->drupalGet('admin/content/file');
+    $this->assertResponse(200);
+    $this->assertLinkByHref('file/' . $files['private_document']->fid);
+    // Verify no operation links are displayed.
+    $this->assertNoLinkByHref('file/' . $files['private_document']->fid . '/edit');
+    $this->assertNoLinkByHref('file/' . $files['private_document']->fid . '/delete');
+
+    // Verify user cannot see private file of other users.
+    $this->assertNoLinkByHref('file/' . $files['private_image']->fid);
+    $this->assertNoLinkByHref('file/' . $files['private_image']->fid . '/edit');
+    $this->assertNoLinkByHref('file/' . $files['private_image']->fid . '/delete');
+
+    // Verify no tableselect.
+    $this->assertNoFieldByName('files[' . $files['private_document']->fid . ']', '', t('No tableselect found.'));
+
+    // Verify operation links are displayed for users with appropriate permission.
+    $this->drupalLogout();
+    $this->drupalLogin($this->base_user_3);
+    $this->drupalGet('admin/content/file');
+    $this->assertResponse(200);
+    foreach ($files as $file) {
+      $this->assertLinkByHref('file/' . $file->fid);
+      $this->assertLinkByHref('file/' . $file->fid . '/edit');
+      $this->assertLinkByHref('file/' . $file->fid . '/delete');
+    }
+
+    // Verify file access can be bypassed.
+    $this->drupalLogout();
+    $this->drupalLogin($this->admin_user);
+    $this->drupalGet('admin/content/file');
+    $this->assertResponse(200);
+    foreach ($files as $file) {
+      $this->assertLinkByHref('file/' . $file->fid);
+      $this->assertLinkByHref('file/' . $file->fid . '/edit');
+      $this->assertLinkByHref('file/' . $file->fid . '/delete');
+    }
+  }
+}
+
 class FileEntityReplaceTestCase extends FileEntityTestHelper {
   public static function getInfo() {
     return array(
@@ -132,6 +333,11 @@ class FileEntityReplaceTestCase extends FileEntityTestHelper {
       'description' => 'Test file replace functionality.',
       'group' => 'File entity',
     );
+  }
+
+  function setUp() {
+    parent::setUp();
+    parent::setUpFiles();
   }
 
   /**
@@ -210,6 +416,11 @@ class FileEntityTokenTestCase extends FileEntityTestHelper {
     );
   }
 
+  function setUp() {
+    parent::setUp();
+    parent::setUpFiles();
+  }
+
   function testFileEntityTokens() {
     $tokens = array(
       'type' => 'Document',
@@ -257,6 +468,11 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
       'description' => 'Test the file entity types.',
       'group' => 'File entity',
     );
+  }
+
+  function setUp() {
+    parent::setUp();
+    parent::setUpFiles();
   }
 
   /**
@@ -421,6 +637,11 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
       'description' => 'Test the access aspects of file entity.',
       'group' => 'File entity',
     );
+  }
+
+  function setUp() {
+    parent::setUp();
+    parent::setUpFiles();
   }
 
   /**

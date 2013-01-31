@@ -11,6 +11,8 @@ require_once dirname(__FILE__) . '/file_entity.pages.inc';
  * Administrative form for browsing files and performing operations on them.
  */
 function file_entity_admin_files($form, &$form_state) {
+  global $user;
+
   if (!empty($form_state['values']['operation'])) {
     // The form is being rebuilt because an operation requiring confirmation
     // was selected. Hand off to the callback of the operation at this point
@@ -60,11 +62,32 @@ function file_entity_admin_files($form, &$form_state) {
   $query->join('users', 'u', 'f.uid = u.uid');
   $query->fields('f', array('fid'));
   $query->fields('u', array('uid'));
-  $query->condition('f.status', FILE_STATUS_PERMANENT);
   $query->limit($limit);
   $query->orderByHeader($header);
   $query->addTag('admin_files');
   $query->addMetaData('form_state', $form_state);
+
+  if (user_access('bypass file access')) {
+    // Administrators don't need to be restricted to only permanent files.
+    $query->condition('f.status', FILE_STATUS_PERMANENT);
+  }
+  elseif(user_access('view files')) {
+    // For non-private files, users can view if they have the 'view files'
+    // permission.
+    $query->condition('f.status', FILE_STATUS_PERMANENT);
+  }
+  elseif(user_access('view own files')) {
+    // For non-private files, allow to see if user owns the file.
+    $query->condition('f.uid', $user->uid, '=');
+    $query->condition('f.status', FILE_STATUS_PERMANENT);
+  }
+  elseif(user_access('view own private files') && user_is_logged_in()) {
+    // For private files, users can view their own private files if the
+    // user is not anonymous, and has the 'view own private files' permission.
+    $query->condition('f.uri', db_like('private://') . '%', 'LIKE');
+    $query->condition('f.uid', $user->uid, '=');
+    $query->condition('f.status', FILE_STATUS_PERMANENT);
+  }
 
   foreach (array_keys(file_entity_get_hidden_stream_wrappers()) as $name) {
     $query->condition('f.uri', $name . '%', 'NOT LIKE');
@@ -112,7 +135,7 @@ function file_entity_admin_files($form, &$form_state) {
         '#attributes' => array('class' => array('links', 'inline')),
       ),
     );
-    if (file_entity_access('edit', $file)) {
+    if (file_entity_access('update', $file)) {
       $options[$file->fid]['operations']['data']['#links']['edit'] = array(
         'title' => t('Edit'),
         'href' => 'file/' . $file->fid . '/edit',
