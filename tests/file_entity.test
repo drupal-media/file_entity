@@ -209,6 +209,47 @@ class FileEntityAdminTestCase extends FileEntityTestHelper {
   }
 
   /**
+   * Tests that the table sorting works on the files admin pages.
+   */
+  function testFilesAdminSort() {
+    $this->drupalLogin($this->admin_user);
+    $i = 0;
+    foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $prefix) {
+      $this->createFileEntity(array('filepath' => $prefix . $this->randomName(6), 'timestamp' => $i));
+      $i++;
+    }
+
+    // Test that the default sort by file_managed.timestamp DESC actually fires properly.
+    $files_query = db_select('file_managed', 'fm')
+      ->fields('fm', array('fid'))
+      ->orderBy('timestamp', 'DESC')
+      ->execute()
+      ->fetchCol();
+
+    $files_form = array();
+    $this->drupalGet('admin/content/file');
+    foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
+      $files_form[] = $input;
+    }
+    $this->assertEqual($files_query, $files_form, 'Files are sorted in the form according to the default query.');
+
+    // Compare the rendered HTML node list to a query for the files ordered by
+    // filename to account for possible database-dependent sort order.
+    $files_query = db_select('file_managed', 'fm')
+      ->fields('fm', array('fid'))
+      ->orderBy('filename')
+      ->execute()
+      ->fetchCol();
+
+    $files_form = array();
+    $this->drupalGet('admin/content/file', array('query' => array('sort' => 'asc', 'order' => 'Title')));
+    foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
+      $files_form[] = $input;
+    }
+    $this->assertEqual($files_query, $files_form, 'Files are sorted in the form the same as they are in the query.');
+  }
+
+  /**
    * Tests files overview with different user permissions.
    */
   function testFilesAdminPages() {
