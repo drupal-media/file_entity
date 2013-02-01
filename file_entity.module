@@ -899,6 +899,7 @@ function template_preprocess_file_entity(&$variables) {
   $variables['file'] = $variables['elements']['#file'];
   $file = $variables['file'];
 
+  $variables['id'] = drupal_html_id('file-'. $file->fid);
   $variables['date']      = format_date($file->timestamp);
   $account = user_load($file->uid);
   $variables['name']      = theme('username', array('account' => $account));
