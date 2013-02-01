@@ -71,17 +71,17 @@ function file_entity_admin_files($form, &$form_state) {
     // Administrators don't need to be restricted to only permanent files.
     $query->condition('f.status', FILE_STATUS_PERMANENT);
   }
-  elseif(user_access('view files')) {
+  elseif (user_access('view files')) {
     // For non-private files, users can view if they have the 'view files'
     // permission.
     $query->condition('f.status', FILE_STATUS_PERMANENT);
   }
-  elseif(user_access('view own files')) {
+  elseif (user_access('view own files')) {
     // For non-private files, allow to see if user owns the file.
     $query->condition('f.uid', $user->uid, '=');
     $query->condition('f.status', FILE_STATUS_PERMANENT);
   }
-  elseif(user_access('view own private files') && user_is_logged_in()) {
+  elseif (user_access('view own private files') && user_is_logged_in()) {
     // For private files, users can view their own private files if the
     // user is not anonymous, and has the 'view own private files' permission.
     $query->condition('f.uri', db_like('private://') . '%', 'LIKE');
