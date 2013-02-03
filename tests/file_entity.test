@@ -267,6 +267,41 @@ class FileEntityEditTestCase extends FileEntityTestHelper {
   }
 }
 
+class FileEntityCreationTestCase extends FileEntityTestHelper {
+  public static function getInfo() {
+    return array(
+      'name' => 'File entity creation',
+      'description' => 'Create a file and test saving it.',
+      'group' => 'File entity',
+    );
+  }
+
+  function setUp() {
+    parent::setUp();
+
+    $web_user = $this->drupalCreateUser(array('create files', 'edit own files'));
+    $this->drupalLogin($web_user);
+  }
+
+  /**
+   * Create a "document" file and verify its consistency in the database.
+   */
+  function testFileEntityCreation() {
+    $test_file = $this->getTestFile('text');
+    // Create a file.
+    $edit = array();
+    $edit['files[upload]'] = drupal_realpath($test_file->uri);
+    $this->drupalPost('file/add', $edit, t('Next'));
+
+    // Check that the document file has been uploaded.
+    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Document', '%name' => $test_file->filename)), t('Document file uploaded.'));
+
+    // Check that the file exists in the database.
+    $file = $this->getFileByFilename($test_file->filename);
+    $this->assertTrue($file, t('File found in database.'));
+  }
+}
+
 /**
  * Test file administration page functionality.
  */
@@ -666,7 +701,7 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
     $edit = array();
     $edit["{$field['field_name']}[$langcode][0][value]"] = $this->randomName();
     $this->drupalPost(NULL, $edit, t('Save'));
-    $this->assertText(t('The file @name was uploaded.', array('@name' => $file->filename)), 'File was uploaded.');
+    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $file->filename)), t('Image 2 file updated.'));
     $this->assertText($field['field_name'], 'File text field was found.');
   }
 
@@ -714,7 +749,7 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
     $edit = array();
     $edit["{$field['field_name']}[$langcode][0][value]"] = $this->randomName();
     $this->drupalPost(NULL, $edit, t('Save'));
-    $this->assertText(t('The file @name was uploaded.', array('@name' => $file->filename)), 'File was uploaded.');
+    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $file->filename)), t('Image file uploaded.'));
     $this->assertText($field['field_name'], 'File text field was found.');
   }
 }

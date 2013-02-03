@@ -297,7 +297,7 @@ function file_entity_add_upload_submit($form, &$form_state) {
 
       file_save($file);
       $form_state['file'] = $file;
-      drupal_set_message(t('The file @name was uploaded.', array('@name' => $file->filename)));
+      drupal_set_message(t('@type %name was uploaded.', array('@type' => file_entity_type_get_name($file), '%name' => $file->filename)));
     }
     else {
       drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
