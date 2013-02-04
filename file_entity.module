@@ -391,8 +391,8 @@ function file_entity_permission() {
   }
   $wrappers += array('public' => array(t('None')), 'private' => array(t('None')));
 
-  $permissions['view files']['description'] .= ' ' . t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['public'])));
-  $permissions['view own private files']['description'] .= ' ' . t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['private'])));
+  $permissions['view files']['description'] = ' ' . t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['public'])));
+  $permissions['view own private files']['description'] = ' ' . t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['private'])));
 
   return $permissions;
 }
