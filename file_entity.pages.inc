@@ -486,6 +486,43 @@ function file_entity_edit($form, &$form_state, $file) {
 
   $form['preview'] = file_view_file($file, 'preview');
 
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 99,
+  );
+
+  // File user information for administrators
+  $form['user'] = array(
+    '#type' => 'fieldset',
+    '#access' => user_access('administer files'),
+    '#title' => t('User information'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('file-form-user'),
+    ),
+    '#attached' => array(
+      'js' => array(
+        drupal_get_path('module', 'file_entity') . '/file_entity.js',
+        array(
+          'type' => 'setting',
+          'data' => array('anonymous' => variable_get('anonymous', t('Anonymous'))),
+        ),
+      ),
+    ),
+    '#weight' => 90,
+  );
+  $form['user']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Associated with'),
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'user/autocomplete',
+    '#default_value' => !empty($file->uid) ? user_load($file->uid)->name : '',
+    '#weight' => -1,
+    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => variable_get('anonymous', t('Anonymous')))),
+  );
+
   // Add the buttons.
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -518,6 +555,16 @@ function file_entity_edit($form, &$form_state, $file) {
  * Form validation handler for file_entity_edit().
  */
 function file_entity_edit_validate($form, &$form_state) {
+  $file = (object) $form_state['values'];
+
+  // Validate the "associated user" field.
+  if (!empty($file->name) && !($account = user_load_by_name($file->name))) {
+    // The use of empty() is mandatory in the context of usernames
+    // as the empty string denotes the anonymous user. In case we
+    // are dealing with an anonymous user we set the user ID to 0.
+    form_set_error('name', t('The username %name does not exist.', array('%name' => $file->name)));
+  }
+
   // Handle the replacement file if uploaded.
   if (isset($form_state['values']['replace_upload'])) {
     // Save the file as a temporary file.
@@ -551,6 +598,24 @@ function file_entity_edit_submit($form, &$form_state) {
 
   // Run entity form submit handling and save the file.
   entity_form_submit_build_entity('file', $file, $form, $form_state);
+
+  // A user might assign the associated user by entering a user name in the file
+  // edit form, which we then need to translate to a user ID.
+  if (isset($file->name)) {
+    // The use of isset() is mandatory in the context of user IDs, because
+    // user ID 0 denotes the anonymous user.
+    if ($user = user_load_by_name($file->name)) {
+      $file->uid = $user->uid;
+    }
+    else {
+      $file->uid = 0; // anonymous user
+    }
+  }
+  elseif ($file->uid) {
+    $user = user_load($file->uid);
+    $file->name = $user->name;
+  }
+
   file_save($file);
 
   $args = array(
