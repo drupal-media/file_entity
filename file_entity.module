@@ -338,38 +338,25 @@ function file_entity_permission() {
       'description' => t('View, edit and delete all files regardless of permission restrictions.'),
       'restrict access' => TRUE,
     ),
-    'administer files' => array(
-      'title' => t('Administer files'),
-      'description' => t('Add, edit or delete files and administer settings.'),
-      'restrict access' => TRUE,
-    ),
     'administer file types' => array(
       'title' => t('Administer file types'),
       'restrict access' => TRUE,
     ),
-    'view files' => array(
-      'title' => t('View file details'),
-      'description' => t('For viewing file details, not for downloading files.'),
-    ),
-    'view own files' => array(
-      'title' => t('View own file details'),
-      'description' => t('For viewing file details, not for downloading files.'),
-    ),
-    'delete own files' => array(
-      'title' => t('Delete own files'),
-    ),
-    'view own private files' => array(
-      'title' => t('View own private file details'),
-      'description' => t('For viewing file details, not for downloading files.'),
+    'administer files' => array(
+      'title' => t('Administer files'),
+      'restrict access' => TRUE,
     ),
     'create files' => array(
-      'title' => t('Add and upload files'),
+      'title' => t('Add and upload new files'),
     ),
-    'download own files' => array(
-      'title' => t('Download own files'),
+    'view own private files' => array(
+      'title' => t('View own private files'),
     ),
-    'download any files' => array(
-      'title' => t('Download any files'),
+    'view own files' => array(
+      'title' => t('View own files'),
+    ),
+    'view files' => array(
+      'title' => t('View files'),
     ),
     'edit own files' => array(
       'title' => t('Edit own files'),
@@ -377,8 +364,17 @@ function file_entity_permission() {
     'edit any files' => array(
       'title' => t('Edit any files'),
     ),
+    'delete own files' => array(
+      'title' => t('Delete own files'),
+    ),
     'delete any files' => array(
       'title' => t('Delete any files'),
+    ),
+    'download own files' => array(
+      'title' => t('Download own files'),
+    ),
+    'download any files' => array(
+      'title' => t('Download any files'),
     ),
   );
 
