@@ -499,6 +499,7 @@ function file_entity_edit($form, &$form_state, $file) {
     '#value' => t('Delete'),
     '#weight' => 10,
     '#submit' => array('file_entity_edit_delete_submit'),
+    '#access' => file_entity_access('delete', $file),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',

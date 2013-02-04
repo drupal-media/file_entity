@@ -256,6 +256,9 @@ class FileEntityEditTestCase extends FileEntityTestHelper {
     $this->assertText(strip_tags($link_text), 0, t('Edit tab found and marked active.'));
     $this->assertFieldByName($name_key, $file->filename, t('Name field displayed.'));
 
+    // The user does not have "delete" permissions so no delete button should be found.
+    $this->assertNoFieldByName('op', t('Delete'), 'Delete button not found.');
+
     // Edit the content of the file.
     $edit = array();
     $edit[$name_key] = $this->randomName(8);
