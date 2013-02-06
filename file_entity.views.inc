@@ -47,7 +47,6 @@ function file_entity_views_data() {
     'help' => t('Provide a simple link to the file entity.'),
     'field' => array(
       'handler' => 'views_handler_field_file_link',
-      'click sortable' => TRUE,
       'real field' => 'fid',
       'additional fields' => array(
         'fid',
@@ -61,7 +60,6 @@ function file_entity_views_data() {
     'help' => t('Provide a simple link to edit the file entity.'),
     'field' => array(
       'handler' => 'views_handler_field_file_link_edit',
-      'click sortable' => TRUE,
       'real field' => 'fid',
       'additional fields' => array(
         'fid',
@@ -75,7 +73,6 @@ function file_entity_views_data() {
     'help' => t('Provide a simple link to delete the file entity.'),
     'field' => array(
       'handler' => 'views_handler_field_file_link_delete',
-      'click sortable' => TRUE,
       'real field' => 'fid',
       'additional fields' => array(
         'fid',
@@ -89,7 +86,6 @@ function file_entity_views_data() {
     'help' => t('Provide a simple link to download the file entity.'),
     'field' => array(
       'handler' => 'views_handler_field_file_link_download',
-      'click sortable' => TRUE,
       'real field' => 'fid',
       'additional fields' => array(
         'fid',
