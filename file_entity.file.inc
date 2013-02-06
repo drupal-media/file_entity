@@ -102,6 +102,14 @@ function file_entity_file_delete($file) {
 
   // Delete image dimensions from the {image_dimensions} table
   db_query('DELETE FROM {image_dimensions} WHERE fid = :fid', array(':fid' => $file->fid));
+
+  // Remove this file from the search index if needed.
+  // This code is implemented in file entity module rather than in search module,
+  // because file entity module is implementing search module's API, not the other
+  // way around.
+  if (module_exists('search')) {
+    search_reindex($file->fid, 'file');
+  }
 }
 
 /**
