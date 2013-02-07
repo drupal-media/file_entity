@@ -148,19 +148,6 @@ function file_entity_file_mimetype_mapping_alter(&$mapping) {
 }
 
 /**
- * Implements hook_file_operation_info().
- */
-function file_entity_file_operation_info() {
-  $info['delete'] = array(
-    'label' => t('Delete selected files'),
-    'callback' => 'file_entity_multiple_delete_confirm_operation',
-    'confirm' => TRUE,
-  );
-
-  return $info;
-}
-
-/**
  * Implements hook_file_load().
  */
 function file_entity_file_load($files) {

@@ -119,7 +119,7 @@ function file_entity_menu() {
     'title' => 'Files',
     'description' => 'Manage files used on your site.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_admin_files'),
+    'page arguments' => array('file_entity_admin_file'),
     'access arguments' => array('administer files'),
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
     'file' => 'file_entity.admin.inc',
@@ -1405,50 +1405,6 @@ function file_entity_view_mode_label($view_mode, $default = FALSE) {
 }
 
 /**
- * Return information about all bulk file operations.
- *
- * @see hook_file_operation_info()
- * @see hook_file_operation_info_alter()
- *
- * @todo Add real caching to this function?
- */
-function file_entity_get_file_operation_info() {
-  $info = &drupal_static(__FUNCTION__);
-
-  if (!isset($info)) {
-    $info = module_invoke_all('file_operation_info');
-
-    // Support the deprecated hooks.
-    // @todo Remove after 2.0 release.
-    $info = drupal_array_merge_deep(module_invoke_all('file_operations_info'), $info);
-    drupal_alter('file_entity_file_operations', $old_info);
-
-    drupal_alter('file_operation_info_alter', $info);
-  }
-
-  return $info;
-}
-
-/**
- * File operation to show a confirm form for file deletion.
- *
- * @param array $files
- *   An array of file_ids to delete.
- * @return type
- */
-function file_entity_multiple_delete_confirm_operation($fids) {
-  // This function is a form generation function.
-  $form = array();
-  $form_state = array();
-  // Set the submit handler explicitly because this form is being built
-  // under a different form_id.
-  $form['#submit'] = array();
-  $form['#submit'][] = 'file_entity_multiple_delete_form_submit';
-  $files = file_load_multiple($fids);
-  return file_entity_multiple_delete_form($form, $form_state, $files);
-}
-
-/**
  * Helper function to get a list of hidden stream wrappers.
  *
  * This is used in several places to filter queries for media so that files in
@@ -1754,6 +1710,29 @@ function file_entity_file_default_types() {
   );
 
   return $types;
+}
+
+/**
+ * Implements hook_file_operations().
+ */
+function file_entity_file_operations() {
+  $operations = array(
+    'permanent' => array(
+      'label' => t('Indicate that the selected files are permanent and should not be deleted'),
+      'callback' => 'file_entity_mass_update',
+      'callback arguments' => array('updates' => array('status' => FILE_STATUS_PERMANENT)),
+    ),
+    'temporary' => array(
+      'label' => t('Indicate that the selected files are temporary and should be removed during cron runs'),
+      'callback' => 'file_entity_mass_update',
+      'callback arguments' => array('updates' => array('status' => 0)),
+    ),
+    'delete' => array(
+      'label' => t('Delete selected files'),
+      'callback' => NULL,
+    ),
+  );
+  return $operations;
 }
 
 /**

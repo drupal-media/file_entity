@@ -123,6 +123,34 @@ function hook_file_view_alter($build, $type) {
 }
 
 /**
+ * Add mass file operations.
+ *
+ * This hook enables modules to inject custom operations into the mass
+ * operations dropdown found at admin/content/file, by associating a callback
+ * function with the operation, which is called when the form is submitted. The
+ * callback function receives one initial argument, which is an array of the
+ * checked files.
+ *
+ * @return
+ *   An array of operations. Each operation is an associative array that may
+ *   contain the following key-value pairs:
+ *   - 'label': Required. The label for the operation, displayed in the dropdown
+ *     menu.
+ *   - 'callback': Required. The function to call for the operation.
+ *   - 'callback arguments': Optional. An array of additional arguments to pass
+ *     to the callback function.
+ */
+function hook_file_operations() {
+  $operations = array(
+    'delete' => array(
+      'label' => t('Delete selected files'),
+      'callback' => NULL,
+    ),
+  );
+  return $operations;
+}
+
+/**
  * Control access to a file.
  *
  * Modules may implement this hook if they want to have a say in whether or not
