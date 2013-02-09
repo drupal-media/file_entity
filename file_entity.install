@@ -261,7 +261,7 @@ function file_entity_uninstall() {
  */
 function file_entity_update_7000() {
   if (db_table_exists('file_display')) {
-    return t('The table {file_display} already exists.')
+    return t('The table {file_display} already exists.');
   }
 
   $schema['file_display'] = array(
@@ -384,7 +384,7 @@ function file_entity_update_7104() {
  */
 function file_entity_update_7200() {
   if (db_table_exists('image_dimensions')) {
-    return t('The table {image_dimensions} already exists.')
+    return t('The table {image_dimensions} already exists.');
   }
 
   $schema['image_dimensions'] = array(
