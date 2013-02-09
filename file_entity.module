@@ -1665,6 +1665,7 @@ function file_entity_file_default_types() {
       'video/mp4',
       'video/x-msvideo',
       'video/ogg',
+      'video/x-flv',
     ),
     'streams' => array(
       'public',
