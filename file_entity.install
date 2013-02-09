@@ -260,6 +260,10 @@ function file_entity_uninstall() {
  * Create the {file_display} database table.
  */
 function file_entity_update_7000() {
+  if (db_table_exists('file_display')) {
+    return t('The table {file_display} already exists.')
+  }
+
   $schema['file_display'] = array(
     'description' => 'Stores configuration options for file displays.',
     'fields' => array(
@@ -379,6 +383,10 @@ function file_entity_update_7104() {
  * Create the {image_dimensions} database table.
  */
 function file_entity_update_7200() {
+  if (db_table_exists('image_dimensions')) {
+    return t('The table {image_dimensions} already exists.')
+  }
+
   $schema['image_dimensions'] = array(
     'description' => 'Cache images dimensions.',
     'fields' => array(
@@ -463,7 +471,9 @@ function file_entity_update_7201() {
       ),
     ),
   );
-  db_create_table('file_type', $schema);
+  if (!db_table_exists('file_type')) {
+    db_create_table('file_type', $schema);
+  }
 
   $schema = array(
     'description' => 'Maps mimetypes to file types.',
@@ -488,7 +498,9 @@ function file_entity_update_7201() {
       array('file_type_mimetype' => 'mimetype'),
     ),
   );
-  db_create_table('file_type_mimetypes',  $schema);
+  if (!db_table_exists('file_type_mimetypes')) {
+    db_create_table('file_type_mimetypes',  $schema);
+  }
 
   $schema = array(
     'description' => 'Maps mimetypes to file types.',
@@ -513,7 +525,9 @@ function file_entity_update_7201() {
       array('file_type_stream' => 'stream'),
     ),
   );
-  db_create_table('file_type_streams',  $schema);
+  if (!db_table_exists('file_type_streams')) {
+    db_create_table('file_type_streams',  $schema);
+  }
 }
 
 /**
