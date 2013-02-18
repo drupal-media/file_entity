@@ -327,6 +327,12 @@ function file_entity_admin_files() {
     // permission.
     $query->condition('fm.status', FILE_STATUS_PERMANENT);
   }
+  elseif (user_access('view private files') && user_is_logged_in()) {
+    // For private files, users can view private files if the
+    // user is not anonymous, and has the 'view private files' permission.
+    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
+    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+  }
   elseif (user_access('view own files')) {
     // For non-private files, allow to see if user owns the file.
     $query->condition('fm.uid', $user->uid, '=');

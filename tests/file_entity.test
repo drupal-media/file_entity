@@ -377,7 +377,8 @@ class FileEntityAdminTestCase extends FileEntityTestHelper {
     $this->admin_user = $this->drupalCreateUser(array('administer files', 'bypass file access'));
     $this->base_user_1 = $this->drupalCreateUser(array('administer files'));
     $this->base_user_2 = $this->drupalCreateUser(array('administer files', 'view own private files'));
-    $this->base_user_3 = $this->drupalCreateUser(array('administer files', 'edit any files', 'delete any files'));
+    $this->base_user_3 = $this->drupalCreateUser(array('administer files', 'view private files'));
+    $this->base_user_4 = $this->drupalCreateUser(array('administer files', 'edit any files', 'delete any files'));
   }
 
   /**
@@ -476,9 +477,19 @@ class FileEntityAdminTestCase extends FileEntityTestHelper {
     // Verify no tableselect.
     $this->assertNoFieldByName('files[' . $files['private_document']->fid . ']', '', t('No tableselect found.'));
 
-    // Verify operation links are displayed for users with appropriate permission.
+    // Verify private file is displayed with permission.
     $this->drupalLogout();
     $this->drupalLogin($this->base_user_3);
+    $this->drupalGet('admin/content/file');
+    $this->assertResponse(200);
+
+    // Verify user can see private file of other users.
+    $this->assertLinkByHref('file/' . $files['private_document']->fid);
+    $this->assertLinkByHref('file/' . $files['private_image']->fid);
+
+    // Verify operation links are displayed for users with appropriate permission.
+    $this->drupalLogout();
+    $this->drupalLogin($this->base_user_4);
     $this->drupalGet('admin/content/file');
     $this->assertResponse(200);
     foreach ($files as $file) {

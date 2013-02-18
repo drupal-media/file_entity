@@ -355,6 +355,9 @@ function file_entity_permission() {
     'view own files' => array(
       'title' => t('View own files'),
     ),
+    'view private files' => array(
+      'title' => t('View private files'),
+    ),
     'view files' => array(
       'title' => t('View files'),
     ),
@@ -433,7 +436,7 @@ function file_entity_search_info() {
  * Implements hook_search_access().
  */
 function file_entity_search_access() {
-  return user_access('view own private files') || user_access('view own files') || user_access('view files');
+  return user_access('view own private files') || user_access('view own files') || user_access('view private files') || user_access('view files');
 }
 
 /**
@@ -500,6 +503,12 @@ function file_entity_search_execute($keys = NULL, $conditions = NULL) {
   elseif (user_access('view files')) {
     // For non-private files, users can view if they have the 'view files'
     // permission.
+    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+  }
+  elseif (user_access('view private files') && user_is_logged_in()) {
+    // For private files, users can view private files if the
+    // user is not anonymous, and has the 'view private files' permission.
+    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
     $query->condition('fm.status', FILE_STATUS_PERMANENT);
   }
   elseif (user_access('view own files')) {
@@ -1556,6 +1565,12 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
     $wrapper = file_entity_get_stream_wrapper($scheme);
 
     if (!empty($wrapper['private'])) {
+      // For private files, users can view private files if the
+      // user is not anonymous, and has the 'view private files' permission.
+      if (!empty($account->uid) && user_access('view private files', $account)) {
+        return $rights[$account->uid][$cache_id][$op] = TRUE;
+      }
+
       // For private files, users can view their own private files if the
       // user is not anonymous, and has the 'view own private files' permission.
       if (!empty($account->uid) && $file->uid == $account->uid && user_access('view own private files', $account)) {
