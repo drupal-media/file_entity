@@ -427,7 +427,7 @@ function file_entity_admin_files() {
       '#type' => 'tableselect',
       '#header' => $header,
       '#options' => $options,
-      '#empty' => t('No content available.'),
+      '#empty' => t('No files available.'),
     );
   }
   // Otherwise, use a simple table.
@@ -436,7 +436,7 @@ function file_entity_admin_files() {
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $options,
-      '#empty' => t('No content available.'),
+      '#empty' => t('No files available.'),
     );
   }
 
