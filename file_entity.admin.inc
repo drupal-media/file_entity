@@ -202,7 +202,7 @@ function file_entity_mass_update($files, $updates) {
  * File Mass Update - helper function.
  */
 function _file_entity_mass_update_helper($fid, $updates) {
-  $file = file_load($fid, NULL, TRUE);
+  $file = file_load($fid);
   // For efficiency manually save the original file before applying any changes.
   $file->original = clone $file;
   foreach ($updates as $name => $value) {
