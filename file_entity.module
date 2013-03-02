@@ -1801,6 +1801,22 @@ function file_entity_file_is_local($file) {
 }
 
 /**
+ * Check if a file entity is considered writeable or not.
+ *
+ * @param object $file
+ *   A file entity object from file_load().
+ *
+ * @return
+ *   TRUE if the file is using a visible, readable and writeable stream wrapper,
+ *   or FALSE otherwise.
+ */
+function file_entity_file_is_writeable($file) {
+  $scheme = file_uri_scheme($file->uri);
+  $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+  return !empty($wrappers[$scheme]);
+}
+
+/**
  * Pre-render callback for adding validation descriptions to file upload fields.
  */
 function file_entity_upload_validators_pre_render($element) {
