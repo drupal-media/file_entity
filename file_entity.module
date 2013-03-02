@@ -1830,3 +1830,105 @@ function file_entity_upload_validators_pre_render($element) {
   }
   return $element;
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter() for file_entity_edit() on behalf of path.module.
+ */
+function path_form_file_entity_edit_alter(&$form, $form_state) {
+  // Make sure this does not show up on the delete confirmation form.
+  if (empty($form_state['confirm_delete'])) {
+    $file = $form_state['file'];
+    $langcode = function_exists('entity_language') ? entity_language('file', $file) : NULL;
+    $langcode = !empty($langcode) ? $langcode : LANGUAGE_NONE;
+    $conditions = array('source' => 'file/' . $file->fid, 'language' => $langcode);
+    $path = (isset($file->fid) ? path_load($conditions) : array());
+    if ($path === FALSE) {
+      $path = array();
+    }
+    $path += array(
+      'pid' => NULL,
+      'source' => isset($file->fid) ? 'file/' . $file->fid : NULL,
+      'alias' => '',
+      'language' => $langcode,
+    );
+    $form['path'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('URL path settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => empty($path['alias']),
+      '#group' => 'additional_settings',
+      '#attributes' => array(
+        'class' => array('path-form'),
+      ),
+      '#attached' => array(
+        'js' => array(drupal_get_path('module', 'path') . '/path.js'),
+      ),
+      '#access' => user_access('create url aliases') || user_access('administer url aliases'),
+      '#weight' => 30,
+      '#tree' => TRUE,
+      '#element_validate' => array('path_form_element_validate'),
+    );
+    $form['path']['alias'] = array(
+      '#type' => 'textfield',
+      '#title' => t('URL alias'),
+      '#default_value' => $path['alias'],
+      '#maxlength' => 255,
+      '#description' => t('Optionally specify an alternative URL by which this file can be accessed. For example, type "about" when writing an about page. Use a relative path and don\'t add a trailing slash or the URL alias won\'t work.'),
+    );
+    $form['path']['pid'] = array('#type' => 'value', '#value' => $path['pid']);
+    $form['path']['source'] = array('#type' => 'value', '#value' => $path['source']);
+    $form['path']['language'] = array('#type' => 'value', '#value' => $path['language']);
+  }
+}
+
+/**
+ * Implements hook_file_insert() on behalf of path.module.
+ */
+function path_file_insert($file) {
+  if (isset($file->path)) {
+    $path = $file->path;
+    $path['alias'] = trim($path['alias']);
+    // Only save a non-empty alias.
+    if (!empty($path['alias'])) {
+      // Ensure fields for programmatic executions.
+      $path['source'] = 'file/' . $file->tid;
+      // Core does not provide a way to store the file language but contrib
+      // modules can do it so we need to take this into account.
+      $langcode = entity_language('file', $file);
+      $path['language'] = !empty($langcode) ? $langcode : LANGUAGE_NONE;
+      path_save($path);
+    }
+  }
+}
+
+/**
+ * Implements hook_file_update() on behalf of path.module.
+ */
+function path_file_update($file) {
+  if (isset($file->path)) {
+    $path = $file->path;
+    $path['alias'] = trim($path['alias']);
+    // Delete old alias if user erased it.
+    if (!empty($path['fid']) && empty($path['alias'])) {
+      path_delete($path['fid']);
+    }
+    // Only save a non-empty alias.
+    if (!empty($path['alias'])) {
+      // Ensure fields for programmatic executions.
+      $path['source'] = 'file/' . $file->fid;
+      // Core does not provide a way to store the file language but contrib
+      // modules can do it so we need to take this into account.
+      $langcode = entity_language('file', $file);
+      $path['language'] = !empty($langcode) ? $langcode : LANGUAGE_NONE;
+      path_save($path);
+    }
+  }
+}
+
+/**
+ * Implements hook_file_delete() on behalf of path.module.
+ */
+function path_file_delete($file) {
+  // Delete all aliases associated with this file.
+  path_delete(array('source' => 'file/' . $file->fid));
+}
