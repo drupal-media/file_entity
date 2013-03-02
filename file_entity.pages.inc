@@ -393,7 +393,6 @@ function file_entity_add_upload_multiple_submit($form, &$form_state) {
       // Note - not using file_move here because if we call file_get_mime
       // (in file_uri_to_object) while it has a .tmp extension, it horks.
 
-      file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
       $destination = file_unmanaged_move($source, $destination, FILE_EXISTS_RENAME);
 
       $file = file_uri_to_object($destination);
