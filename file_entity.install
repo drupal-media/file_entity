@@ -73,8 +73,8 @@ function file_entity_schema() {
       ),
     ),
     'indexes' => array(
-      array('file_type' => 'type'),
-      array('file_type_mimetype' => 'mimetype'),
+      'file_type' => array('type'),
+      'file_type_mimetype' => array('mimetype'),
     ),
   );
   $schema['file_type_streams'] = array(
@@ -96,8 +96,8 @@ function file_entity_schema() {
       ),
     ),
     'indexes' => array(
-      array('file_type' => 'type'),
-      array('file_type_stream' => 'stream'),
+      'file_type' => array('type'),
+      'file_type_stream' => array('stream'),
     ),
   );
   $schema['file_display'] = array(
