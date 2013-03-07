@@ -357,6 +357,7 @@ function file_entity_permission() {
     ),
     'view private files' => array(
       'title' => t('View private files'),
+      'restrict access' => TRUE,
     ),
     'view files' => array(
       'title' => t('View files'),
