@@ -585,6 +585,11 @@ function file_type_delete($type) {
     ->condition('type', $type->type)
     ->execute();
 
+  // Remove this type from CToolS status variable.
+  $status = variable_get('default_file_type', array());
+  unset($status[$type->type]);
+  variable_set('default_file_type', $status);
+
   file_info_cache_clear();
 
   // After deleting from the database, check if the type still exists as a
@@ -595,6 +600,29 @@ function file_type_delete($type) {
     module_invoke_all('file_type_delete', $type);
   }
 }
+
+
+/**
+ * Enable a file type.
+ *
+ * @param string $type
+ *   Type of the file_type to disable
+ */
+function file_type_enable($type) {
+  ctools_export_crud_enable('file_type', $type);
+}
+
+
+/**
+ * Disable a file type.
+ *
+ * @param string $type
+ *   Type of the file_type to disable
+ */
+function file_type_disable($type) {
+  ctools_export_crud_disable('file_type', $type);
+}
+
 
 /**
  * Determines file type for a given file.

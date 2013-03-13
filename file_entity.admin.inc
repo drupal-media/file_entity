@@ -523,14 +523,17 @@ function file_entity_multiple_delete_confirm_submit($form, &$form_state) {
  * Displays the file type admin overview page.
  */
 function file_entity_list_types_page() {
+  // Allow for ctools formatting.
+  drupal_add_css(drupal_get_path('module', 'ctools') . '/css/export-ui-list.css');
+
   $file_entity_info = entity_get_info('file');
   $field_ui = module_exists('field_ui');
   $header = array(
     array('data' => t('Name')),
-    array('data' => t('Operations'), 'colspan' => $field_ui ? '4' : '2'),
+    array('data' => t('Operations'), 'colspan' => $field_ui ? '5' : '3'),
+    array('data' => t('Status')),
   );
   $rows = array();
-
   foreach (file_type_get_all_types(TRUE) as $type) {
     $row = array(array('data' => theme('file_entity_file_type_overview', array('label' => $type->label, 'description' => $type->description))));
     $path = isset($file_entity_info['bundles'][$type->type]['admin']['real path']) ? $file_entity_info['bundles'][$type->type]['admin']['real path'] : NULL;
@@ -542,8 +545,53 @@ function file_entity_list_types_page() {
     }
     $row[] = array('data' => isset($path) ? l(t('manage file display'), $path . '/file-display') : '');
 
-    $rows[] = $row;
+    // @TODO when the type is disabled there is no usable path. Not sure
+    // what is the correct approach here.
+    $admin_path = 'admin/structure/file-types/manage/' . $type->type;
+    switch ($type->ctools_type) {
+      // Configuration is in code.
+      case 'Default':
+        if (!empty($type->disabled)) {
+          $row[] = l(t('enable'), $admin_path . '/enable');
+        }
+        else {
+          $row[] = l(t('disable'), $admin_path . '/disable');
+        }
+      break;
+
+      // Configuration is in DB.
+      case 'Normal':
+        if (!empty($type->disabled)) {
+          $status = l(t('enable'), $admin_path . '/enable');
+        }
+        else {
+          $status = l(t('disable'), $admin_path . '/disable');
+        }
+        $row[] = $status . ' | ' . l(t('delete'), $admin_path . '/delete');
+      break;
+
+      // Configuration is in code, but overridden in DB.
+      case 'Overridden':
+        if (!empty($type->disabled)) {
+          $row[] = l(t('enable'), $admin_path . '/enable');
+        }
+        else {
+          $row[] = l(t('disable'), $admin_path . '/disable') . ' | ' . l(t('revert'), $admin_path . '/revert');
+        }
+      break;
+    }
+
+    // Show the type status.
+    $row[] = !empty($type->disabled) ? t('Disabled') : $type->ctools_type;
+    // Format the row with the status.
+    $rows[] = array('data' => $row, 'class' => array((!empty($type->disabled) ? 'ctools-export-ui-disabled' : '')));
   }
+
+  // Move disabled items to the bottom.
+  $disabled = array_filter($rows, function($row) {return in_array('ctools-export-ui-disabled', $row['class']);});
+  $rows = array_diff_key($rows, $disabled);
+  $rows += $disabled;
+  $rows = array_values($rows);
 
   $build['file_type_table'] = array(
     '#theme' => 'table',
@@ -710,8 +758,18 @@ function theme_file_entity_file_display_order($variables) {
  * @see file_entity_file_type_form_validate()
  * @see file_entity_file_type_form_submit()
  */
-function file_entity_file_type_form($form, &$form_state, $type) {
-  $form['#file_type'] = $type->type;
+function file_entity_file_type_form($form, &$form_state, $type = NULL) {
+  if (!isset($type->type)) {
+    // This is a new type.
+    $type = (object) array(
+      'type' => '',
+      'label' => '',
+      'description' => '',
+      'streams' => array(),
+      'mimetypes' => array(),
+    );
+  }
+  $form['#file_type'] = $type;
 
   $form['label'] = array(
     '#type' => 'textfield',
@@ -720,6 +778,19 @@ function file_entity_file_type_form($form, &$form_state, $type) {
     '#required' => TRUE,
     '#default_value' => $type->label,
   );
+
+  $form['type'] = array(
+    '#type' => 'machine_name',
+    '#default_value' => $type->type,
+    '#maxlength' => 255,
+    '#disabled' => (bool) $type->type,
+    '#machine_name' => array(
+      'exists' => 'file_type_load',
+      'source' => array('label'),
+    ),
+    '#description' => t('A unique machine-readable name for this file type. It must only contain lowercase letters, numbers, and underscores.'),
+  );
+
   $form['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description'),
@@ -767,10 +838,18 @@ function file_entity_file_type_form($form, &$form_state, $type) {
     '#default_value' => $default_value,
   );
 
-  $form['submit'] = array(
+  $form['actions'] = array('#type' => 'actions');
+
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
   );
+  if (!empty($type->type)) {
+    $form['actions']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete'),
+    );
+  }
 
   return $form;
 }
@@ -799,8 +878,18 @@ function file_entity_file_type_form_validate($form, &$form_state) {
  * @see file_entity_file_type_form_validate()
  */
 function file_entity_file_type_form_submit($form, &$form_state) {
-  $type = file_type_load($form['#file_type']);
-
+  if (!empty($form['#file_type']->type)) {
+    $type = file_type_load($form['#file_type']->type);
+  }
+  else {
+    $type = (object) array(
+      'type' => $form_state['values']['type'],
+    );
+  }
+  if ($form_state['values']['op'] == t('Delete')) {
+    $form_state['redirect'] = 'admin/structure/file-types/manage/' . $type->type . '/delete';
+    return;
+  }
   $type->label = $form_state['values']['label'];
   $type->description = $form_state['values']['description'];
   $type->mimetypes = array_filter(array_map('trim', explode("\n", $form_state['values']['mimetypes'])));
@@ -815,4 +904,125 @@ function file_entity_file_type_form_submit($form, &$form_state) {
 
   drupal_set_message(t('The file type %type has been updated.', array('%type' => $type->label)));
   $form_state['redirect'] = 'admin/structure/file-types';
+}
+
+
+/**
+ * Menu callback; disable a single file type.
+ */
+function file_entity_type_enable_confirm($form, &$form_state, $type) {
+  $form['type'] = array('#type' => 'value', '#value' => $type->type);
+  $form['label'] = array('#type' => 'value', '#value' => $type->label);
+  $message = t('Are you sure you want to enable the file type %type?', array('%type' => $type->label));
+  return confirm_form($form, $message, 'admin/structure/file-types', '', t('Enable'));
+}
+
+
+/**
+ * Process file type disable confirm submissions.
+ */
+function file_entity_type_enable_confirm_submit($form, &$form_state) {
+  file_type_enable($form_state['values']['type']);
+  $t_args = array('%label' => $form_state['values']['label']);
+  drupal_set_message(t('The file type %label has been enabled.', $t_args));
+  watchdog('file_entity', 'Enabled file type %label.', $t_args, WATCHDOG_NOTICE);
+  $form_state['redirect'] = 'admin/structure/file-types';
+  return;
+}
+
+
+/**
+ * Menu callback; disable a single file type.
+ */
+function file_entity_type_disable_confirm($form, &$form_state, $type) {
+  $form['type'] = array('#type' => 'value', '#value' => $type->type);
+  $form['label'] = array('#type' => 'value', '#value' => $type->label);
+
+  $message = t('Are you sure you want to disable the file type %type?', array('%type' => $type->label));
+  $caption = '';
+
+  $num_files = db_query("SELECT COUNT(*) FROM {file_managed} WHERE type = :type", array(':type' => $type->type))->fetchField();
+  if ($num_files) {
+    $caption .= '<p>' . format_plural($num_files, '%type is used by 1 file on
+      your site. If you disable this file type, you will not be able to edit
+      the %type file and it may not display correctly.', '%type is used by
+      @count files on your site. If you remove %type, you will not be able to
+      edit the %type file and it may not display correctly.',
+    array('%type' => $type->label)) . '</p>';
+  }
+
+  return confirm_form($form, $message, 'admin/structure/file-types', $caption, t('Disable'));
+}
+
+
+/**
+ * Process file type disable confirm submissions.
+ */
+function file_entity_type_disable_confirm_submit($form, &$form_state) {
+  file_type_disable($form_state['values']['type']);
+  $t_args = array('%label' => $form_state['values']['label']);
+  drupal_set_message(t('The file type %label has been disabled.', $t_args));
+  watchdog('file_entity', 'Disabled file type %label.', $t_args, WATCHDOG_NOTICE);
+  $form_state['redirect'] = 'admin/structure/file-types';
+  return;
+}
+
+
+/**
+ * Menu callback; revert a single file type.
+ */
+function file_entity_type_revert_confirm($form, &$form_state, $type) {
+  $form['type'] = array('#type' => 'value', '#value' => $type->type);
+  $form['label'] = array('#type' => 'value', '#value' => $type->label);
+  $message = t('Are you sure you want to revert the file type %type?', array('%type' => $type->label));
+  return confirm_form($form, $message, 'admin/structure/file-types', '', t('Revert'));
+}
+
+
+/**
+ * Process file type delete confirm submissions.
+ */
+function file_entity_type_revert_confirm_submit($form, &$form_state) {
+  // @NOTE deleting the file_type from the DB actually reverts it to code.
+  file_type_delete($form_state['values']['type']);
+  $t_args = array('%label' => $form_state['values']['label']);
+  drupal_set_message(t('The file type %label has been reverted.', $t_args));
+  watchdog('file_entity', 'Reverted file type %label.', $t_args, WATCHDOG_NOTICE);
+  $form_state['redirect'] = 'admin/structure/file-types';
+  return;
+}
+
+
+/**
+ * Menu callback; delete a single file type.
+ */
+function file_entity_type_delete_confirm($form, &$form_state, $type) {
+  $form['type'] = array('#type' => 'value', '#value' => $type->type);
+  $form['label'] = array('#type' => 'value', '#value' => $type->label);
+
+  $message = t('Are you sure you want to delete the file type %type?', array('%type' => $type->label));
+  $caption = '';
+
+  $num_files = db_query("SELECT COUNT(*) FROM {file_managed} WHERE type = :type", array(':type' => $type->type))->fetchField();
+  if ($num_files) {
+    $caption .= '<p>' . format_plural($num_files, '%type is used by 1 file on your site. If you remove this file type, you will not be able to edit the %type file and it may not display correctly.', '%type is used by @count pieces of file on your site. If you remove %type, you will not be able to edit the %type file and it may not display correctly.', array('%type' => $type->label)) . '</p>';
+  }
+
+  $caption .= '<p>' . t('This action cannot be undone.') . '</p>';
+
+  return confirm_form($form, $message, 'admin/structure/file-types', $caption, t('Delete'));
+}
+
+/**
+ * Process file type delete confirm submissions.
+ */
+function file_entity_type_delete_confirm_submit($form, &$form_state) {
+  file_type_delete($form_state['values']['type']);
+
+  $t_args = array('%label' => $form_state['values']['label']);
+  drupal_set_message(t('The file type %label has been deleted.', $t_args));
+  watchdog('file_entity', 'Deleted file type %label.', $t_args, WATCHDOG_NOTICE);
+
+  $form_state['redirect'] = 'admin/structure/file-types';
+  return;
 }

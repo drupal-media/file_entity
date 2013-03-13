@@ -111,9 +111,45 @@ function file_entity_menu() {
     'access arguments' => array('administer file types'),
     'file' => 'file_entity.admin.inc',
   );
+  $items['admin/structure/file-types/add'] = array(
+    'title' => 'Add file type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('file_entity_file_type_form'),
+    'access arguments' => array('administer file types'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'file_entity.admin.inc',
+  );
   $items['admin/structure/file-types/manage/%file_type'] = array(
     'title' => 'Manage file types',
     'description' => 'Manage settings for the type of files used on your site.',
+  );
+  $items['admin/structure/file-types/manage/%file_type/enable'] = array(
+    'title' => 'Enable file type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('file_entity_type_enable_confirm', 4),
+    'access arguments' => array('administer file types'),
+    'file' => 'file_entity.admin.inc',
+  );
+  $items['admin/structure/file-types/manage/%file_type/disable'] = array(
+    'title' => 'Disable file type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('file_entity_type_disable_confirm', 4),
+    'access arguments' => array('administer file types'),
+    'file' => 'file_entity.admin.inc',
+  );
+  $items['admin/structure/file-types/manage/%file_type/revert'] = array(
+    'title' => 'Revert a file type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('file_entity_type_revert_confirm', 4),
+    'access arguments' => array('administer file types'),
+    'file' => 'file_entity.admin.inc',
+  );
+  $items['admin/structure/file-types/manage/%file_type/delete'] = array(
+    'title' => 'Delete file type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('file_entity_type_delete_confirm', 4),
+    'access arguments' => array('administer file types'),
+    'file' => 'file_entity.admin.inc',
   );
   $items['admin/content/file'] = array(
     'title' => 'Files',

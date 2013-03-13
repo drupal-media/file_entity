@@ -812,6 +812,99 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
     $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $file->filename)), t('Image file uploaded.'));
     $this->assertText($field['field_name'], 'File text field was found.');
   }
+
+  /**
+   * Test file types CRUD UI.
+   */
+  function testTypesCrudUi() {
+    $this->drupalGet('admin/structure/file-types');
+    $this->assertResponse(403, 'File types UI page is not accessible to unauthorized users.');
+
+    $user = $this->drupalCreateUser(array('administer file types'));
+    $this->drupalLogin($user);
+
+    $this->drupalGet('admin/structure/file-types');
+    $this->assertResponse(200, 'File types UI page is accessible to users with adequate permission.');
+
+    // Create new file type.
+    $edit = array(
+      'label' => t('Test type'),
+      'type' => 'test_type',
+      'description' => t('This is dummy file type used just for testing.'),
+      'mimetypes' => 'image/png',
+      'streams[public]' => TRUE,
+    );
+    $this->drupalGet('admin/structure/file-types/add');
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertText(t('The file type @type has been updated.', array('@type' => $edit['label'])), 'New file type successfully created.');
+    $this->assertText($edit['label'], 'New file type created: label found.');
+    $this->assertText($edit['description'], 'New file type created: description found.');
+    $this->assertFieldByXPath("//table//tr[1]//td[7]", t('Normal'), 'Newly created file type is stored in DB.');
+    $this->assertLink(t('disable'), 0, 'Able to disable newly created file type.');
+    $this->assertLink(t('delete'), 0, 'Able to delete newly created file type.');
+    $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['type'] . '/disable', 0, 'Disable link points to disable confirmation page.');
+    $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['type'] . '/delete', 0, 'Delete link points to delete confirmation page.');
+
+    // Edit file type.
+    $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/edit');
+    $this->assertRaw(t('Save'), 'Save button found on edit page.');
+    $this->assertRaw(t('Delete'), 'Delete button found on edit page.');
+    $this->assertRaw($edit['label'], 'Label found on file type edit page');
+    $this->assertText($edit['description'], 'Description found on file type edit page');
+    $this->assertText($edit['mimetypes'], 'Mime-type configuration found on file type edit page');
+    $this->assertText(t('Mimetype List'), 'Mimetype list present on edit form.');
+    $this->assertFieldChecked('edit-streams-public', 'File type configured to use public files.');
+    $this->assertNoFieldChecked('edit-streams-private', 'File type configured not to use private files.');
+
+    // Modify file type.
+    $edit['label'] = t('New type label');
+    $this->drupalPost(NULL, array('label' => $edit['label']), t('Save'));
+    $this->assertText(t('The file type @type has been updated.', array('@type' => $edit['label'])), 'File type was modified.');
+    $this->assertText($edit['label'], 'Modified label found on file types list.');
+
+    // Disable and re-enable file type.
+    $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/disable');
+    $this->assertText(t('Are you sure you want to disable the file type @type?', array('@type' => $edit['label'])), 'Disable confirmation page found.');
+    $this->drupalPost(NULL, array(), t('Disable'));
+    $this->assertText(t('The file type @type has been disabled.', array('@type' => $edit['label'])), 'Disable confirmation message found.');
+    $this->assertFieldByXPath("//table//tr[5]//td[1]", $edit['label'], 'Disabled type moved to the tail of the list.');
+    $this->assertLink(t('enable'), 0, 'Able to re-enable newly created file type.');
+    $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['type'] . '/enable', 0, 'Enable link points to enable confirmation page.');
+    $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/enable');
+    $this->assertText(t('Are you sure you want to enable the file type @type?', array('@type' => $edit['label'])), 'Enable confirmation page found.');
+    $this->drupalPost(NULL, array(), t('Enable'));
+    $this->assertText(t('The file type @type has been enabled.', array('@type' => $edit['label'])), 'Enable confirmation message found.');
+    $this->assertFieldByXPath("//table//tr[1]//td[1]", $edit['label'], 'Enabled type moved to the top of the list.');
+
+    // Delete newly created type.
+    $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/delete');
+    $this->assertText(t('Are you sure you want to delete the file type @type?', array('@type' => $edit['label'])), 'Delete confirmation page found.');
+    $this->drupalPost(NULL, array(), t('Delete'));
+    $this->assertText(t('The file type @type has been deleted.', array('@type' => $edit['label'])), 'Delete confirmation message found.');
+    $this->drupalGet('admin/structure/file-types');
+    $this->assertNoText($edit['label'], 'File type successfully deleted.');
+
+    // Edit exported file type.
+    $this->drupalGet('admin/structure/file-types/manage/image/edit');
+    $this->assertRaw(t('Image'), 'Label found on file type edit page');
+    $this->assertText("image/jpeg\nimage/gif\nimage/png", 'Mime-type configuration found on file type edit page');
+    $this->assertFieldChecked('edit-streams-public', 'File type configured to use public files.');
+    $this->assertNoFieldChecked('edit-streams-private', 'File type configured not to use private files.');
+    $this->drupalPost(NULL, array('label' => t('Funky images')), t('Save'));
+    $this->assertText(t('The file type @type has been updated.', array('@type' => t('Funky images'))), 'File type was modified.');
+    $this->assertText(t('Funky image'), 'Modified label found on file types list.');
+    $this->assertFieldByXPath("//table//tr[1]//td[7]", t('Overridden'), 'Modified type overrides configuration from code.');
+    $this->assertLink(t('revert'), 0, 'Able to revert overridden file type.');
+    $this->assertLinkByHref('admin/structure/file-types/manage/image/revert', 0, 'Revert link points to revert confirmation page.');
+
+    // Revert file type.
+    $this->drupalGet('admin/structure/file-types/manage/image/revert');
+    $this->assertText(t('Are you sure you want to revert the file type @type?', array('@type' => t('Funky images'))), 'Revert confirmation page found.');
+    $this->drupalPost(NULL, array(), t('Revert'));
+    $this->assertText(t('The file type @type has been reverted.', array('@type' => t('Funky images'))), 'Revert confirmation message found.');
+    $this->assertText(t('Image'), 'Reverted file type found in list.');
+    $this->assertFieldByXPath("//table//tr[1]//td[7]", t('Default'), 'Reverted file type shows correct state.');
+  }
 }
 
 class FileEntityAccessTestCase extends FileEntityTestHelper {
