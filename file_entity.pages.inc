@@ -828,5 +828,10 @@ function file_entity_get_upload_validators(array $options = array()) {
     $validators['file_validate_image_resolution'] = array($options['max_resolution'], $options['min_resolution']);
   }
 
+  // Add other custom upload validators from options.
+  if (!empty($options['upload_validators'])) {
+    $validators += $options['upload_validators'];
+  }
+
   return $validators;
 }
