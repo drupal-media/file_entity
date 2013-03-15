@@ -1169,8 +1169,8 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
         '#theme' => 'image_style',
         '#style_name' => $display['settings']['image_style'],
         '#path' => $file->uri,
-        '#width' => $file->image_dimensions['width'],
-        '#height' => $file->image_dimensions['height'],
+        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->image_dimensions['width'],
+        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->image_dimensions['height'],
         '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
         '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
       );
@@ -1179,8 +1179,8 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
       $element = array(
         '#theme' => 'image',
         '#path' => $file->uri,
-        '#width' => $file->image_dimensions['width'],
-        '#height' => $file->image_dimensions['height'],
+        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->image_dimensions['width'],
+        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->image_dimensions['height'],
         '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
         '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
       );
