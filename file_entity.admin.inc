@@ -523,30 +523,35 @@ function file_entity_multiple_delete_confirm_submit($form, &$form_state) {
  * Displays the file type admin overview page.
  */
 function file_entity_list_types_page() {
-  // Allow for ctools formatting.
-  drupal_add_css(drupal_get_path('module', 'ctools') . '/css/export-ui-list.css');
-
   $file_entity_info = entity_get_info('file');
   $field_ui = module_exists('field_ui');
+  $colspan = $field_ui ? 5 : 3;
   $header = array(
     array('data' => t('Name')),
-    array('data' => t('Operations'), 'colspan' => $field_ui ? '5' : '3'),
+    array('data' => t('Operations'), 'colspan' => $colspan),
     array('data' => t('Status')),
   );
   $rows = array();
-  foreach (file_type_get_all_types(TRUE) as $type) {
+  $weight = 0;
+  $types = file_type_get_all_types(TRUE);
+  $count = count($types);
+  foreach ($types as $type) {
+    $weight++;
     $row = array(array('data' => theme('file_entity_file_type_overview', array('label' => $type->label, 'description' => $type->description))));
     $path = isset($file_entity_info['bundles'][$type->type]['admin']['real path']) ? $file_entity_info['bundles'][$type->type]['admin']['real path'] : NULL;
 
-    $row[] = array('data' => isset($path) ? l(t('edit file type'), $path . '/edit') : '');
-    if ($field_ui) {
-      $row[] = array('data' => isset($path) ? l(t('manage fields'), $path . '/fields') : '');
-      $row[] = array('data' => isset($path) ? l(t('manage display'), $path . '/display') : '');
+    if (empty($type->disabled) && isset($path)) {
+      $row[] = array('data' => l(t('edit file type'), $path . '/edit'));
+      if ($field_ui) {
+        $row[] = array('data' => l(t('manage fields'), $path . '/fields'));
+        $row[] = array('data' => l(t('manage display'), $path . '/display'));
+      }
+      $row[] = array('data' => l(t('manage file display'), $path . '/file-display'));
     }
-    $row[] = array('data' => isset($path) ? l(t('manage file display'), $path . '/file-display') : '');
+    else {
+      $row += array_fill(1, $colspan - 1, '');
+    }
 
-    // @TODO when the type is disabled there is no usable path. Not sure
-    // what is the correct approach here.
     $admin_path = 'admin/structure/file-types/manage/' . $type->type;
     switch ($type->ctools_type) {
       // Configuration is in code.
@@ -581,23 +586,27 @@ function file_entity_list_types_page() {
       break;
     }
 
-    // Show the type status.
-    $row[] = !empty($type->disabled) ? t('Disabled') : $type->ctools_type;
-    // Format the row with the status.
-    $rows[] = array('data' => $row, 'class' => array((!empty($type->disabled) ? 'ctools-export-ui-disabled' : '')));
+    if (!empty($type->disabled)) {
+      $row[] = t('Disabled');
+      $rows[$weight + $count] = array('data' => $row, 'class' => array('ctools-export-ui-disabled'));
+    }
+    else {
+      $row[] = $type->ctools_type;
+      $rows[$weight] = array('data' => $row);
+    }
   }
 
   // Move disabled items to the bottom.
-  $disabled = array_filter($rows, function($row) {return in_array('ctools-export-ui-disabled', $row['class']);});
-  $rows = array_diff_key($rows, $disabled);
-  $rows += $disabled;
-  $rows = array_values($rows);
+  ksort($rows);
 
   $build['file_type_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
     '#empty' => t('No file types available.'),
+    '#attached' => array(
+      'css' => array(drupal_get_path('module', 'ctools') . '/css/export-ui-list.css'),
+    ),
   );
 
   return $build;
