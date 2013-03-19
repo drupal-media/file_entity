@@ -39,7 +39,7 @@ function file_entity_file_presave($file) {
 function file_entity_file_type($file) {
   $types = array();
   foreach (file_type_get_enabled_types() as $type) {
-    if (in_array($file->filemime, $type->mimetypes)) {
+    if (file_entity_match_mimetypes($type->mimetypes, $file->filemime)) {
       $types[] = $type->type;
     }
   }

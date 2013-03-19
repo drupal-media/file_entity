@@ -1697,9 +1697,7 @@ function file_entity_file_default_types() {
     'label' => t('Image'),
     'description' => t('An <em>Image</em> file is a still visual.'),
     'mimetypes' => array(
-      'image/jpeg',
-      'image/gif',
-      'image/png',
+      'image/*',
     ),
     'streams' => array(
       'public',
@@ -1713,11 +1711,7 @@ function file_entity_file_default_types() {
     'label' => t('Video'),
     'description' => t('A <em>Video</em> file is a moving visual recording.'),
     'mimetypes' => array(
-      'video/quicktime',
-      'video/mp4',
-      'video/x-msvideo',
-      'video/ogg',
-      'video/x-flv',
+      'video/*',
     ),
     'streams' => array(
       'public',
@@ -1731,10 +1725,7 @@ function file_entity_file_default_types() {
     'label' => t('Audio'),
     'description' => t('An <em>Audio</em> file is a sound recording.'),
     'mimetypes' => array(
-      'audio/mpeg',
-      'audio/x-ms-wma',
-      'audio/x-wav',
-      'audio/ogg',
+      'audio/*',
     ),
     'streams' => array(
       'public',
@@ -1971,4 +1962,35 @@ function path_file_update($file) {
 function path_file_delete($file) {
   // Delete all aliases associated with this file.
   path_delete(array('source' => 'file/' . $file->fid));
+}
+
+/**
+ * Checks if pattern(s) match mimetype(s).
+ */
+function file_entity_match_mimetypes($needle, $haystack) {
+  $needle = is_array($needle) ? $needle : array($needle);
+  $haystack = is_array($haystack) ? $haystack : array($haystack);
+
+  foreach ($haystack as $mimetype) {
+    foreach ($needle as $search) {
+      if (file_entity_fnmatch($search, $mimetype)) {
+        return TRUE;
+      }
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * A wrapper function for the PHP function fnmatch().
+ *
+ * We include this, because Windows servers do not implement fnmatch() until
+ * PHP Version 5.3. See: http://php.net/manual/en/function.fnmatch.php
+ */
+function file_entity_fnmatch($pattern, $string) {
+  if (!function_exists('fnmatch')) {
+    return preg_match("#^".strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']'))."$#", $string);
+  }
+  return fnmatch($pattern, $string);
 }

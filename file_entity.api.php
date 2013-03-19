@@ -41,9 +41,7 @@ function hook_file_default_types() {
       'label' => t('Image'),
       'description' => t("An <em>Image</em> is a two-dimensional picture that has a similar appearance to some subject, usually a physical object or a person."),
       'mimetypes' => array(
-        'image/jpeg',
-        'image/gif',
-        'image/png',
+        'image/*',
       ),
     ),
   );

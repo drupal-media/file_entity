@@ -875,7 +875,13 @@ function file_entity_file_type_form_validate($form, &$form_state) {
   $valid_mimetypes = $mimetype_mapping['mimetypes'];
   $submitted_mimetypes = array_filter(array_map('trim', explode("\n", $form_state['values']['mimetypes'])));
 
-  $invalid_mimetypes = array_diff($submitted_mimetypes, $valid_mimetypes);
+  $invalid_mimetypes = array();
+  foreach ($submitted_mimetypes as $mimetype) {
+    if (!file_entity_match_mimetypes($mimetype, $valid_mimetypes)) {
+      $invalid_mimetypes[] = $mimetype;
+    }
+  }
+
   foreach ($invalid_mimetypes as $mimetype) {
     form_set_error('mimetypes', t('The mimetype %mimetype is not a valid mimetype.', array('%mimetype' => $mimetype)));
   }
