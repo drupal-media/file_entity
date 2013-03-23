@@ -39,6 +39,55 @@ class FileEntityTestHelper extends DrupalWebTestCase {
   }
 
   /**
+   * Helper for testFileEntityPrivateDownloadAccess() test.
+   *
+   * Defines several cases for accesing private files.
+   *
+   * @return array
+   *   Array of associative arrays, each one having the next keys:
+   *   - "message" string with the assertion message.
+   *   - "permissions" array of permissions or NULL for anonymous user.
+   *   - "expect" expected HTTP response code.
+   *   - "owner" Optional boolean indicating if the user is a file owner.
+   */
+  protected function getPrivateDownloadAccessCases() {
+    return array(
+      array(
+        'message' => "File owners cannot download their own files unless they are granted the 'view own private files' permission.",
+        'permissions' => array(),
+        'expect' => 403,
+        'owner' => TRUE,
+      ),
+      array(
+        'message' => "File owners can download their own files as they have been granted the 'view own private files' permission.",
+        'permissions' => array('view own private files'),
+        'expect' => 200,
+        'owner' => TRUE,
+      ),
+      array(
+        'message' => "Anonymous users cannot download private files.",
+        'permissions' => NULL,
+        'expect' => 403,
+      ),
+      array(
+        'message' => "Authenticated users cannot download each other's private files.",
+        'permissions' => array(),
+        'expect' => 403,
+      ),
+      array(
+        'message' => "Users who can view public files are not able to download private files.",
+        'permissions' => array('view files'),
+        'expect' => 403,
+      ),
+      array(
+        'message' => "Users who bypass file access can download any file.",
+        'permissions' => array('bypass file access'),
+        'expect' => 200,
+      ),
+    );
+  }
+
+  /**
    * Retrieves a sample file of the specified type.
    */
   function getTestFile($type_name, $size = NULL) {
@@ -1057,5 +1106,43 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->fid}/delete");
     $this->assertResponse(200, 'Users with access can access the file add page');
+  }
+
+  /**
+   * Test to see if we have access to download private files when granted the permissions.
+   */
+  function testFileEntityPrivateDownloadAccess() {
+    foreach ($this->getPrivateDownloadAccessCases() as $case) {
+      // Create users and login only if non-anonymous.
+      $authenticated_user = !is_null($case['permissions']);
+      if ($authenticated_user) {
+        $account = $this->drupalCreateUser($case['permissions']);
+        $this->drupalLogin($account);
+      }
+
+      // Create private, permanent files owned by this user only he's an owner.
+      if (!empty($case['owner'])) {
+        $file = next($this->files['text']);
+        $file->status = FILE_STATUS_PERMANENT;
+        $file->uid = $account->uid;
+        file_save($file);
+        $file = file_move($file, 'private://');
+
+        // Check if the physical file is there.
+        $arguments = array('%name' => $file->filename, '%username' => $account->name, '%uri' => $file->uri);
+        $this->assertTrue(is_file($file->uri), format_string('File %name owned by %username successfully created at %uri.', $arguments));
+        $url = file_create_url($file->uri);
+        $message_file_info = ' ' . format_string('File %uri was checked.', array('%uri' => $file->uri));
+      }
+
+      // Try to download the file.
+      $this->drupalGet($url);
+      $this->assertResponse($case['expect'], $case['message'] . $message_file_info);
+
+      // Logout authenticated users.
+      if ($authenticated_user) {
+        $this->drupalLogout();
+      }
+    }
   }
 }

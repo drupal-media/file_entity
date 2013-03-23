@@ -1528,8 +1528,6 @@ function file_entity_ctools_plugin_api($owner, $api) {
  *
  * Stream wrappers that are considered private should implement a 'private'
  * flag equal to TRUE in hook_stream_wrappers().
- *
- * @todo Unify core's hook_file_download() as a 'download' op of file_entity_access().
  */
 
 /**
@@ -1632,8 +1630,6 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
  * Implements hook_file_entity_access().
  */
 function file_entity_file_entity_access($op, $file, $account) {
-  $grants = array();
-
   // If the file URI is invalid, deny access.
   if (is_object($file) && !file_valid_uri($file->uri)) {
     return FILE_ENTITY_ACCESS_DENY;
@@ -1663,23 +1659,28 @@ function file_entity_file_entity_access($op, $file, $account) {
     }
   }
 
-  if ($op == 'view' && is_object($file) && file_uri_scheme($file->uri) == 'private') {
-    // When viewing private files, we can only invoke hook_file_download()
-    // if the $account user objet matches the current user.
-    if ($GLOBALS['user']->uid == $account->uid) {
-      foreach (module_implements('file_download') as $module) {
-        $access = module_invoke($module, 'file_download', $file->uri);
-        if ($access === -1) {
-          return FILE_ENTITY_ACCESS_DENY;
-        }
-        elseif (!empty($access)) {
-          $grants[] = $access;
-        }
-      }
-    }
+  return !empty($grants) ? FILE_ENTITY_ACCESS_ALLOW : FILE_ENTITY_ACCESS_IGNORE;
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function file_entity_file_download($uri) {
+  // Load the file from the URI.
+  $file = file_uri_to_object($uri);
+
+  // An existing file wasn't found, so we don't control access.
+  // E.g. image derivatives will fall here.
+  if (empty($file->fid)) {
+    return NULL;
   }
 
-  return !empty($grants) ? FILE_ENTITY_ACCESS_ALLOW : FILE_ENTITY_ACCESS_IGNORE;
+  // Allow the user to download the file if they have appropriate permissions.
+  if (file_entity_access('view', $file)) {
+    return file_get_content_headers($file);
+  }
+
+  return -1;
 }
 
 /**
