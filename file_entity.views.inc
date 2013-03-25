@@ -110,6 +110,13 @@ function file_entity_views_data() {
 }
 
 /**
+ * Implements hook_views_data_alter().
+ */
+function file_entity_views_data_alter(&$data) {
+  $data['file_managed']['filename']['field']['handler'] = 'views_handler_field_file_filename';
+}
+
+/**
  * Implements hook_views_plugins().
  */
 function file_entity_views_plugins() {
