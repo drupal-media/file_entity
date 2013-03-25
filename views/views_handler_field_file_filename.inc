@@ -15,7 +15,7 @@ class views_handler_field_file_filename extends views_handler_field_file {
    * Constructor to provide additional field to add.
    */
   function init(&$view, &$options) {
-    if (!empty($options['link_to_file'])) {
+    if (!empty($this->options['link_to_file'])) {
       $this->additional_fields['fid'] = 'fid';
     }
     parent::init($view, $options);
@@ -41,9 +41,11 @@ class views_handler_field_file_filename extends views_handler_field_file {
    * Data should be made XSS safe prior to calling this function.
    */
   function render_link($data, $values) {
-    if (!empty($this->options['link_to_file']) && $data !== NULL && $data !== '') {
-      $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = 'file/' . $this->get_value($values, 'fid');
+    if (!empty($this->options['link_to_file']) && !empty($this->additional_fields['fid'])) {
+      if ($data !== NULL && $data !== '') {
+        $this->options['alter']['make_link'] = TRUE;
+        $this->options['alter']['path'] = 'file/' . $this->get_value($values, 'fid');
+      }
     }
     return $data;
   }

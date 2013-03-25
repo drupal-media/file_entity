@@ -185,21 +185,10 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
     'label' => '',
   ),
 );
-/* Field: File: File ID */
-$handler->display->display_options['fields']['fid']['id'] = 'fid';
-$handler->display->display_options['fields']['fid']['table'] = 'file_managed';
-$handler->display->display_options['fields']['fid']['field'] = 'fid';
-$handler->display->display_options['fields']['fid']['label'] = '';
-$handler->display->display_options['fields']['fid']['exclude'] = TRUE;
-$handler->display->display_options['fields']['fid']['element_label_colon'] = FALSE;
 /* Field: File: Name */
 $handler->display->display_options['fields']['filename']['id'] = 'filename';
 $handler->display->display_options['fields']['filename']['table'] = 'file_managed';
 $handler->display->display_options['fields']['filename']['field'] = 'filename';
-$handler->display->display_options['fields']['filename']['alter']['make_link'] = TRUE;
-$handler->display->display_options['fields']['filename']['alter']['path'] = 'file/[fid]';
-$handler->display->display_options['fields']['filename']['alter']['word_boundary'] = FALSE;
-$handler->display->display_options['fields']['filename']['alter']['ellipsis'] = FALSE;
 /* Field: File: Type */
 $handler->display->display_options['fields']['type']['id'] = 'type';
 $handler->display->display_options['fields']['type']['table'] = 'file_managed';
@@ -227,6 +216,12 @@ $handler->display->display_options['fields']['edit']['table'] = 'file_managed';
 $handler->display->display_options['fields']['edit']['field'] = 'edit';
 $handler->display->display_options['fields']['edit']['label'] = '';
 $handler->display->display_options['fields']['edit']['element_label_colon'] = FALSE;
+/* Field: File: Usage link */
+$handler->display->display_options['fields']['usage']['id'] = 'usage';
+$handler->display->display_options['fields']['usage']['table'] = 'file_managed';
+$handler->display->display_options['fields']['usage']['field'] = 'usage';
+$handler->display->display_options['fields']['usage']['label'] = '';
+$handler->display->display_options['fields']['usage']['element_label_colon'] = FALSE;
 /* Field: File: Delete link */
 $handler->display->display_options['fields']['delete']['id'] = 'delete';
 $handler->display->display_options['fields']['delete']['table'] = 'file_managed';

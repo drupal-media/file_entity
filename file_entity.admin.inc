@@ -388,6 +388,13 @@ function file_entity_admin_files() {
         'query' => $destination,
       );
     }
+    if (file_entity_access('view', $file)) {
+      $operations['usage'] = array(
+        'title' => t('usage'),
+        'href' => 'file/' . $file->fid . '/usage',
+        'query' => $destination,
+      );
+    }
     if (file_entity_access('delete', $file)) {
       $operations['delete'] = array(
         'title' => t('delete'),
