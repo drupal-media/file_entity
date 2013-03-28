@@ -879,6 +879,10 @@ function file_entity_entity_info_alter(&$entity_info) {
     'label' => t('Preview'),
     'custom settings' => TRUE,
   );
+  $entity_info['file']['view modes']['rss'] = array(
+    'label' => t('RSS'),
+    'custom settings' => FALSE,
+  );
 
   // Search integration is provided by file_entity.module, so search-related
   // view modes for files are defined here and not in search.module.

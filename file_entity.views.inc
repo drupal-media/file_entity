@@ -132,6 +132,16 @@ function file_entity_views_plugins() {
         'type' => 'normal',
         'help topic' => 'style-file',
       ),
+      'file_rss' => array(
+        'title' => t('File'),
+        'help' => t('Display the file with standard file view.'),
+        'handler' => 'views_plugin_row_file_rss',
+        'theme' => 'views_view_row_rss',
+        'base' => array('file_managed'), // only works with 'file' as base.
+        'uses options' => TRUE,
+        'type' => 'feed',
+        'help topic' => 'style-file-rss',
+      ),
     ),
   );
 }
