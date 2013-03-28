@@ -1676,7 +1676,7 @@ function file_entity_file_entity_access($op, $file, $account) {
     }
   }
 
-  return !empty($grants) ? FILE_ENTITY_ACCESS_ALLOW : FILE_ENTITY_ACCESS_IGNORE;
+  return FILE_ENTITY_ACCESS_IGNORE;
 }
 
 /**
