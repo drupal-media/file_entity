@@ -243,6 +243,11 @@ function file_entity_install() {
 
   // Create the title and alt text fields
   _file_entity_create_alt_title_fields();
+
+  // Configure default pathauto variables if it is currently installed.
+  if (module_exists('pathauto')) {
+    variable_set('pathauto_file_pattern', 'file/[file:name]');
+  }
 }
 
 /**
@@ -833,5 +838,14 @@ function file_entity_update_7205() {
   }
   if (!db_index_exists('file_type_streams', 'file_type_stream')) {
     db_add_index('file_type_streams', 'file_type_stream', array('stream'));
+  }
+}
+
+/**
+ * Configure default pathauto variables if it is currently installed.
+ */
+function file_entity_update_7206() {
+  if (module_exists('pathauto')) {
+    variable_set('pathauto_file_pattern', 'file/[file:name]');
   }
 }

@@ -813,6 +813,19 @@ function file_entity_admin_paths() {
 }
 
 /**
+ * Implements hook_action_info_alter().
+ */
+function file_entity_action_info_alter(&$actions) {
+  if (module_exists('pathauto')) {
+    $actions['pathauto_file_update_action'] = array(
+      'type' => 'file',
+      'label' => t('Update file alias'),
+      'configurable' => FALSE,
+    );
+  }
+}
+
+/**
  * Implements hook_theme().
  */
 function file_entity_theme() {
@@ -1862,6 +1875,118 @@ function file_entity_upload_validators_pre_render($element) {
   }
   return $element;
 }
+
+/**
+ * @name pathauto_file Pathauto integration for the core file module.
+ * @{
+ */
+
+/**
+ * Implements hook_file_insert() on behalf of pathauto.module.
+ */
+function pathauto_file_insert($file) {
+  pathauto_file_update_alias($file, 'insert');
+}
+
+/**
+ * Implements hook_file_update() on behalf of pathauto.module.
+ */
+function pathauto_file_update($file) {
+  pathauto_file_update_alias($file, 'update');
+}
+
+/**
+ * Implements hook_file_delete() on behalf of pathauto.module.
+ */
+function pathauto_file_delete($file) {
+  pathauto_entity_path_delete_all('file', $file, "file/{$file->fid}");
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() on behalf of pathauto.module.
+ *
+ * Add the Pathauto settings to the file form.
+ */
+function pathauto_form_file_entity_edit_alter(&$form, &$form_state, $form_id) {
+  $file = $form_state['file'];
+  $langcode = pathauto_entity_language('file', $file);
+  pathauto_field_attach_form('file', $file, $form, $form_state, $langcode);
+}
+
+/**
+ * Implements hook_file_operations() on behalf of pathauto.module.
+ */
+function pathauto_file_operations() {
+  $operations['pathauto_update_alias'] = array(
+    'label' => t('Update URL alias'),
+    'callback' => 'pathauto_file_update_alias_multiple',
+    'callback arguments' => array('bulkupdate', array('message' => TRUE)),
+  );
+  return $operations;
+}
+
+/**
+ * Update the URL aliases for an individual file.
+ *
+ * @param $file
+ *   A file object.
+ * @param $op
+ *   Operation being performed on the file ('insert', 'update' or 'bulkupdate').
+ * @param $options
+ *   An optional array of additional options.
+ */
+function pathauto_file_update_alias(stdClass $file, $op, array $options = array()) {
+  // Skip processing if the user has disabled pathauto for the file.
+  if (isset($file->path['pathauto']) && empty($file->path['pathauto'])) {
+    return;
+  }
+
+  $options += array('language' => pathauto_entity_language('file', $file));
+
+  // Skip processing if the file has no pattern.
+  if (!pathauto_pattern_load_by_entity('file', $file->type, $options['language'])) {
+    return;
+  }
+
+  module_load_include('inc', 'pathauto');
+  $uri = entity_uri('file', $file);
+  pathauto_create_alias('file', $op, $uri['path'], array('file' => $file), $file->type, $options['language']);
+}
+
+/**
+ * Update the URL aliases for multiple files.
+ *
+ * @param $fids
+ *   An array of file IDs.
+ * @param $op
+ *   Operation being performed on the files ('insert', 'update' or
+ *   'bulkupdate').
+ * @param $options
+ *   An optional array of additional options.
+ */
+function pathauto_file_update_alias_multiple(array $fids, $op, array $options = array()) {
+  $options += array('message' => FALSE);
+
+  $files = file_load_multiple($fids);
+  foreach ($files as $file) {
+    pathauto_file_update_alias($file, $op, $options);
+  }
+
+  if (!empty($options['message'])) {
+    drupal_set_message(format_plural(count($fids), 'Updated URL alias for 1 file.', 'Updated URL aliases for @count files.'));
+  }
+}
+
+/**
+ * Update action wrapper for pathauto_file_update_alias().
+ */
+function pathauto_file_update_action($file, $context = array()) {
+  pathauto_file_update_alias($file, 'bulkupdate', array('message' => TRUE));
+}
+
+/**
+ * @} End of "name pathauto_file".
+ */
 
 /**
  * Implements hook_form_FORM_ID_alter() for file_entity_edit() on behalf of path.module.
