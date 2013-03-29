@@ -63,7 +63,7 @@ function file_entity_download_page($file) {
  *   Skip this step if there are no fields on this entity type.
  */
 function file_entity_add_upload($form, &$form_state, array $options = array()) {
-  $step = (isset($form_state['step']) && in_array($form_state['step'], array(1, 2, 3))) ? $form_state['step'] : 1;
+  $step = (isset($form_state['step']) && in_array($form_state['step'], array(1, 2, 3, 4))) ? $form_state['step'] : 1;
   $form['#step'] = $step;
   switch ($step) {
     case 1:
@@ -71,6 +71,8 @@ function file_entity_add_upload($form, &$form_state, array $options = array()) {
     case 2:
       return file_entity_add_upload_step_filetype($form, $form_state, $options);
     case 3:
+      return file_entity_add_upload_step_scheme($form, $form_state, $options);
+    case 4:
       return file_entity_add_upload_step_fields($form, $form_state, $options);
   }
 }
@@ -130,6 +132,38 @@ function file_entity_add_upload_step_filetype($form, &$form_state, array $option
 
 /**
  * Generate form fields for the third step in the add file wizard.
+ */
+function file_entity_add_upload_step_scheme($form, &$form_state, array $options = array()) {
+  $file = file_load($form_state['storage']['upload']);
+
+  $options = array();
+  foreach (file_entity_get_scheme_candidates($file, STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
+    $options[$scheme] = check_plain($info['description']);
+  }
+
+  $form['scheme'] = array(
+    '#type' => 'radios',
+    '#title' => t('Destination'),
+    '#options' => $options,
+    '#default_value' => isset($form_state['storage']['scheme']) ? $form_state['storage']['scheme'] : file_default_scheme(),
+    '#required' => TRUE,
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['previous'] = array(
+    '#type' => 'submit',
+    '#value' => t('Previous'),
+  );
+  $form['actions']['next'] = array(
+    '#type' => 'submit',
+    '#value' => t('Next'),
+  );
+
+  return $form;
+}
+
+/**
+ * Generate form fields for the fourth step in the add file wizard.
  */
 function file_entity_add_upload_step_fields($form, &$form_state, array $options = array()) {
   // Load the file and overwrite the filetype set on the previous screen.
@@ -211,6 +245,35 @@ function file_entity_usage_page($file) {
 }
 
 /**
+ * Get the candidate schemes for a given file.
+ *
+ * @param array $file
+ *   An upload file array from form_state.
+ *
+ * @param $filter
+ *   (Optional) Filters out all types except those with an on bit for each on
+ *   bit in $filter. For example, if $filter is STREAM_WRAPPERS_WRITE_VISIBLE,
+ *   which is equal to (STREAM_WRAPPERS_READ | STREAM_WRAPPERS_WRITE |
+ *   STREAM_WRAPPERS_VISIBLE), then only stream wrappers with all three of these
+ *   bits set are returned. Defaults to STREAM_WRAPPERS_ALL, which returns all
+ *   registered stream wrappers.
+ *
+ * @return array
+ *   An array of schemes that the file's file type supports.
+ */
+function file_entity_get_scheme_candidates($file, $filter = STREAM_WRAPPERS_ALL) {
+  $type = file_type_load($file->type);
+  $stream_wrappers = file_get_stream_wrappers($filter);
+  $candidates = array();
+  foreach ($type->streams as $stream) {
+    if ($stream_wrappers[$stream]) {
+      $candidates[$stream] = $stream_wrappers[$stream];
+    }
+  }
+  return $candidates;
+}
+
+/**
  * Get the candidate filetypes for a given file.
  *
  * Only filetypes for which the user has access to create entities are returned.
@@ -259,8 +322,21 @@ function file_entity_add_upload_submit($form, &$form_state) {
     }
   }
 
-  // We have the filetype, check if we can skip step 3.
-  if (($form['#step'] == 2 && $trigger == 'edit-next')) {
+  // Only one visible, writeable stream wrapper is available, check if we can
+  // skip step 3.
+  if (($form['#step'] == 2 && $trigger == 'edit-next') || ($form['#step'] == 4 && $trigger == 'edit-previous')) {
+    $file = file_load($form_state['storage']['upload']);
+    $candidates = file_entity_get_scheme_candidates($file, STREAM_WRAPPERS_WRITE_VISIBLE);
+    if (count($candidates) == 1) {
+      $candidates_keys = array_keys($candidates);
+      // There is only one possible stream wrapper for this file. Skip the third page.
+      $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
+      $form_state['storage']['scheme'] = reset($candidates_keys);
+    }
+  }
+
+  // We have the filetype, check if we can skip step 4.
+  if (($form['#step'] == 3 && $trigger == 'edit-next')) {
     $file = file_load($form_state['storage']['upload']);
     if (!field_info_instances('file', $form_state['storage']['type'])) {
       // This filetype doesn't have fields, save the file.
@@ -283,6 +359,9 @@ function file_entity_add_upload_submit($form, &$form_state) {
   if ($save) {
     $file = file_load($form_state['storage']['upload']);
     if ($file) {
+      if (file_uri_scheme($file->uri) != $form_state['storage']['scheme']) {
+        $file = file_move($file, $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri), FILE_EXISTS_RENAME);
+      }
       $file->type = $form_state['storage']['type'];
       $file->display = TRUE;
 
@@ -491,6 +570,36 @@ function file_entity_edit($form, &$form_state, $file) {
     '#weight' => 99,
   );
 
+  // File destination information for administrators
+  $form['destination'] = array(
+    '#type' => 'fieldset',
+    '#access' => user_access('administer files'),
+    '#title' => t('Destination'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('file-form-destination'),
+    ),
+    '#attached' => array(
+      'js' => array(
+        drupal_get_path('module', 'file_entity') . '/file_entity.js',
+      ),
+    ),
+  );
+
+  $options = array();
+  foreach (file_entity_get_scheme_candidates($file, STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
+    $options[$scheme] = check_plain($info['description']);
+  }
+
+  $form['destination']['scheme'] = array(
+    '#type' => 'radios',
+    '#title' => t('Destination'),
+    '#options' => $options,
+    '#default_value' => file_uri_scheme($file->uri),
+  );
+
   // File user information for administrators
   $form['user'] = array(
     '#type' => 'fieldset',
@@ -614,6 +723,10 @@ function file_entity_edit_submit($form, &$form_state) {
   elseif ($file->uid) {
     $user = user_load($file->uid);
     $file->name = $user->name;
+  }
+
+  if (file_uri_scheme($file->uri) != $form_state['values']['scheme']) {
+    $file = file_move($file, $form_state['values']['scheme'] . '://' . file_uri_target($file->uri), FILE_EXISTS_RENAME);
   }
 
   file_save($file);

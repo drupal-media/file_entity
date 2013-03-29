@@ -799,13 +799,20 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
     $this->drupalPost('file/add', $edit, t('Next'));
 
     // Step 2: Select file type candidate
-    $this->assertText('Image 1', 'File candidate list item found.');
-    $this->assertText('Image 2', 'File candidate list item found.');
+    $this->assertText('Image 1', 'File type candidate list item found.');
+    $this->assertText('Image 2', 'File type candidate list item found.');
     $edit = array();
     $edit['type'] = 'image2';
     $this->drupalPost(NULL, $edit, t('Next'));
 
-    // Step 3: Complete field widgets
+    // Step 3: Select file scheme candidate
+    $this->assertText('Public local files served by the webserver.', 'File scheme candidate list item found.');
+    $this->assertText('Private local files served by Drupal.', 'File scheme candidate list item found.');
+    $edit = array();
+    $edit['scheme'] = 'public';
+    $this->drupalPost(NULL, $edit, t('Next'));
+
+    // Step 4: Complete field widgets
     $langcode = LANGUAGE_NONE;
     $edit = array();
     $edit["{$field['field_name']}[$langcode][0][value]"] = $this->randomName();
