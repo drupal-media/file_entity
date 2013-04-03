@@ -849,3 +849,10 @@ function file_entity_update_7206() {
     variable_set('pathauto_file_pattern', 'file/[file:name]');
   }
 }
+
+/**
+ * Remove the administration files limit variable.
+ */
+function file_entity_update_7207() {
+  variable_del('file_entity_admin_files_limit');
+}

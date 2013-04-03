@@ -350,11 +350,9 @@ function file_entity_admin_files() {
     $query->condition('fm.uri', $name . '%', 'NOT LIKE');
   }
 
-  $limit = variable_get('file_entity_admin_files_limit', 50);
-
   $fids = $query
     ->fields('fm', array('fid'))
-    ->limit($limit)
+    ->limit(50)
     ->orderByHeader($header)
     ->addTag('admin_files')
     ->execute()
