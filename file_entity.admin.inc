@@ -276,8 +276,6 @@ function file_entity_admin_file($form, $form_state) {
  * Form builder: Builds the file administration overview.
  */
 function file_entity_admin_files() {
-  global $user;
-
   $admin_access = user_access('administer files');
 
   // Build the 'Update options' form.
@@ -318,43 +316,11 @@ function file_entity_admin_files() {
   $query = db_select('file_managed', 'fm')->extend('PagerDefault')->extend('TableSort');
   file_entity_build_filter_query($query);
 
-  if (user_access('bypass file access')) {
-    // Administrators don't need to be restricted to only permanent files.
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-  elseif (user_access('view files')) {
-    // For non-private files, users can view if they have the 'view files'
-    // permission.
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-  elseif (user_access('view private files') && user_is_logged_in()) {
-    // For private files, users can view private files if the
-    // user is not anonymous, and has the 'view private files' permission.
-    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-  elseif (user_access('view own files')) {
-    // For non-private files, allow to see if user owns the file.
-    $query->condition('fm.uid', $user->uid, '=');
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-  elseif (user_access('view own private files') && user_is_logged_in()) {
-    // For private files, users can view their own private files if the
-    // user is not anonymous, and has the 'view own private files' permission.
-    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
-    $query->condition('fm.uid', $user->uid, '=');
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-
-  foreach (array_keys(file_entity_get_hidden_stream_wrappers()) as $name) {
-    $query->condition('fm.uri', $name . '%', 'NOT LIKE');
-  }
-
   $fids = $query
     ->fields('fm', array('fid'))
     ->limit(50)
     ->orderByHeader($header)
-    ->addTag('admin_files')
+    ->addTag('file_access')
     ->execute()
     ->fetchCol();
   $files = file_load_multiple($fids);

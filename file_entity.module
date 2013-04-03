@@ -533,34 +533,6 @@ function file_entity_search_execute($keys = NULL, $conditions = NULL) {
   $query->join('file_managed', 'fm', 'fm.fid = i.sid');
   $query->searchExpression($keys, 'file');
 
-  if (user_access('bypass file access')) {
-    // Administrators don't need to be restricted to only permanent files.
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-  elseif (user_access('view files')) {
-    // For non-private files, users can view if they have the 'view files'
-    // permission.
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-  elseif (user_access('view private files') && user_is_logged_in()) {
-    // For private files, users can view private files if the
-    // user is not anonymous, and has the 'view private files' permission.
-    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-  elseif (user_access('view own files')) {
-    // For non-private files, allow to see if user owns the file.
-    $query->condition('fm.uid', $user->uid, '=');
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-  elseif (user_access('view own private files') && user_is_logged_in()) {
-    // For private files, users can view their own private files if the
-    // user is not anonymous, and has the 'view own private files' permission.
-    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
-    $query->condition('fm.uid', $user->uid, '=');
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
-  }
-
   // Insert special keywords.
   $query->setOption('type', 'fm.type');
   if ($query->setOption('term', 'ti.tid')) {
@@ -577,6 +549,7 @@ function file_entity_search_execute($keys = NULL, $conditions = NULL) {
   // Load results.
   $find = $query
     ->limit(10)
+    ->addTag('file_access')
     ->execute();
   $results = array();
   foreach ($find as $item) {
@@ -1677,6 +1650,45 @@ function file_entity_file_entity_access($op, $file, $account) {
   }
 
   return FILE_ENTITY_ACCESS_IGNORE;
+}
+
+/**
+ * Implements hook_query_TAG_alter.
+ */
+function file_entity_query_file_access_alter(QueryAlterableInterface $query) {
+  global $user;
+
+  if (user_access('bypass file access')) {
+    // Administrators don't need to be restricted to only permanent files.
+    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+  }
+  elseif (user_access('view files')) {
+    // For non-private files, users can view if they have the 'view files'
+    // permission.
+    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+  }
+  elseif (user_access('view private files') && user_is_logged_in()) {
+    // For private files, users can view private files if the
+    // user is not anonymous, and has the 'view private files' permission.
+    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
+    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+  }
+  elseif (user_access('view own files')) {
+    // For non-private files, allow to see if user owns the file.
+    $query->condition('fm.uid', $user->uid, '=');
+    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+  }
+  elseif (user_access('view own private files') && user_is_logged_in()) {
+    // For private files, users can view their own private files if the
+    // user is not anonymous, and has the 'view own private files' permission.
+    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
+    $query->condition('fm.uid', $user->uid, '=');
+    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+  }
+
+  foreach (array_keys(file_entity_get_hidden_stream_wrappers()) as $name) {
+    $query->condition('fm.uri', $name . '%', 'NOT LIKE');
+  }
 }
 
 /**
