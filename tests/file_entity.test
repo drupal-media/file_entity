@@ -178,7 +178,7 @@ class FileEntityUnitTestCase extends FileEntityTestHelper {
   public static function getInfo() {
     return array(
       'name' => 'File entity unit tests',
-      'description' => 'Test basic file entity funcitonality.',
+      'description' => 'Test basic file entity functionality.',
       'group' => 'File entity',
     );
   }
