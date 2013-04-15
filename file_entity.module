@@ -1618,24 +1618,26 @@ function file_entity_file_entity_access($op, $file, $account) {
     }
   }
 
-  $type = is_string($file) ? $file : $file->type;
+  if (!empty($file)) {
+    $type = is_string($file) ? $file : $file->type;
 
-  if (in_array($type, file_entity_permissions_get_configured_types())) {
-    if ($op == 'download') {
-      if (user_access('download any ' . $type . ' files', $account) || is_object($file) && user_access('download own ' . $type . ' files', $account) && ($account->uid == $file->uid)) {
-        return FILE_ENTITY_ACCESS_ALLOW;
+    if (in_array($type, file_entity_permissions_get_configured_types())) {
+      if ($op == 'download') {
+        if (user_access('download any ' . $type . ' files', $account) || is_object($file) && user_access('download own ' . $type . ' files', $account) && ($account->uid == $file->uid)) {
+          return FILE_ENTITY_ACCESS_ALLOW;
+        }
       }
-    }
 
-    if ($op == 'update') {
-      if (user_access('edit any ' . $type . ' files', $account) || (is_object($file) && user_access('edit own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
-        return FILE_ENTITY_ACCESS_ALLOW;
+      if ($op == 'update') {
+        if (user_access('edit any ' . $type . ' files', $account) || (is_object($file) && user_access('edit own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+          return FILE_ENTITY_ACCESS_ALLOW;
+        }
       }
-    }
 
-    if ($op == 'delete') {
-      if (user_access('delete any ' . $type . ' files', $account) || (is_object($file) && user_access('delete own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
-        return FILE_ENTITY_ACCESS_ALLOW;
+      if ($op == 'delete') {
+        if (user_access('delete any ' . $type . ' files', $account) || (is_object($file) && user_access('delete own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+          return FILE_ENTITY_ACCESS_ALLOW;
+        }
       }
     }
   }
