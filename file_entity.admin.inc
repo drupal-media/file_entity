@@ -352,7 +352,7 @@ function file_entity_admin_files() {
         'query' => $destination,
       );
     }
-    if (file_entity_access('view', $file)) {
+    if (file_entity_access('update', $file)) {
       $operations['usage'] = array(
         'title' => t('usage'),
         'href' => 'file/' . $file->fid . '/usage',
