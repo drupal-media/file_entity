@@ -856,3 +856,60 @@ function file_entity_update_7206() {
 function file_entity_update_7207() {
   variable_del('file_entity_admin_files_limit');
 }
+
+/**
+ * Add expanded file type permissions to roles with existing file permissions.
+ */
+function file_entity_update_7208() {
+  foreach (array('edit own files', 'edit any files', 'delete own files', 'delete any files', 'download own files', 'download any files') as $old_permission) {
+    $roles = user_roles(FALSE, $old_permission);
+
+    foreach ($roles as $rid => $name) {
+      $new_permissions = array();
+
+      foreach (file_type_get_enabled_types() as $type => $info) {
+        switch ($old_permission) {
+          case 'edit own files':
+            $new_permissions[] = 'edit own ' . $type . ' files';
+            break;
+          case 'edit any files':
+            $new_permissions[] = 'edit any ' . $type . ' files';
+            break;
+          case 'delete own files':
+            $new_permissions[] = 'delete own ' . $type . ' files';
+            break;
+          case 'delete any files':
+            $new_permissions[] = 'delete any ' . $type . ' files';
+          case 'download own files':
+            $new_permissions[] = 'download own ' . $type . ' files';
+            break;
+          case 'download any files':
+            $new_permissions[] = 'download any ' . $type . ' files';
+            break;
+        }
+      }
+
+      if (!empty($new_permissions)) {
+        // Grant new permissions for the role.
+        foreach ($new_permissions as $name) {
+          db_merge('role_permission')
+            ->key(array(
+              'rid' => $rid,
+              'permission' => $name,
+            ))
+            ->fields(array(
+              'module' => 'file_entity',
+            ))
+            ->execute();
+        }
+      }
+
+      // Remove old permission from the role.
+      db_delete('role_permission')
+        ->condition('rid', $rid)
+        ->condition('permission', $old_permission)
+        ->condition('module', 'file_entity')
+        ->execute();
+    }
+  }
+}

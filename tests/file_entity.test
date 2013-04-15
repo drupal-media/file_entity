@@ -279,7 +279,7 @@ class FileEntityEditTestCase extends FileEntityTestHelper {
   function setUp() {
     parent::setUp();
 
-    $this->web_user = $this->drupalCreateUser(array('edit own files', 'create files'));
+    $this->web_user = $this->drupalCreateUser(array('edit own document files', 'create files'));
     $this->admin_user = $this->drupalCreateUser(array('bypass file access', 'administer files'));
   }
 
@@ -382,7 +382,7 @@ class FileEntityCreationTestCase extends FileEntityTestHelper {
   function setUp() {
     parent::setUp();
 
-    $web_user = $this->drupalCreateUser(array('create files', 'edit own files'));
+    $web_user = $this->drupalCreateUser(array('create files', 'edit own document files'));
     $this->drupalLogin($web_user);
   }
 
@@ -432,7 +432,7 @@ class FileEntityAdminTestCase extends FileEntityTestHelper {
     $this->base_user_1 = $this->drupalCreateUser(array('administer files'));
     $this->base_user_2 = $this->drupalCreateUser(array('administer files', 'view own private files'));
     $this->base_user_3 = $this->drupalCreateUser(array('administer files', 'view private files'));
-    $this->base_user_4 = $this->drupalCreateUser(array('administer files', 'edit any files', 'delete any files'));
+    $this->base_user_4 = $this->drupalCreateUser(array('administer files', 'edit any document files', 'delete any document files', 'edit any image files', 'delete any image files'));
   }
 
   /**
@@ -588,7 +588,7 @@ class FileEntityReplaceTestCase extends FileEntityTestHelper {
     $file = reset($this->files['text']);
 
     // Create a user with file edit permissions.
-    $user = $this->drupalCreateUser(array('edit any files'));
+    $user = $this->drupalCreateUser(array('edit any document files'));
     $this->drupalLogin($user);
 
     // Test that the Upload widget appears for a local file.
@@ -1019,7 +1019,7 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->assertFileEntityAccess(array('view' => TRUE), $file, $web_user);
 
     // User can download own files but no other files.
-    $web_user = $this->drupalCreateUser(array('create files', 'download own files'));
+    $web_user = $this->drupalCreateUser(array('create files', 'download own image files'));
     $this->assertFileEntityAccess(array('download' => FALSE), $file, $web_user);
     $file->uid = $web_user->uid;
     $file->status = FILE_STATUS_PERMANENT;
@@ -1027,7 +1027,7 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
 
     // User can update own files but no other files.
-    $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own files'));
+    $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files'));
     $this->assertFileEntityAccess(array('update' => FALSE), $file, $web_user);
     $file->uid = $web_user->uid;
     $file->status = FILE_STATUS_PERMANENT;
@@ -1035,7 +1035,7 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
 
     // User can delete own files but no other files.
-    $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own files', 'delete own files'));
+    $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files', 'delete own image files'));
     $this->assertFileEntityAccess(array('delete' => FALSE), $file, $web_user);
     $file->uid = $web_user->uid;
     $file->status = FILE_STATUS_PERMANENT;
@@ -1047,15 +1047,15 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->assertFileEntityAccess(array('view' => TRUE), $file, $web_user);
 
     // User can download any file.
-    $web_user = $this->drupalCreateUser(array('create files', 'download any files'));
+    $web_user = $this->drupalCreateUser(array('create files', 'download any image files'));
     $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
 
     // User can edit any file.
-    $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any files'));
+    $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any image files'));
     $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
 
     // User can delete any file.
-    $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any files', 'delete any files'));
+    $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any image files', 'delete any image files'));
     $this->assertFileEntityAccess(array('delete' => TRUE), $file, $web_user);
   }
 
@@ -1096,7 +1096,7 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->fid}/download");
     $this->assertResponse(403, 'Users without access can not download the file');
-    $web_user = $this->drupalCreateUser(array('download any files'));
+    $web_user = $this->drupalCreateUser(array('download any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->fid}/download");
     $this->assertResponse(200, 'Users with access can download the file');
@@ -1105,7 +1105,7 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->fid}/edit");
     $this->assertResponse(403, 'Users without access can not access the file edit page');
-    $web_user = $this->drupalCreateUser(array('edit any files'));
+    $web_user = $this->drupalCreateUser(array('edit any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->fid}/edit");
     $this->assertResponse(200, 'Users with access can access the file add page');
@@ -1114,7 +1114,7 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->fid}/delete");
     $this->assertResponse(403, 'Users without access can not access the file view page');
-    $web_user = $this->drupalCreateUser(array('delete any files'));
+    $web_user = $this->drupalCreateUser(array('delete any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->fid}/delete");
     $this->assertResponse(200, 'Users with access can access the file add page');

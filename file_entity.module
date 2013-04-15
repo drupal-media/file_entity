@@ -398,24 +398,6 @@ function file_entity_permission() {
     'view files' => array(
       'title' => t('View files'),
     ),
-    'edit own files' => array(
-      'title' => t('Edit own files'),
-    ),
-    'edit any files' => array(
-      'title' => t('Edit any files'),
-    ),
-    'delete own files' => array(
-      'title' => t('Delete own files'),
-    ),
-    'delete any files' => array(
-      'title' => t('Delete any files'),
-    ),
-    'download own files' => array(
-      'title' => t('Download own files'),
-    ),
-    'download any files' => array(
-      'title' => t('Download any files'),
-    ),
   );
 
   // Add description for the 'View file details' and 'View own private file
@@ -433,6 +415,11 @@ function file_entity_permission() {
 
   $permissions['view files']['description'] = t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['public'])));
   $permissions['view own private files']['description'] = t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['private'])));
+
+  // Generate standard file permissions for all applicable file types.
+  foreach (file_entity_permissions_get_configured_types() as $type) {
+    $permissions += file_entity_list_permissions($type);
+  }
 
   return $permissions;
 }
@@ -1631,21 +1618,25 @@ function file_entity_file_entity_access($op, $file, $account) {
     }
   }
 
-  if ($op == 'download') {
-    if (user_access('download any files', $account) || (is_object($file) && user_access('download own files', $account) && ($account->uid == $file->uid))) {
-      return FILE_ENTITY_ACCESS_ALLOW;
-    }
-  }
+  $type = is_string($file) ? $file : $file->type;
 
-  if ($op == 'update') {
-    if (user_access('edit any files', $account) || (is_object($file) && user_access('edit own files', $account) && ($account->uid == $file->uid))) {
-      return FILE_ENTITY_ACCESS_ALLOW;
+  if (in_array($type, file_entity_permissions_get_configured_types())) {
+    if ($op == 'download') {
+      if (user_access('download any ' . $type . ' files', $account) || is_object($file) && user_access('download own ' . $type . ' files', $account) && ($account->uid == $file->uid)) {
+        return FILE_ENTITY_ACCESS_ALLOW;
+      }
     }
-  }
 
-  if ($op == 'delete') {
-    if (user_access('delete any files', $account) || (is_object($file) && user_access('delete own files', $account) && ($account->uid == $file->uid))) {
-      return FILE_ENTITY_ACCESS_ALLOW;
+    if ($op == 'update') {
+      if (user_access('edit any ' . $type . ' files', $account) || (is_object($file) && user_access('edit own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+        return FILE_ENTITY_ACCESS_ALLOW;
+      }
+    }
+
+    if ($op == 'delete') {
+      if (user_access('delete any ' . $type . ' files', $account) || (is_object($file) && user_access('delete own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+        return FILE_ENTITY_ACCESS_ALLOW;
+      }
     }
   }
 
@@ -1710,6 +1701,69 @@ function file_entity_file_download($uri) {
   }
 
   return -1;
+}
+
+/**
+ * Helper function to generate standard file permission list for a given type.
+ *
+ * @param $type
+ *   The machine-readable name of the file type.
+ * @return array
+ *   An array of permission names and descriptions.
+ */
+function file_entity_list_permissions($type) {
+  $info = file_type_load($type);
+
+  // Build standard list of file permissions for this type.
+  $permissions = array(
+    "edit own $type files" => array(
+      'title' => t('%type_name: Edit own files', array('%type_name' => $info->label)),
+    ),
+    "edit any $type files" => array(
+      'title' => t('%type_name: Edit any files', array('%type_name' => $info->label)),
+    ),
+    "delete own $type files" => array(
+      'title' => t('%type_name: Delete own files', array('%type_name' => $info->label)),
+    ),
+    "delete any $type files" => array(
+      'title' => t('%type_name: Delete any files', array('%type_name' => $info->label)),
+    ),
+    "download own $type files" => array(
+      'title' => t('%type_name: Download own files', array('%type_name' => $info->label)),
+    ),
+    "download any $type files" => array(
+      'title' => t('%type_name: Download any files', array('%type_name' => $info->label)),
+    ),
+  );
+
+  return $permissions;
+}
+
+/**
+ * Returns an array of file types that should be managed by permissions.
+ *
+ * By default, this will include all file types in the system. To exclude a
+ * specific file from getting permissions defined for it, set the
+ * file_entity_permissions_$type variable to 0. File entity does not provide an
+ * interface for doing so, however, contrib modules may exclude their own files
+ * in hook_install(). Alternatively, contrib modules may configure all file
+ * types at once, or decide to apply some other hook_file_entity_access()
+ * implementation to some or all file types.
+ *
+ * @return
+ *   An array of file types managed by this module.
+ */
+function file_entity_permissions_get_configured_types() {
+
+  $configured_types = array();
+
+  foreach (file_type_get_enabled_types() as $type => $info) {
+    if (variable_get('file_entity_permissions_' . $type, 1)) {
+      $configured_types[] = $type;
+    }
+  }
+
+  return $configured_types;
 }
 
 /**
