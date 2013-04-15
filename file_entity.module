@@ -1541,10 +1541,6 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
     $account = $GLOBALS['user'];
   }
 
-  if (!$file && $op == 'create') {
-    return user_access('create files', $account) || user_access('bypass file access', $account);
-  }
-
   // $file may be either an object or a file type. Since file types cannot be
   // an integer, use either fid or type as the static cache id.
   $cache_id = is_object($file) ? $file->fid : $file;

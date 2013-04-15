@@ -1004,6 +1004,10 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->assertFileEntityAccess(array('create' => TRUE), NULL, $web_user);
     $this->assertFileEntityAccess(array('view' => TRUE, 'download' => TRUE, 'update' => TRUE, 'delete' => TRUE), $file, $web_user);
 
+    // A user with 'administer files' should not access CRUD operations.
+    $web_user = $this->drupalCreateUser(array('administer files'));
+    $this->assertFileEntityAccess(array('view' => FALSE, 'download' => FALSE, 'update' => FALSE, 'delete' => FALSE), $file, $web_user);
+
     // User cannot 'view files'.
     $web_user = $this->drupalCreateUser(array('create files'));
     $this->assertFileEntityAccess(array('view' => FALSE), $file, $web_user);
