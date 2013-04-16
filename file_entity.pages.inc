@@ -121,6 +121,8 @@ function file_entity_add_upload_step_filetype($form, &$form_state, array $option
   $form['actions']['previous'] = array(
     '#type' => 'submit',
     '#value' => t('Previous'),
+    '#limit_validation_errors' => array(),
+    '#submit' => array('file_entity_add_upload_submit'),
   );
   $form['actions']['next'] = array(
     '#type' => 'submit',
@@ -153,6 +155,8 @@ function file_entity_add_upload_step_scheme($form, &$form_state, array $options 
   $form['actions']['previous'] = array(
     '#type' => 'submit',
     '#value' => t('Previous'),
+    '#limit_validation_errors' => array(),
+    '#submit' => array('file_entity_add_upload_submit'),
   );
   $form['actions']['next'] = array(
     '#type' => 'submit',
@@ -177,6 +181,8 @@ function file_entity_add_upload_step_fields($form, &$form_state, array $options 
   $form['actions']['previous'] = array(
     '#type' => 'submit',
     '#value' => t('Previous'),
+    '#limit_validation_errors' => array(),
+    '#submit' => array('file_entity_add_upload_submit'),
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
