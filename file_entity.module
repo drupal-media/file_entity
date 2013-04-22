@@ -49,6 +49,8 @@ function file_entity_hook_info() {
     'file_displays_alter',
     'file_type',
     'file_type_alter',
+    'file_download_headers_alter',
+    'file_entity_access',
   );
 
   return array_fill_keys($hooks, array('group' => 'file'));

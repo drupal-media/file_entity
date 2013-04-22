@@ -326,8 +326,10 @@ function hook_file_ranking() {
  *
  * @param $headers
  *   Array of download headers.
+ * @param $file
+ *   File object.
  */
-function hook_file_download_headers_alter(&$headers) {
+function hook_file_download_headers_alter(array &$headers, $file) {
   // Instead of being powered by PHP, tell the world this resource was powered
   // by your custom module!
   $headers['X-Powered-By'] = 'My Module';

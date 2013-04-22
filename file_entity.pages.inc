@@ -47,7 +47,7 @@ function file_entity_download_page($file) {
   );
 
   // Let other modules alter the download headers.
-  drupal_alter('file_download_headers', $headers);
+  drupal_alter('file_download_headers', $headers, $file);
 
   file_transfer($file->uri, $headers);
 }
