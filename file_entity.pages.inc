@@ -366,7 +366,10 @@ function file_entity_add_upload_submit($form, &$form_state) {
     $file = file_load($form_state['storage']['upload']);
     if ($file) {
       if (file_uri_scheme($file->uri) != $form_state['storage']['scheme']) {
-        $file = file_move($file, $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri), FILE_EXISTS_RENAME);
+        if ($moved_file = file_move($file, $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri), FILE_EXISTS_RENAME)) {
+          // Only re-assign the file object if file_move() did not fail.
+          $file = $moved_file;
+        }
       }
       $file->type = $form_state['storage']['type'];
       $file->display = TRUE;
@@ -579,7 +582,7 @@ function file_entity_edit($form, &$form_state, $file) {
   // File destination information for administrators
   $form['destination'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer files'),
+    '#access' => user_access('administer files') && file_entity_file_is_writeable($file),
     '#title' => t('Destination'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -732,7 +735,10 @@ function file_entity_edit_submit($form, &$form_state) {
   }
 
   if (file_uri_scheme($file->uri) != $form_state['values']['scheme']) {
-    $file = file_move($file, $form_state['values']['scheme'] . '://' . file_uri_target($file->uri), FILE_EXISTS_RENAME);
+    if ($moved_file = file_move($file, $form_state['values']['scheme'] . '://' . file_uri_target($file->uri), FILE_EXISTS_RENAME)) {
+      // Only re-assign the file object if file_move() did not fail.
+      $file = $moved_file;
+    }
   }
 
   file_save($file);
