@@ -255,7 +255,7 @@ function file_entity_install() {
  */
 function file_entity_uninstall() {
   drupal_load('module', 'file_entity');
-  foreach (file_type_get_all_types(TRUE) as $type) {
+  foreach (file_type_load_all(TRUE) as $type) {
     file_type_delete($type);
   }
   db_drop_field('file_managed', 'type');

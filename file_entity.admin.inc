@@ -517,7 +517,7 @@ function file_entity_list_types_page() {
   );
   $rows = array();
   $weight = 0;
-  $types = file_type_get_all_types(TRUE);
+  $types = file_type_load_all(TRUE);
   $count = count($types);
   foreach ($types as $type) {
     $weight++;

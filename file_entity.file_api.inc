@@ -400,29 +400,78 @@ function file_display_new($file_type, $view_mode, $formatter_name) {
  */
 
 /**
- * Returns an array of all available file types, including enabled and disabled ones.
+ * Load a file type configuration object.
+ *
+ * @param string $name
+ *   The file type machine name to load.
+ *
+ * @return object
+ *   The file type object, or FALSE if it does not exist.
+ */
+function file_type_load($name) {
+  ctools_include('export');
+  $type = ctools_export_crud_load('file_type', $name);
+  return isset($type) ? $type : FALSE;
+}
+
+/**
+ * Load multiple file type configuration objects.
+ *
+ * @param array $names
+ *   An array of file type machine names to load.
+ *
+ * @return array
+ *   An array of file type objects, keyed by machine name.
+ */
+function file_type_load_multiple(array $names) {
+  ctools_include('export');
+  return ctools_export_crud_load_multiple('file_type', $names);
+}
+
+/**
+ * Load all file type configuration objects.
+ *
+ * This includes all enabled and disabled file types.
+ *
+ * @param boolean $reset
+ *   If TRUE, the static cache of all file types will be flushed prior to
+ *   loading. This can be important on listing pages where file types might
+ *   have changed on the page load.
+ *
+ * @return array
+ *   An array of file type objects, keyed by machine name.
  *
  * @see file_type_get_enabled_types()
  * @see file_type_get_disabled_types()
  */
-function file_type_get_all_types($reset = FALSE) {
+function file_type_load_all($reset = FALSE) {
   ctools_include('export');
   return ctools_export_crud_load_all('file_type', $reset);
+}
+
+/**
+ * CTools exportables 'subrecords callback' to load {file_type} subrecords.
+ */
+function file_type_load_subrecords($types) {
+  foreach ($types as $type) {
+    $type->mimetypes = db_query('SELECT mimetype FROM {file_type_mimetypes} WHERE type = :type', array(':type' => $type->type))->fetchCol();
+    $type->streams = db_query('SELECT stream FROM {file_type_streams} WHERE type = :type', array(':type' => $type->type))->fetchCol();
+  }
 }
 
 /**
  * Returns an array of enabled file types.
  */
 function file_type_get_enabled_types() {
-  $types = file_type_get_all_types();
+  $types = file_type_load_all();
   return array_filter($types, 'file_type_is_enabled');
 }
 
 /**
  * Returns an array of disabled file types.
  */
-function file_type_get_disabled_types($reset = FALSE) {
-  $types = file_type_get_all_types();
+function file_type_get_disabled_types() {
+  $types = file_type_load_all();
   return array_filter($types, 'file_type_is_disabled');
 }
 
@@ -436,27 +485,8 @@ function file_type_is_enabled($type) {
 /**
  * Returns TRUE if a file type is disabled, FALSE otherwise.
  */
-function file_type_is_disabled($view) {
+function file_type_is_disabled($type) {
   return !empty($type->disabled);
-}
-
-/**
- * Returns the configuration object for the passed in file type name, or FALSE if it doesn't exist.
- */
-function file_type_load($type_name) {
-  ctools_include('export');
-  $type = ctools_export_crud_load('file_type', $type_name);
-  return isset($type) ? $type : FALSE;
-}
-
-/**
- * CTools exportables 'subrecords callback' to load {file_type} subrecords.
- */
-function file_type_load_subrecords($types) {
-  foreach ($types as $type) {
-    $type->mimetypes = db_query('SELECT mimetype FROM {file_type_mimetypes} WHERE type = :type', array(':type' => $type->type))->fetchCol();
-    $type->streams = db_query('SELECT stream FROM {file_type_streams} WHERE type = :type', array(':type' => $type->type))->fetchCol();
-  }
 }
 
 /**
