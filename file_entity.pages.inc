@@ -35,6 +35,11 @@ function file_entity_view_page($file) {
  * Menu callback; download a single file entity.
  */
 function file_entity_download_page($file) {
+  // If the file does not exist it can cause problems with file_transfer().
+  if (!is_file($file->uri)) {
+    return MENU_NOT_FOUND;
+  }
+
   $headers = array(
     'Content-Type' => 'force-download',
     'Content-Disposition' => 'attachment; filename="' . $file->filename . '"',
