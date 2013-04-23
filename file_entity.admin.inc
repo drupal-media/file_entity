@@ -316,14 +316,15 @@ function file_entity_admin_files() {
   $query = db_select('file_managed', 'fm')->extend('PagerDefault')->extend('TableSort');
   file_entity_build_filter_query($query);
 
-  $fids = $query
-    ->fields('fm', array('fid'))
+  $result = $query
+    ->fields('fm', array('fid', 'uid'))
     ->limit(50)
     ->orderByHeader($header)
     ->addTag('file_access')
     ->execute()
-    ->fetchCol();
-  $files = file_load_multiple($fids);
+    ->fetchAllKeyed();
+  $files = file_load_multiple(array_keys($result));
+  $accounts = user_load_multiple(array_unique($result));
 
   // Prepare the list of files.
   $destination = drupal_get_destination();
@@ -340,9 +341,21 @@ function file_entity_admin_files() {
       ),
       'type' => $file_type ? check_plain($file_type->label) : FILE_TYPE_NONE,
       'size' => format_size($file->filesize),
-      'author' => theme('username', array('account' => user_load($file->uid))),
+      'author' => theme('username', array('account' => $accounts[$file->uid])),
       'timestamp' => format_date($file->timestamp, 'short'),
     );
+
+    // Show a warning for files that do not exist.
+    if (@!is_file($file->uri)) {
+      $options[$file->fid]['#attributes']['class'][] = 'error';
+      if (!file_stream_wrapper_get_instance_by_uri($file->uri)) {
+        $options[$file->fid]['#attributes']['title'] = t('The stream wrapper for @scheme files is missing.', array('@scheme' => file_uri_scheme($file->uri)));
+      }
+      else {
+        $options[$file->fid]['#attributes']['title'] = t('The file does not exist.');
+      }
+    }
+
     // Build a list of all the accessible operations for the current file.
     $operations = array();
     if (file_entity_access('update', $file)) {
