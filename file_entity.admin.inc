@@ -347,21 +347,21 @@ function file_entity_admin_files() {
     $operations = array();
     if (file_entity_access('update', $file)) {
       $operations['edit'] = array(
-        'title' => t('edit'),
+        'title' => t('Edit'),
         'href' => 'file/' . $file->fid . '/edit',
         'query' => $destination,
       );
     }
     if (file_entity_access('update', $file)) {
       $operations['usage'] = array(
-        'title' => t('usage'),
+        'title' => t('Usage'),
         'href' => 'file/' . $file->fid . '/usage',
         'query' => $destination,
       );
     }
     if (file_entity_access('delete', $file)) {
       $operations['delete'] = array(
-        'title' => t('delete'),
+        'title' => t('Delete'),
         'href' => 'file/' . $file->fid . '/delete',
         'query' => $destination,
       );
