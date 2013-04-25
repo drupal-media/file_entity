@@ -77,29 +77,6 @@ function file_entity_schema() {
       'file_type_mimetype' => array('mimetype'),
     ),
   );
-  $schema['file_type_streams'] = array(
-    'description' => 'Maps mimetypes to file types.',
-    'fields' => array(
-      'type' => array(
-        'description' => 'The machine name of the file type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'stream' => array(
-        'description' => 'Streams mapped to this file type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-    ),
-    'indexes' => array(
-      'file_type' => array('type'),
-      'file_type_stream' => array('stream'),
-    ),
-  );
   $schema['file_display'] = array(
     'description' => 'Stores configuration options for file displays.',
     'fields' => array(
@@ -428,7 +405,7 @@ function file_entity_update_7200() {
 }
 
 /**
- * Add the {file_type}, {file_type_mimetypes} and {file_type_streams} tables.
+ * Add the {file_type}, {file_type_mimetypes} tables.
  */
 function file_entity_update_7201() {
   $schema = array(
@@ -505,33 +482,6 @@ function file_entity_update_7201() {
   );
   if (!db_table_exists('file_type_mimetypes')) {
     db_create_table('file_type_mimetypes',  $schema);
-  }
-
-  $schema = array(
-    'description' => 'Maps mimetypes to file types.',
-    'fields' => array(
-      'type' => array(
-        'description' => 'The machine name of the file type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'stream' => array(
-        'description' => 'Streams mapped to this file type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-    ),
-    'indexes' => array(
-      'file_type' => array('type'),
-      'file_type_stream' => array('stream'),
-    ),
-  );
-  if (!db_table_exists('file_type_streams')) {
-    db_create_table('file_type_streams',  $schema);
   }
 }
 
@@ -813,15 +763,6 @@ function file_entity_update_7205() {
     db_drop_index('file_type_mimetypes', 1);
   }
 
-  // Drop broken file type streams indexes. These may not exist if the broken
-  // version of update 7201 was never run.
-  if (db_index_exists('file_type_streams', 0)) {
-    db_drop_index('file_type_streams', 0);
-  }
-  if (db_index_exists('file_type_streams', 1)) {
-    db_drop_index('file_type_streams', 1);
-  }
-
   // Add file type indexes. These may already exist if the fixed version of
   // update 7201 was run.
   if (!db_index_exists('file_type_mimetypes', 'file_type')) {
@@ -829,15 +770,6 @@ function file_entity_update_7205() {
   }
   if (!db_index_exists('file_type_mimetypes', 'file_type_mimetype')) {
     db_add_index('file_type_mimetypes', 'file_type_mimetype', array('mimetype'));
-  }
-
-  // Add file type streams indexes. These may already exist if the fixed
-  // version of update 7201 was run.
-  if (!db_index_exists('file_type_streams', 'file_type')) {
-    db_add_index('file_type_streams', 'file_type', array('type'));
-  }
-  if (!db_index_exists('file_type_streams', 'file_type_stream')) {
-    db_add_index('file_type_streams', 'file_type_stream', array('stream'));
   }
 }
 
@@ -911,5 +843,14 @@ function file_entity_update_7208() {
         ->condition('module', 'file_entity')
         ->execute();
     }
+  }
+}
+
+/**
+ * Remove the {file_type_streams} table if it exists.
+ */
+function file_entity_update_7209() {
+  if (db_table_exists('file_type_streams')) {
+    db_drop_table('file_type_streams');
   }
 }

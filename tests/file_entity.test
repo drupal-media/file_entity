@@ -32,7 +32,6 @@ class FileEntityTestHelper extends DrupalWebTestCase {
     $type->label = "Test";
     $type->description = '';
     $type->mimetypes = array('image/jpeg', 'image/gif', 'image/png', 'image/tiff');
-    $type->streams = array('public', 'private');
 
     foreach ($overrides as $k => $v) {
       $type->$k = $v;
@@ -291,10 +290,14 @@ class FileEntityEditTestCase extends FileEntityTestHelper {
 
     $test_file = $this->getTestFile('text');
     $name_key = "filename";
+
     // Create file to edit.
     $edit = array();
     $edit['files[upload]'] = drupal_realpath($test_file->uri);
     $this->drupalPost('file/add', $edit, t('Next'));
+    if ($this->xpath('//input[@name="scheme"]')) {
+      $this->drupalPost(NULL, array(), t('Next'));
+    }
 
     // Check that the file exists in the database.
     $file = $this->getFileByFilename($test_file->filename);
@@ -395,6 +398,11 @@ class FileEntityCreationTestCase extends FileEntityTestHelper {
     $edit = array();
     $edit['files[upload]'] = drupal_realpath($test_file->uri);
     $this->drupalPost('file/add', $edit, t('Next'));
+
+    // Step 2: Scheme selection
+    if ($this->xpath('//input[@name="scheme"]')) {
+      $this->drupalPost(NULL, array(), t('Next'));
+    }
 
     // Check that the document file has been uploaded.
     $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Document', '%name' => $test_file->filename)), t('Document file uploaded.'));
@@ -865,7 +873,12 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
     $edit['files[upload]'] = drupal_realpath($file->uri);
     $this->drupalPost('file/add', $edit, t('Next'));
 
-    // Step 2: Complete field widgets
+    // Step 2: Scheme selection
+    if ($this->xpath('//input[@name="scheme"]')) {
+      $this->drupalPost(NULL, array(), t('Next'));
+    }
+
+    // Step 3: Complete field widgets
     $langcode = LANGUAGE_NONE;
     $edit = array();
     $edit["{$field['field_name']}[$langcode][0][value]"] = $this->randomName();
@@ -893,7 +906,6 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
       'type' => 'test_type',
       'description' => t('This is dummy file type used just for testing.'),
       'mimetypes' => 'image/png',
-      'streams[public]' => TRUE,
     );
     $this->drupalGet('admin/structure/file-types/add');
     $this->drupalPost(NULL, $edit, t('Save'));
@@ -914,8 +926,6 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
     $this->assertText($edit['description'], 'Description found on file type edit page');
     $this->assertText($edit['mimetypes'], 'Mime-type configuration found on file type edit page');
     $this->assertText(t('Mimetype List'), 'Mimetype list present on edit form.');
-    $this->assertFieldChecked('edit-streams-public', 'File type configured to use public files.');
-    $this->assertNoFieldChecked('edit-streams-private', 'File type configured not to use private files.');
 
     // Modify file type.
     $edit['label'] = t('New type label');
@@ -949,8 +959,6 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
     $this->drupalGet('admin/structure/file-types/manage/image/edit');
     $this->assertRaw(t('Image'), 'Label found on file type edit page');
     $this->assertText("image/*", 'Mime-type configuration found on file type edit page');
-    $this->assertFieldChecked('edit-streams-public', 'File type configured to use public files.');
-    $this->assertNoFieldChecked('edit-streams-private', 'File type configured not to use private files.');
     $this->drupalPost(NULL, array('label' => t('Funky images')), t('Save'));
     $this->assertText(t('The file type @type has been updated.', array('@type' => t('Funky images'))), 'File type was modified.');
     $this->assertText(t('Funky image'), 'Modified label found on file types list.');

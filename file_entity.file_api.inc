@@ -455,7 +455,6 @@ function file_type_load_all($reset = FALSE) {
 function file_type_load_subrecords($types) {
   foreach ($types as $type) {
     $type->mimetypes = db_query('SELECT mimetype FROM {file_type_mimetypes} WHERE type = :type', array(':type' => $type->type))->fetchCol();
-    $type->streams = db_query('SELECT stream FROM {file_type_streams} WHERE type = :type', array(':type' => $type->type))->fetchCol();
   }
 }
 
@@ -526,15 +525,6 @@ function file_type_save($type) {
     }
   }
 
-  // Prepare the stream multiple insert query, but don't execute it until
-  // later in this function.
-  if (!empty($type->streams)) {
-    $stream_insert = db_insert('file_type_streams')->fields(array('type', 'stream'));
-    foreach ($type->streams as $stream) {
-      $stream_insert->values(array('type' => $type->type, 'stream' => $stream));
-    }
-  }
-
   // Update an existing type object, whether with a modified 'type' property or
   // not.
   if ($old_type) {
@@ -546,9 +536,6 @@ function file_type_save($type) {
       db_delete('file_type_mimetypes')
         ->condition('type', $old_type->type)
         ->execute();
-      db_delete('file_type_streams')
-        ->condition('type', $old_type->type)
-        ->execute();
     }
     else {
       db_insert('file_type')
@@ -557,9 +544,6 @@ function file_type_save($type) {
     }
     if (isset($mimetype_insert)) {
       $mimetype_insert->execute();
-    }
-    if (isset($stream_insert)) {
-      $stream_insert->execute();
     }
     if ($rename_bundle) {
       field_attach_rename_bundle('file', $old_type->type, $type->type);
@@ -574,9 +558,6 @@ function file_type_save($type) {
       ->execute();
     if (isset($mimetype_insert)) {
       $mimetype_insert->execute();
-    }
-    if (isset($stream_insert)) {
-      $stream_insert->execute();
     }
     field_attach_create_bundle('file', $type->type);
     module_invoke_all('file_type_insert', $type);

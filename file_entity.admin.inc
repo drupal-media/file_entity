@@ -758,7 +758,6 @@ function file_entity_file_type_form($form, &$form_state, $type = NULL) {
       'type' => '',
       'label' => '',
       'description' => '',
-      'streams' => array(),
       'mimetypes' => array(),
     );
   }
@@ -810,25 +809,6 @@ function file_entity_file_type_form($form, &$form_state, $type = NULL) {
   $form['mimetype_mapping']['mapping'] = array(
     '#theme' => 'item_list',
     '#items' => $mimetypes['mimetypes'],
-  );
-
-  // Options for allowed Streams.
-  $options = array('public' => t('Public files'), 'private' => t('Private files'));
-  foreach (file_get_stream_wrappers() as $stream => $wrapper) {
-    $options[$stream] = $wrapper['name'];
-  }
-  unset($options['temporary']);
-  $default_value = array();
-  if (isset($type->streams)) {
-    foreach ($type->streams as $stream) {
-      $default_value[$stream] = $stream;
-    }
-  }
-  $form['streams'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Allowed streams'),
-    '#options' => $options,
-    '#default_value' => $default_value,
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -892,12 +872,6 @@ function file_entity_file_type_form_submit($form, &$form_state) {
   $type->label = $form_state['values']['label'];
   $type->description = $form_state['values']['description'];
   $type->mimetypes = array_filter(array_map('trim', explode("\n", $form_state['values']['mimetypes'])));
-  $type->streams = array();
-  foreach ($form_state['values']['streams'] as $stream) {
-    if ($stream) {
-      $type->streams[] = $stream;
-    }
-  }
 
   file_type_save($type);
 

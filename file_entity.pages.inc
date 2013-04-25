@@ -144,7 +144,7 @@ function file_entity_add_upload_step_scheme($form, &$form_state, array $options 
   $file = file_load($form_state['storage']['upload']);
 
   $options = array();
-  foreach (file_entity_get_scheme_candidates($file, STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
+  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
     $options[$scheme] = check_plain($info['description']);
   }
 
@@ -256,35 +256,6 @@ function file_entity_usage_page($file) {
 }
 
 /**
- * Get the candidate schemes for a given file.
- *
- * @param array $file
- *   An upload file array from form_state.
- *
- * @param $filter
- *   (Optional) Filters out all types except those with an on bit for each on
- *   bit in $filter. For example, if $filter is STREAM_WRAPPERS_WRITE_VISIBLE,
- *   which is equal to (STREAM_WRAPPERS_READ | STREAM_WRAPPERS_WRITE |
- *   STREAM_WRAPPERS_VISIBLE), then only stream wrappers with all three of these
- *   bits set are returned. Defaults to STREAM_WRAPPERS_ALL, which returns all
- *   registered stream wrappers.
- *
- * @return array
- *   An array of schemes that the file's file type supports.
- */
-function file_entity_get_scheme_candidates($file, $filter = STREAM_WRAPPERS_ALL) {
-  $type = file_type_load($file->type);
-  $stream_wrappers = file_get_stream_wrappers($filter);
-  $candidates = array();
-  foreach ($type->streams as $stream) {
-    if ($stream_wrappers[$stream]) {
-      $candidates[$stream] = $stream_wrappers[$stream];
-    }
-  }
-  return $candidates;
-}
-
-/**
  * Get the candidate filetypes for a given file.
  *
  * Only filetypes for which the user has access to create entities are returned.
@@ -337,12 +308,11 @@ function file_entity_add_upload_submit($form, &$form_state) {
   // skip step 3.
   if (($form['#step'] == 2 && $trigger == 'edit-next') || ($form['#step'] == 4 && $trigger == 'edit-previous')) {
     $file = file_load($form_state['storage']['upload']);
-    $candidates = file_entity_get_scheme_candidates($file, STREAM_WRAPPERS_WRITE_VISIBLE);
-    if (count($candidates) == 1) {
-      $candidates_keys = array_keys($candidates);
+    $schemes = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+    if (count($schemes) == 1) {
       // There is only one possible stream wrapper for this file. Skip the third page.
       $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
-      $form_state['storage']['scheme'] = reset($candidates_keys);
+      $form_state['storage']['scheme'] = key($schemes);
     }
   }
 
@@ -603,8 +573,8 @@ function file_entity_edit($form, &$form_state, $file) {
   );
 
   $options = array();
-  foreach (file_entity_get_scheme_candidates($file, STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
-    $options[$scheme] = check_plain($info['description']);
+  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
+    $options[$scheme] = check_plain($info['name']);
   }
 
   $form['destination']['scheme'] = array(

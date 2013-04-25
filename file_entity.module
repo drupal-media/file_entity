@@ -1783,9 +1783,6 @@ function file_entity_file_default_types() {
     'mimetypes' => array(
       'image/*',
     ),
-    'streams' => array(
-      'public',
-    ),
   );
 
   // Video.
@@ -1797,9 +1794,6 @@ function file_entity_file_default_types() {
     'mimetypes' => array(
       'video/*',
     ),
-    'streams' => array(
-      'public',
-    ),
   );
 
   // Audio.
@@ -1810,9 +1804,6 @@ function file_entity_file_default_types() {
     'description' => t('An <em>Audio</em> file is a sound recording.'),
     'mimetypes' => array(
       'audio/*',
-    ),
-    'streams' => array(
-      'public',
     ),
   );
 
@@ -1834,9 +1825,6 @@ function file_entity_file_default_types() {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ),
-    'streams' => array(
-      'public',
     ),
   );
 
