@@ -2178,3 +2178,14 @@ function file_entity_fnmatch($pattern, $string) {
   }
   return fnmatch($pattern, $string);
 }
+
+/**
+ * Return an URI for a file download.
+ */
+function file_entity_download_uri($file) {
+  $uri = array('path' => "file/{$file->fid}/download", 'options' => array());
+  if (!variable_get('file_entity_allow_insecure_download', FALSE)) {
+    $uri['options']['query']['token'] = drupal_get_token($uri['path']);
+  }
+  return $uri;
+}

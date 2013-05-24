@@ -35,6 +35,13 @@ function file_entity_view_page($file) {
  * Menu callback; download a single file entity.
  */
 function file_entity_download_page($file) {
+  // Ensure there is a valid token to download this file.
+  if (!variable_get('file_entity_allow_insecure_download', FALSE)) {
+    if (!isset($_GET['token']) || !drupal_valid_token($_GET['token'], "file/$file->fid/download")) {
+      return MENU_ACCESS_DENIED;
+    }
+  }
+
   // If the file does not exist it can cause problems with file_transfer().
   if (!is_file($file->uri)) {
     return MENU_NOT_FOUND;

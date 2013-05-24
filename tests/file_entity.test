@@ -171,6 +171,16 @@ class FileEntityTestHelper extends DrupalWebTestCase {
 
     return $file;
   }
+
+  /**
+   * Overrides DrupalWebTestCase::drupalGetToken() to support the hash salt.
+   *
+   * @todo Remove when http://drupal.org/node/1555862 is fixed in core.
+   */
+  protected function drupalGetToken($value = '') {
+    $private_key = drupal_get_private_key();
+    return drupal_hmac_base64($value, $this->session_id . $private_key . drupal_get_hash_salt());
+  }
 }
 
 class FileEntityUnitTestCase extends FileEntityTestHelper {
@@ -1104,14 +1114,19 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $this->drupalGet("file/{$file->fid}/view");
     $this->assertResponse(200, 'Users with access can access the file view page');
 
+    $url = "file/{$file->fid}/download";
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
-    $this->drupalGet("file/{$file->fid}/download");
+    $this->drupalGet($url, array('query' => array('token' => $this->drupalGetToken($url))));
     $this->assertResponse(403, 'Users without access can not download the file');
     $web_user = $this->drupalCreateUser(array('download any document files'));
     $this->drupalLogin($web_user);
-    $this->drupalGet("file/{$file->fid}/download");
+    $this->drupalGet($url, array('query' => array('token' => $this->drupalGetToken($url))));
     $this->assertResponse(200, 'Users with access can download the file');
+    $this->drupalGet($url, array('query' => array('token' => 'invalid-token')));
+    $this->assertResponse(403, 'Cannot download file with in invalid token.');
+    $this->drupalGet($url);
+    $this->assertResponse(403, 'Cannot download file without a token.');
 
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);

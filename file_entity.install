@@ -235,7 +235,12 @@ function file_entity_uninstall() {
   foreach (file_type_load_all(TRUE) as $type) {
     file_type_delete($type);
   }
+
+  // Remove the added column to the core {file_managed} table.
   db_drop_field('file_managed', 'type');
+
+  // Remove variables.
+  variable_del('file_entity_allow_insecure_download');
 }
 
 /**
