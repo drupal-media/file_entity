@@ -81,8 +81,10 @@ function file_entity_file_update($file) {
   if ($file->type == 'image' && module_exists('image')) {
     // If the image dimensions have changed, update any image field references
     // to this file and flush image style derivatives.
-    if ($file->image_dimensions != $file->original->image_dimensions) {
-      _file_entity_update_image_field_dimensions($file);
+    if (isset($file->image_dimensions) && isset($file->original->image_dimensions)) {
+      if ($file->image_dimensions != $file->original->image_dimensions) {
+        _file_entity_update_image_field_dimensions($file);
+      }
     }
 
     // Flush image style derivatives whenever an image is updated.
