@@ -2106,7 +2106,7 @@ function path_file_insert($file) {
     // Only save a non-empty alias.
     if (!empty($path['alias'])) {
       // Ensure fields for programmatic executions.
-      $path['source'] = 'file/' . $file->tid;
+      $path['source'] = 'file/' . $file->fid;
       // Core does not provide a way to store the file language but contrib
       // modules can do it so we need to take this into account.
       $langcode = entity_language('file', $file);
