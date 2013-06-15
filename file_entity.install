@@ -208,6 +208,20 @@ function file_entity_install() {
   if (module_exists('pathauto')) {
     variable_set('pathauto_file_pattern', 'file/[file:name]');
   }
+
+  // Classify existing files according to the currently defined file types.
+  // Queue all files to be classified during cron runs using the Queue API.
+  $queue = DrupalQueue::get('file_entity_type_determine');
+
+  $result = db_query('SELECT fid FROM {file_managed}');
+
+  foreach ($result as $record) {
+    $queue->createItem($record->fid);
+  }
+
+  // Warn users that existing files will not have a file type until the queue
+  // has been processed.
+  drupal_set_message(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
 }
 
 /**

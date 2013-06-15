@@ -426,6 +426,29 @@ function file_entity_permission() {
   return $permissions;
 }
 
+/*
+ * Implements hook_cron_queue_info().
+ */
+function file_entity_cron_queue_info() {
+  $queues['file_entity_type_determine'] = array(
+    'worker callback' => 'file_entity_type_determine',
+  );
+  return $queues;
+}
+
+/*
+ * Determines file type for a given file ID and saves the file.
+ *
+ * @param $fid
+ *   A file ID.
+ */
+function file_entity_type_determine($fid) {
+  $file = file_load($fid);
+
+  // The file type will be automatically determined when saving the file.
+  file_save($file);
+}
+
 /**
  * Gather the rankings from the the hook_ranking implementations.
  *
