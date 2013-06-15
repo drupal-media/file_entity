@@ -34,6 +34,13 @@ function file_entity_schema() {
         'size' => 'medium',
         'translatable' => TRUE,
       ),
+      'mimetypes' => array(
+        'description' => 'Mimetypes mapped to this file type.',
+        'type' => 'blob',
+        'size' => 'big',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+      ),
     ),
     'primary key' => array('type'),
     'export' => array(
@@ -43,7 +50,6 @@ function file_entity_schema() {
       'default hook' => 'file_default_types',
       'identifier' => 'file_type',
       'export type string' => 'ctools_type',
-      'subrecords callback' => 'file_type_load_subrecords',
       'save callback' => 'file_type_save',
       'delete callback' => 'file_type_delete',
       'api' => array(
@@ -52,29 +58,6 @@ function file_entity_schema() {
         'minimum_version' => 1,
         'current_version' => 1,
       ),
-    ),
-  );
-  $schema['file_type_mimetypes'] = array(
-    'description' => 'Maps mimetypes to file types.',
-    'fields' => array(
-      'type' => array(
-        'description' => 'The machine name of the file type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'mimetype' => array(
-        'description' => 'Mimetypes mapped to this file type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-    ),
-    'indexes' => array(
-      'file_type' => array('type'),
-      'file_type_mimetype' => array('mimetype'),
     ),
   );
   $schema['file_display'] = array(
@@ -857,5 +840,44 @@ function file_entity_update_7208() {
 function file_entity_update_7209() {
   if (db_table_exists('file_type_streams')) {
     db_drop_table('file_type_streams');
+  }
+}
+
+/**
+ * Merge MIME types into the {file_type} table.
+ */
+function file_entity_update_7210() {
+  // Add the new mimetypes field if it doesn't already exist.
+  if (!db_field_exists('file_type', 'mimetypes')) {
+    $field = array(
+      'description' => 'Mimetypes mapped to this file type.',
+      'type' => 'blob',
+      'size' => 'big',
+      'not null' => FALSE,
+      'serialize' => TRUE,
+    );
+
+    db_add_field('file_type', 'mimetypes', $field);
+  }
+
+  // Migrate any existing MIME type information into {file_type}.
+  if (db_table_exists('file_type_mimetypes')) {
+    foreach (file_type_load_all(TRUE) as $type) {
+      $mimetypes = array();
+      $result = db_select('file_type_mimetypes', 'ftm')
+        ->fields('ftm', array('mimetype'))
+        ->condition('type', $type->type, '=')
+        ->execute();
+
+      foreach ($result as $record) {
+        $mimetypes[] = $record->mimetype;
+      }
+
+      $type->mimetypes = $mimetypes;
+      file_type_save($type);
+    }
+
+    // Remove {file_type_mimetypes} after the information is migrated.
+    db_drop_table('file_type_mimetypes');
   }
 }

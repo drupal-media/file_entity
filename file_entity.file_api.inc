@@ -450,15 +450,6 @@ function file_type_load_all($reset = FALSE) {
 }
 
 /**
- * CTools exportables 'subrecords callback' to load {file_type} subrecords.
- */
-function file_type_load_subrecords($types) {
-  foreach ($types as $type) {
-    $type->mimetypes = db_query('SELECT mimetype FROM {file_type_mimetypes} WHERE type = :type', array(':type' => $type->type))->fetchCol();
-  }
-}
-
-/**
  * Returns an array of enabled file types.
  */
 function file_type_get_enabled_types() {
@@ -514,16 +505,8 @@ function file_type_save($type) {
     'type' => $type->type,
     'label' => $type->label,
     'description' => $type->description,
+    'mimetypes' => serialize($type->mimetypes),
   );
-
-  // Prepare the mimetype multiple insert query, but don't execute it until
-  // later in this function.
-  if (!empty($type->mimetypes)) {
-    $mimetype_insert = db_insert('file_type_mimetypes')->fields(array('type', 'mimetype'));
-    foreach ($type->mimetypes as $mimetype) {
-      $mimetype_insert->values(array('type' => $type->type, 'mimetype' => $mimetype));
-    }
-  }
 
   // Update an existing type object, whether with a modified 'type' property or
   // not.
@@ -533,17 +516,11 @@ function file_type_save($type) {
         ->fields($fields)
         ->condition('type', $old_type->type)
         ->execute();
-      db_delete('file_type_mimetypes')
-        ->condition('type', $old_type->type)
-        ->execute();
     }
     else {
       db_insert('file_type')
         ->fields($fields)
         ->execute();
-    }
-    if (isset($mimetype_insert)) {
-      $mimetype_insert->execute();
     }
     if ($rename_bundle) {
       field_attach_rename_bundle('file', $old_type->type, $type->type);
@@ -556,9 +533,6 @@ function file_type_save($type) {
     db_insert('file_type')
       ->fields($fields)
       ->execute();
-    if (isset($mimetype_insert)) {
-      $mimetype_insert->execute();
-    }
     field_attach_create_bundle('file', $type->type);
     module_invoke_all('file_type_insert', $type);
     $status = SAVED_NEW;
@@ -590,9 +564,6 @@ function file_type_delete($type) {
   $type = is_string($type) ? file_type_load($type) : $type;
 
   db_delete('file_type')
-    ->condition('type', $type->type)
-    ->execute();
-  db_delete('file_type_mimetypes')
     ->condition('type', $type->type)
     ->execute();
 
