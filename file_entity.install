@@ -887,8 +887,10 @@ function file_entity_update_7210() {
         $mimetypes[] = $record->mimetype;
       }
 
-      $type->mimetypes = $mimetypes;
-      file_type_save($type);
+      if (!empty($mimetypes)) {
+        $type->mimetypes = $mimetypes;
+        file_type_save($type);
+      }
     }
 
     // Remove {file_type_mimetypes} after the information is migrated.
