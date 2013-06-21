@@ -1154,25 +1154,26 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
   }
 
   // Do not bother proceeding if this file does not have an image mime type.
-  if (strpos($file->filemime, 'image/') !== 0) {
+  if (file_entity_file_get_mimetype_type($file) != 'image') {
     return;
   }
 
-  if (file_entity_file_is_readable($file) && isset($file->image_dimensions)) {
+  if (file_entity_file_is_readable($file)) {
     // We don't sanitize here.
     // @see http://drupal.org/node/1553094#comment-6257382
     // Theme function will take care of escaping.
+    $file->metadata += array('width' => NULL, 'height' => NULL);
     $replace_options = array(
-      'clear' => 1,
-      'sanitize' => 0,
+      'clear' => TRUE,
+      'sanitize' => FALSE,
     );
     if (!empty($display['settings']['image_style'])) {
       $element = array(
         '#theme' => 'image_style',
         '#style_name' => $display['settings']['image_style'],
         '#path' => $file->uri,
-        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->image_dimensions['width'],
-        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->image_dimensions['height'],
+        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->metadata['width'],
+        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->metadata['height'],
         '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
         '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
       );
@@ -1181,8 +1182,8 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
       $element = array(
         '#theme' => 'image',
         '#path' => $file->uri,
-        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->image_dimensions['width'],
-        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->image_dimensions['height'],
+        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->metadata['width'],
+        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->metadata['height'],
         '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
         '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
       );
@@ -2211,4 +2212,9 @@ function file_entity_download_uri($file) {
     $uri['options']['query']['token'] = drupal_get_token($uri['path']);
   }
   return $uri;
+}
+
+function file_entity_file_get_mimetype_type($file) {
+  list($type, $subtype) = explode('/', $file->filemime, 2);
+  return $type;
 }

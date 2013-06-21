@@ -367,3 +367,11 @@ function hook_file_type_alter(&$types, $file) {
   // Choose a specific, non-first, file type.
   $types = array($types[4]);
 }
+
+function hook_file_metadata_info() {
+
+}
+
+function hook_file_metadata_info_alter() {
+
+}
