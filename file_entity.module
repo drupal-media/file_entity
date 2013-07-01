@@ -427,6 +427,21 @@ function file_entity_permission() {
 }
 
 /*
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Add the File entity settings to the file system settings form.
+ */
+function file_entity_form_system_file_system_settings_alter(&$form, &$form_state, $form_id) {
+  $form['file_entity_default_allowed_extensions'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default allowed file extensions'),
+    '#default_value' => variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp'),
+    '#weight' => -10,
+    '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
+  );
+}
+
+/*
  * Implements hook_cron_queue_info().
  */
 function file_entity_cron_queue_info() {
