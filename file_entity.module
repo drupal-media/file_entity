@@ -458,10 +458,10 @@ function file_entity_cron_queue_info() {
  *   A file ID.
  */
 function file_entity_type_determine($fid) {
-  $file = file_load($fid);
-
-  // The file type will be automatically determined when saving the file.
-  file_save($file);
+  if ($file = file_load($fid)) {
+    // The file type will be automatically determined when saving the file.
+    file_save($file);
+  }
 }
 
 /**
