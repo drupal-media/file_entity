@@ -849,6 +849,10 @@ function file_entity_theme() {
       'variables' => array('file' => NULL, 'icon_directory' => NULL),
       'file' => 'file_entity.theme.inc',
     ),
+    'file_entity_download_link' => array(
+      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'text' => NULL),
+      'file' => 'file_entity.theme.inc',
+    ),
   );
 }
 

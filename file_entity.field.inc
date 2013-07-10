@@ -20,7 +20,7 @@ function file_entity_field_formatter_info() {
     'description' => t('Displays a link that will force the browser to download the file.'),
     'field types' => array('file', 'image'),
     'settings' => array(
-      'text' => t('Download'),
+      'text' => t('Download [file:name]'),
     ),
   );
   return $info;
@@ -136,13 +136,10 @@ function file_entity_field_formatter_view($entity_type, $entity, $field, $instan
     foreach ($items as $delta => $item) {
       $file = (object) $item;
       if (file_entity_access('download', $file)) {
-        $text = token_replace(t($settings['text']), array('file' => $file), array('clear' => TRUE));
-        $uri = file_entity_download_uri($file);
         $element[$delta] = array(
-          '#type' => 'link',
-          '#title' => $text,
-          '#href' => $uri['path'],
-          '#options' => $uri['options'],
+          '#theme' => 'file_entity_download_link',
+          '#file' => $file,
+          '#text' => $settings['text'],
         );
       }
     }
