@@ -332,16 +332,16 @@ function file_entity_add_upload_submit($form, &$form_state) {
     }
   }
 
-  switch ($trigger) {
-    case 'edit-next':
-      $form_state['step'] = $form['#step'] + 1;
-      break;
-    case 'edit-previous':
-      $form_state['step'] = $form['#step'] - 1;
-      break;
-    case 'edit-submit':
-      $save = TRUE;
-      break;
+  // Form id's can vary depending on how many other forms are displayed, so we
+  // need to do string comparissons. e.g edit-submit--2.
+  if (strpos($trigger, 'edit-next') !== FALSE) {
+    $form_state['step'] = $form['#step'] + 1;
+  }
+  elseif (strpos($trigger, 'edit-previous') !== FALSE) {
+    $form_state['step'] = $form['#step'] - 1;
+  }
+  elseif (strpos($trigger, 'edit-submit') !== FALSE) {
+    $save = TRUE;
   }
 
   if ($save) {
