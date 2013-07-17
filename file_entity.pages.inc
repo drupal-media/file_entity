@@ -297,29 +297,35 @@ function file_entity_add_upload_submit($form, &$form_state) {
   $save = FALSE;
   $trigger = $form_state['triggering_element']['#id'];
 
-  // We have the file, check if we can skip step 2.
-  // The next step is step 2 when we are on step 1 and clicking "next" or
-  // when we are on step 3 and clicking "previous".
-  if (($form['#step'] == 1 && $trigger == 'edit-next') || ($form['#step'] == 3 && $trigger == 'edit-previous')) {
-    $file = file_load($form_state['storage']['upload']);
-    $candidates = file_entity_get_filetype_candidates($file);
-    if (count($candidates) == 1) {
-      $candidates_keys = array_keys($candidates);
-      // There is only one possible filetype for this file. Skip the second page.
-      $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
-      $form_state['storage']['type'] = reset($candidates_keys);
-    }
+  $steps_to_check = array(2, 3);
+  if ($trigger == 'edit-previous') {
+    //if the previous button was hit, the step checking order should be reversed 3, 2
+    $steps_to_check = array_reverse($steps_to_check);
   }
 
-  // Only one visible, writeable stream wrapper is available, check if we can
-  // skip step 3.
-  if (($form['#step'] == 2 && $trigger == 'edit-next') || ($form['#step'] == 4 && $trigger == 'edit-previous')) {
-    $file = file_load($form_state['storage']['upload']);
-    $schemes = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
-    if (count($schemes) == 1) {
-      // There is only one possible stream wrapper for this file. Skip the third page.
-      $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
-      $form_state['storage']['scheme'] = key($schemes);
+  foreach ($steps_to_check as $step) {
+    //Check if we can skip step 2 and 3
+    if (($form['#step'] == $step - 1 && $trigger == 'edit-next') || ($form['#step'] == $step + 1 && $trigger == 'edit-previous')) {
+      $file = file_load($form_state['storage']['upload']);
+      if ($step == 2) {
+        //check if we can skip step 2
+        $candidates = file_entity_get_filetype_candidates($file);
+        if (count($candidates) == 1) {
+          $candidates_keys = array_keys($candidates);
+          // There is only one possible filetype for this file. Skip the second page.
+          $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
+          $form_state['storage']['type'] = reset($candidates_keys);
+        }
+      }
+      else {
+        //check if we can skip step 3
+        $schemes = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+        if (count($schemes) == 1) {
+          // There is only one possible stream wrapper for this file. Skip the third page.
+          $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
+          $form_state['storage']['scheme'] = key($schemes);
+        }
+      }
     }
   }
 
