@@ -43,7 +43,7 @@ function file_entity_field_formatter_settings_form($field, $instance, $view_mode
       // Never empty, so no #empty_option
     );
   }
-  elseif ($display['type'] = 'file_download_link') {
+  elseif ($display['type'] == 'file_download_link') {
     $element['text'] = array(
       '#type' => 'textfield',
       '#title' => t('Link text'),
