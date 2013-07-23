@@ -439,6 +439,32 @@ function file_entity_form_system_file_system_settings_alter(&$form, &$form_state
     '#weight' => -10,
     '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
   );
+  $form['file_upload_wizard'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('File upload wizard'),
+    '#weight' => -9,
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#description' => t('Configure the steps available when uploading a new file.'),
+  );
+  $form['file_upload_wizard']['file_entity_file_upload_wizard_skip_file_type'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Skip filetype selection.'),
+    '#default_value' => variable_get('file_entity_file_upload_wizard_skip_file_type', FALSE),
+    '#description' => t('The file type selection step is only available if the uploaded file falls into two or more file types. If this step is skipped, files with no available file type or two or more file types will not be assigned a file type.'),
+  );
+  $form['file_upload_wizard']['file_entity_file_upload_wizard_skip_scheme'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Skip scheme selection.'),
+    '#default_value' => variable_get('file_entity_file_upload_wizard_skip_scheme', FALSE),
+    '#description' => t('The scheme selection step is only available if two or more file destinations, such as public local files served by the webserver and private local files served by Drupal, are available. If this step is skipped, files will automatically be saved using the default download method.'),
+  );
+  $form['file_upload_wizard']['file_entity_file_upload_wizard_skip_fields'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Skip available fields.'),
+    '#default_value' => variable_get('file_entity_file_upload_wizard_skip_fields', FALSE),
+    '#description' => t('The field selection step is only available if the file type the file belongs to has any available fields. If this step is skipped, any fields on the file will be left blank.'),
+  );
 }
 
 /*
