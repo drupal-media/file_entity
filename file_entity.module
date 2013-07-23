@@ -1023,6 +1023,16 @@ function file_entity_metadata_form_file($file) {
 }
 
 /**
+ * Implements hook_ctools_plugin_directory().
+ */
+
+function file_entity_ctools_plugin_directory($module, $type) {
+  if ($module == 'ctools' && $type == 'content_types') {
+    return 'plugins/' . $type;
+  }
+}
+
+/**
  * Implements hook_field_extra_fields().
  *
  * Adds 'file' as an extra field, so that its display and form component can be
