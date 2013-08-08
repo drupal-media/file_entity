@@ -658,10 +658,18 @@ function file_entity_edit($form, &$form_state, $file) {
     '#submit' => array('file_entity_edit_delete_submit'),
     '#access' => file_entity_access('delete', $file),
   );
+
+  // Build the URL for the cancel button taking into account that there might be
+  // a "destination" that includes query string variables.
+  $parameters = drupal_get_query_parameters();
+  $destination = isset($parameters['destination']) ? $parameters['destination'] : 'file/' . $file->fid;
+  $url = drupal_parse_url($destination);
+
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),
-    '#href' => isset($_GET['destination']) ? $_GET['destination'] : 'file/' . $file->fid,
+    '#href' => $url['path'],
+    '#options' => array('query' => $url['query']),
     '#weight' => 15,
   );
 
