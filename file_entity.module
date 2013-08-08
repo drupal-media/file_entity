@@ -1385,10 +1385,8 @@ function template_preprocess_file_entity(&$variables) {
   $account = user_load($file->uid);
   $variables['name']      = theme('username', array('account' => $account));
 
-  // @todo Use entity_uri once http://drupal.org/node/1057242 is fixed.
-  //$uri = entity_uri('file', $file);
-  //$variables['file_url']  = url($uri['path'], $uri['options']);
-  $variables['file_url'] = file_create_url($file->uri);
+  $uri = entity_uri('file', $file);
+  $variables['file_url']  = url($uri['path'], $uri['options']);
   $label = entity_label('file', $file);
   $variables['label']     = check_plain($label);
   $variables['page']      = $view_mode == 'full' && file_entity_is_page($file);
