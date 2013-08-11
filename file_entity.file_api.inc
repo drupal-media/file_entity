@@ -81,11 +81,11 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
 
   $build = array();
   foreach ($files as $file) {
-    $build[$file->fid] = file_view($file, $view_mode, $langcode);
-    $build[$file->fid]['#weight'] = $weight;
+    $build['files'][$file->fid] = file_view($file, $view_mode, $langcode);
+    $build['files'][$file->fid]['#weight'] = $weight;
     $weight++;
   }
-  $build['#sorted'] = TRUE;
+  $build['files']['#sorted'] = TRUE;
 
   return $build;
 }
