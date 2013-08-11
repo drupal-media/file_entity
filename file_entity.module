@@ -126,32 +126,36 @@ function file_entity_menu() {
     'description' => 'Manage settings for the type of files used on your site.',
   );
   $items['admin/structure/file-types/manage/%file_type/enable'] = array(
-    'title' => 'Enable file type',
+    'title' => 'Enable',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('file_entity_type_enable_confirm', 4),
     'access arguments' => array('administer file types'),
     'file' => 'file_entity.admin.inc',
+    'type' => MENU_CALLBACK,
   );
   $items['admin/structure/file-types/manage/%file_type/disable'] = array(
-    'title' => 'Disable file type',
+    'title' => 'Disable',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('file_entity_type_disable_confirm', 4),
     'access arguments' => array('administer file types'),
     'file' => 'file_entity.admin.inc',
+    'type' => MENU_CALLBACK,
   );
   $items['admin/structure/file-types/manage/%file_type/revert'] = array(
-    'title' => 'Revert a file type',
+    'title' => 'Revert',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('file_entity_type_revert_confirm', 4),
     'access arguments' => array('administer file types'),
     'file' => 'file_entity.admin.inc',
+    'type' => MENU_CALLBACK,
   );
   $items['admin/structure/file-types/manage/%file_type/delete'] = array(
-    'title' => 'Delete file type',
+    'title' => 'Delete',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('file_entity_type_delete_confirm', 4),
     'access arguments' => array('administer file types'),
     'file' => 'file_entity.admin.inc',
+    'type' => MENU_CALLBACK,
   );
   $items['admin/content/file'] = array(
     'title' => 'Files',
@@ -2276,4 +2280,20 @@ function file_entity_download_uri($file) {
 function file_entity_file_get_mimetype_type($file) {
   list($type, $subtype) = explode('/', $file->filemime, 2);
   return $type;
+}
+
+/**
+ * Implements hook_admin_menu_map().
+ */
+function file_entity_admin_menu_map() {
+  if (!user_access('administer file types')) {
+    return;
+  }
+  $map['admin/structure/file-types/manage/%file_type'] = array(
+    'parent' => 'admin/structure/file-types',
+    'arguments' => array(
+      array('%file_type' => array_keys(file_entity_type_get_names())),
+    ),
+  );
+  return $map;
 }
