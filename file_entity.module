@@ -1757,41 +1757,172 @@ function file_entity_file_entity_access($op, $file, $account) {
 }
 
 /**
- * Implements hook_query_TAG_alter.
+ * Implements hook_query_TAG_alter().
+ *
+ * This is the hook_query_alter() for queries tagged with 'file_access'. It adds
+ * file access checks for the user account given by the 'account' meta-data (or
+ * global $user if not provided).
  */
 function file_entity_query_file_access_alter(QueryAlterableInterface $query) {
+  _file_entity_query_file_entity_access_alter($query, 'file');
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * This function implements the same functionality as
+ * file_entity_query_file_access_alter() for the SQL field storage engine. File
+ * access conditions are added for field values belonging to files only.
+ */
+function file_entity_query_entity_field_access_alter(QueryAlterableInterface $query) {
+  _file_entity_query_file_entity_access_alter($query, 'entity');
+}
+
+/**
+ * Helper for file entity access functions.
+ *
+ * @param $query
+ *   The query to add conditions to.
+ * @param $type
+ *   Either 'file' or 'entity' depending on what sort of query it is. See
+ *   file_entity_query_file_entity_access_alter() and
+ *   file_entity_query_entity_field_access_alter() for more.
+ */
+function _file_entity_query_file_entity_access_alter($query, $type) {
   global $user;
 
-  if (user_access('bypass file access')) {
-    // Administrators don't need to be restricted to only permanent files.
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+  // Read meta-data from query, if provided.
+  if (!$account = $query->getMetaData('account')) {
+    $account = $user;
   }
-  elseif (user_access('view files')) {
-    // For non-private files, users can view if they have the 'view files'
-    // permission.
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+
+  // If $account can bypass file access, we don't need to alter the query.
+  if (user_access('bypass file access', $account)) {
+    return;
   }
-  elseif (user_access('view private files')) {
-    // For private files, users can view private files if the
-    // user has the 'view private files' permission.
-    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+
+  $tables = $query->getTables();
+  $base_table = $query->getMetaData('base_table');
+  // If no base table is specified explicitly, search for one.
+  if (!$base_table) {
+    $fallback = '';
+    foreach ($tables as $alias => $table_info) {
+      if (!($table_info instanceof SelectQueryInterface)) {
+        $table = $table_info['table'];
+        // If the file_managed table is in the query, it wins immediately.
+        if ($table == 'file_managed') {
+          $base_table = $table;
+          break;
+        }
+        // Check whether the table has a foreign key to file_managed.fid. If it
+        // does, do not run this check again as we found a base table and only
+        // file_managed can triumph that.
+        if (!$base_table) {
+          // The schema is cached.
+          $schema = drupal_get_schema($table);
+          if (isset($schema['fields']['fid'])) {
+            if (isset($schema['foreign keys'])) {
+              foreach ($schema['foreign keys'] as $relation) {
+                if ($relation['table'] === 'file_managed' && $relation['columns'] === array('fid' => 'fid')) {
+                  $base_table = $table;
+                }
+              }
+            }
+            else {
+              // At least it's a fid. A table with a field called fid is very
+              // very likely to be a file_managed.fid in a file access query.
+              $fallback = $table;
+            }
+          }
+        }
+      }
+    }
+    // If there is nothing else, use the fallback.
+    if (!$base_table) {
+      if ($fallback) {
+        watchdog('security', 'Your file listing query is using @fallback as a base table in a query tagged for file access. This might not be secure and might not even work. Specify foreign keys in your schema to file_managed.fid ', array('@fallback' => $fallback), WATCHDOG_WARNING);
+        $base_table = $fallback;
+      }
+      else {
+        throw new Exception(t('Query tagged for file access but there is no fid. Add foreign keys to file_managed.fid in schema to fix.'));
+      }
+    }
   }
-  elseif (user_access('view own files')) {
-    // For non-private files, allow to see if user owns the file.
-    $query->condition('fm.uid', $user->uid, '=');
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+
+  if ($type == 'entity') {
+    // The original query looked something like:
+    // @code
+    //  SELECT fid FROM sometable s
+    //  WHERE ($file_access_conditions)
+    // @endcode
+    //
+    // Our query will look like:
+    // @code
+    //  SELECT entity_type, entity_id
+    //  FROM field_data_something s
+    //  WHERE (entity_type = 'file' AND $file_access_conditions) OR (entity_type <> 'file')
+    // @endcode
+    //
+    // So instead of directly adding to the query object, we need to collect
+    // all of the file access conditions in a separate db_and() object and
+    // then add it to the query at the end.
+    $file_conditions = db_and();
   }
-  elseif (user_access('view own private files') && user_is_logged_in()) {
-    // For private files, users can view their own private files if the
-    // user is not anonymous, and has the 'view own private files' permission.
-    $query->condition('fm.uri', db_like('private://') . '%', 'LIKE');
-    $query->condition('fm.uid', $user->uid, '=');
-    $query->condition('fm.status', FILE_STATUS_PERMANENT);
+  else {
+    $file_conditions = db_and();
+  }
+  foreach ($tables as $falias => $tableinfo) {
+    $table = $tableinfo['table'];
+    if (!($table instanceof SelectQueryInterface) && $table == $base_table) {
+      // Now handle entities.
+      if ($type == 'entity') {
+        // Set a common alias for entities.
+        $base_alias = $falias;
+      }
+
+      if ($base_table != 'file_managed') {
+        $field = 'fid';
+        // Now handle entities.
+        if ($type == 'entity') {
+          // Set a common alias for entities.
+          $base_alias = $falias;
+          $field = 'entity_id';
+        }
+        $file_managed_alias = $query->join('file_managed', 'fm', "fm.fid = $falias.$field");
+      }
+      else {
+        $file_managed_alias = $falias;
+      }
+    }
+  }
+
+  // Add any applicable access conditions.
+  if (user_access('view own files')) {
+    $file_conditions->condition("$file_managed_alias.uid", $user->uid, '=');
+  }
+  elseif (user_access('view own private files')) {
+    $file_conditions->condition("$file_managed_alias.uri", db_like('private://') . '%', 'LIKE');
+    $file_conditions->condition("$file_managed_alias.uid", $user->uid, '=');
   }
 
   foreach (array_keys(file_entity_get_hidden_stream_wrappers()) as $name) {
-    $query->condition('fm.uri', $name . '%', 'NOT LIKE');
+    $file_conditions->condition("$file_managed_alias.uri", $name . '%', 'NOT LIKE');
+  }
+
+  if ($type == 'entity') {
+    // All the file access conditions are only for field values belonging to
+    // files.
+    $file_conditions->condition("$base_alias.entity_type", 'file');
+    $or = db_or();
+    $or->condition($file_conditions);
+    // If the field value belongs to a non-file entity type then this function
+    // does not do anything with it.
+    $or->condition("$base_alias.entity_type", 'file', '<>');
+    // Add the compiled set of rules to the query.
+    $query->condition($or);
+  }
+  else {
+    $query->condition($file_conditions);
   }
 }
 
