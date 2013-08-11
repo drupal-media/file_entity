@@ -1014,3 +1014,18 @@ function file_entity_update_7213() {
     }
   }
 }
+
+/**
+ * Fix the default value in {file_managed}.type to match the field schema.
+ */
+function file_entity_update_7214() {
+  db_drop_index('file_managed', 'file_type');
+  db_change_field('file_managed', 'type', 'type', array(
+    'description' => 'The type of this file.',
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => TRUE,
+    'default' => 'undefined',
+  ));
+  db_add_index('file_managed', 'file_type', array('type'));
+}
