@@ -617,7 +617,7 @@ function file_entity_file_display_form($form, &$form_state, $file_type, $view_mo
   // filters for existing text formats.
   $formatters = file_info_formatter_types();
   foreach ($formatters as $name => $formatter) {
-    if (isset($formatter['file types']) && !in_array($file_type, $formatter['file types'])) {
+    if (!empty($formatter['hidden']) || isset($formatter['file types']) && !in_array($file_type, $formatter['file types'])) {
       unset($formatters[$name]);
     }
   }

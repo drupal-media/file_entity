@@ -14,6 +14,7 @@ function file_entity_field_formatter_info() {
     'description' => t('Display the file in a specific view mode'),
     'field types' => array('file', 'image'),
     'settings' => array('file_view_mode' => 'default'),
+    'hidden file formatter' => TRUE,
   );
   $info['file_download_link'] = array(
     'label' => t('Download link'),

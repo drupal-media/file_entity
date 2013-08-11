@@ -1110,6 +1110,7 @@ function file_entity_file_formatter_info() {
       $formatters['file_field_' . $field_formatter_type] = array(
         'label' => $field_formatter_info['label'],
         'view callback' => 'file_entity_file_formatter_file_field_view',
+        'hidden' => !empty($field_formatter_info['hidden file formatter']),
       );
       if (!$is_file_formatter) {
         $formatters['file_field_' . $field_formatter_type]['file types'] = array('image');
@@ -1134,6 +1135,7 @@ function file_entity_file_formatter_info() {
       ),
       'view callback' => 'file_entity_file_formatter_file_image_view',
       'settings callback' => 'file_entity_file_formatter_file_image_settings',
+      'hidden' => TRUE,
     );
     // Provide default token values.
     if (module_exists('token')) {
