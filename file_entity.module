@@ -77,7 +77,7 @@ function file_entity_hook_info_alter(&$info) {
     'file_insert',
     'file_update',
     'file_delete',
-    // Miscellanious hooks
+    // Miscellaneous hooks
     'file_mimetype_mapping_alter',
     'file_url_alter',
   );
