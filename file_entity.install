@@ -118,10 +118,11 @@ function file_entity_schema() {
     'description' => 'Cache images dimensions.',
     'fields' => array(
       'fid' => array(
-        'description' => 'The file ID.',
-        'type' => 'serial',
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
+        'default' => 0,
       ),
       'name' => array(
         'description' => "The name of the metadata (e.g. 'width').",
@@ -911,10 +912,11 @@ function file_entity_update_7211() {
     'description' => 'Stores file metadata in a key/value store.',
     'fields' => array(
       'fid' => array(
-        'description' => 'The file ID.',
-        'type' => 'serial',
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
+        'default' => 0,
       ),
       'name' => array(
         'description' => "The name of the metadata (e.g. 'width').",
@@ -1030,4 +1032,19 @@ function file_entity_update_7214() {
     'default' => 'undefined',
   ));
   db_add_index('file_managed', 'file_type', array('type'));
+}
+
+/**
+ * Fix the {file_metadata}.fid schema.
+ */
+function file_entity_update_7215() {
+  db_drop_primary_key('file_metadata');
+  db_change_field('file_metadata', 'fid', 'fid', array(
+    'description' => 'The {file_managed}.fid of the metadata.',
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+  ));
+  db_add_primary_key('file_metadata', array('fid', 'name'));
 }
