@@ -1038,6 +1038,10 @@ function file_entity_update_7214() {
  * Fix the {file_metadata}.fid schema.
  */
 function file_entity_update_7215() {
+  // When changing a primary key serial field to an int, we need to add a
+  // temporary index to make this update work.
+  // @see https://drupal.org/node/190027
+  db_add_index('file_metadata', 'temp', array('fid'));
   db_drop_primary_key('file_metadata');
   db_change_field('file_metadata', 'fid', 'fid', array(
     'description' => 'The {file_managed}.fid of the metadata.',
@@ -1047,4 +1051,5 @@ function file_entity_update_7215() {
     'default' => 0,
   ));
   db_add_primary_key('file_metadata', array('fid', 'name'));
+  db_drop_index('file_metadata', 'temp');
 }
