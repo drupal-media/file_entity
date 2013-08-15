@@ -260,12 +260,7 @@ function _file_entity_update_image_field_dimensions($file) {
   }
 
   // Find all image field enabled on the site.
-  $image_fields = array();
-  foreach (field_info_fields() as $field) {
-    if ($field['type'] == 'image') {
-      $image_fields[] = $field['field_name'];
-    }
-  }
+  $image_fields = _file_entity_get_fields_by_type('image');
 
   foreach ($image_fields as $image_field) {
     $query = new EntityFieldQuery();

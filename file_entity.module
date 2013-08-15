@@ -2498,3 +2498,63 @@ function file_entity_get_download_token($file) {
   $identifier = !empty($GLOBALS['user']->uid) ? session_id() : ip_address();
   return drupal_hmac_base64("file/$file->fid/download", $identifier . drupal_get_private_key() . drupal_get_hash_salt());
 }
+
+/**
+ * Find all fields that are of a certain field type.
+ *
+ * @param string $field_type
+ *   A field type.
+ *
+ * @return array
+ *   An array of field names that match the type $field_type.
+ */
+function _file_entity_get_fields_by_type($field_type) {
+  $return = array();
+  if (function_exists('field_info_field_map')) {
+    foreach (field_info_field_map() as $field_name => $field) {
+      if ($field['type'] == $field_type) {
+        $return[$field_name] = $field_name;
+      }
+    }
+  }
+  else {
+    foreach (field_info_fields() as $field_name => $field) {
+      if ($field['type'] == $field_type) {
+        $return[$field_name] = $field_name;
+      }
+    }
+  }
+  return $return;
+}
+
+/**
+ * Implements hook_field_attach_load().
+ */
+function file_entity_field_attach_load($entity_type, $entities, $age, $options) {
+  // Loop over all the entities looking for entities with attached images.
+  foreach ($entities as $entity) {
+    list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+    // Examine every image field instance attached to this entity's bundle.
+    $instances = array_intersect_key(field_info_instances($entity_type, $bundle), _file_entity_get_fields_by_type('image'));
+    foreach ($instances as $field_name => $instance) {
+      if (!empty($entity->{$field_name})) {
+        foreach ($entity->{$field_name} as $langcode => $items) {
+          foreach ($items as $delta => $item) {
+            // If alt and title text is not specified, fall back to alt and
+            // title text on the file.
+            if (empty($item['alt']) || empty($item['title'])) {
+              dpm($item);
+              $file = file_load($item['fid']);
+              dpm($file);
+              foreach (array('alt', 'title') as $key) {
+                if (empty($item[$key]) && !empty($file->{$key})) {
+                  $entity->{$field_name}[$langcode][$delta][$key] = $file->{$key};
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
