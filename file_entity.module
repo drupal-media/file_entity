@@ -909,6 +909,27 @@ function file_entity_theme() {
       'variables' => array('file' => NULL, 'icon_directory' => NULL, 'text' => NULL),
       'file' => 'file_entity.theme.inc',
     ),
+    'file_entity_file_audio' => array(
+      'variables' => array(
+        'files' => array(),
+        'controls' => TRUE,
+        'autoplay' => FALSE,
+        'loop' => FALSE,
+      ),
+      'file' => 'file_entity.theme.inc',
+    ),
+    'file_entity_file_video' => array(
+      'variables' => array(
+        'files' => array(),
+        'controls' => TRUE,
+        'autoplay' => FALSE,
+        'loop' => FALSE,
+        'muted' => FALSE,
+        'width' => NULL,
+        'height' => NULL,
+      ),
+      'file' => 'file_entity.theme.inc',
+    ),
   );
 }
 
