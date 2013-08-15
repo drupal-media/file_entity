@@ -37,7 +37,7 @@ function file_entity_view_page($file) {
 function file_entity_download_page($file) {
   // Ensure there is a valid token to download this file.
   if (!variable_get('file_entity_allow_insecure_download', FALSE)) {
-    if (!isset($_GET['token']) || !drupal_valid_token($_GET['token'], "file/$file->fid/download")) {
+    if (!isset($_GET['token']) || $_GET['token'] !== file_entity_get_download_token($file)) {
       return MENU_ACCESS_DENIED;
     }
   }

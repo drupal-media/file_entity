@@ -2434,7 +2434,7 @@ function file_entity_fnmatch($pattern, $string) {
 function file_entity_download_uri($file) {
   $uri = array('path' => "file/{$file->fid}/download", 'options' => array());
   if (!variable_get('file_entity_allow_insecure_download', FALSE)) {
-    $uri['options']['query']['token'] = drupal_get_token($uri['path']);
+    $uri['options']['query']['token'] = file_entity_get_download_token($file);
   }
   return $uri;
 }
@@ -2458,4 +2458,22 @@ function file_entity_admin_menu_map() {
     ),
   );
   return $map;
+}
+
+/*
+ * Generate a file download CSRF token.
+ *
+ * This is essentially a duplicate of drupal_get_token, that attempts to still
+ * work if the user is anonymous, by using ip_address() as the identifier
+ * rather than session_id().
+ *
+ * @param object $file
+ *   A file entity object.
+ *
+ * @return string
+ *   A CSRF token string.
+ */
+function file_entity_get_download_token($file) {
+  $identifier = !empty($GLOBALS['user']->uid) ? session_id() : ip_address();
+  return drupal_hmac_base64("file/$file->fid/download", $identifier . drupal_get_private_key() . drupal_get_hash_salt());
 }
