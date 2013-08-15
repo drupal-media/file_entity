@@ -1255,6 +1255,9 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
     // We don't sanitize here.
     // @see http://drupal.org/node/1553094#comment-6257382
     // Theme function will take care of escaping.
+    if (!isset($file->metadata)) {
+      $file->metadata = array();
+    }
     $file->metadata += array('width' => NULL, 'height' => NULL);
     $replace_options = array(
       'clear' => TRUE,
