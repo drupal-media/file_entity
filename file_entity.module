@@ -1554,6 +1554,9 @@ function file_entity_ctools_plugin_api($owner, $api) {
   if ($owner == 'file_entity' && $api == 'file_type') {
     return array('version' => 1);
   }
+  if ($owner == 'file_entity' && $api == 'file_default_displays') {
+    return array('version' => 1);
+  }
 }
 
 /**
