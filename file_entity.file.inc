@@ -123,10 +123,10 @@ function file_entity_file_update($file) {
 
     // Flush image style derivatives whenever an image is updated.
     image_path_flush($file->uri);
+  }
 
   // Clear any related field caches.
   file_entity_invalidate_field_caches($file);
-  }
 }
 
 /**
