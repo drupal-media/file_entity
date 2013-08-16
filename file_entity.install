@@ -820,6 +820,7 @@ function file_entity_update_7208() {
             break;
           case 'delete any files':
             $new_permissions[] = 'delete any ' . $type . ' files';
+            break;
           case 'download own files':
             $new_permissions[] = 'download own ' . $type . ' files';
             break;
