@@ -1071,5 +1071,5 @@ function file_entity_settings_form($form, &$form_state) {
     '#description' => t('The field selection step is only available if the file type the file belongs to has any available fields. If this step is skipped, any fields on the file will be left blank.'),
   );
 
-  return $form;
+  return system_settings_form($form);
 }
