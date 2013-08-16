@@ -155,21 +155,13 @@ function file_entity_file_delete($file) {
  * Implements hook_file_mimetype_mapping_alter().
  */
 function file_entity_file_mimetype_mapping_alter(&$mapping) {
-  // Fix the mime type mapping for ogg.
-  // @todo Remove when http://drupal.org/node/1239376 is fixed in core (7.8).
-  $new_mappings['ogg'] = 'audio/ogg';
-
-  // Add support for m4v.
-  // @todo Remove when http://drupal.org/node/1290486 is fixed in core (7.9).
-  $new_mappings['m4v'] = 'video/x-m4v';
-
   // Add support for mka and mkv.
-  // @todo Remove when http://drupal.org/node/1293140 is fixed in core.
+  // @todo Remove when http://drupal.org/node/1443070 is fixed in core.
   $new_mappings['mka'] = 'audio/x-matroska';
   $new_mappings['mkv'] = 'video/x-matroska';
 
   // Add support for weba, webm, and webp.
-  // @todo Remove when http://drupal.org/node/1347624 is fixed in core.
+  // @todo Remove when http://drupal.org/node/1443070 is fixed in core.
   $new_mappings['weba'] = 'audio/webm';
   $new_mappings['webm'] = 'video/webm';
   $new_mappings['webp'] = 'image/webp';

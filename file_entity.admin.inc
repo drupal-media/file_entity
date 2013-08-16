@@ -1013,7 +1013,7 @@ function file_entity_settings_form($form, &$form_state) {
   $form['file_entity_default_allowed_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),
-    '#default_value' => variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp'),
+    '#default_value' => variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'),
     '#weight' => -10,
     '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
   );
