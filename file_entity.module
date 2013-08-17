@@ -419,15 +419,7 @@ function file_entity_permission() {
 
   // Add description for the 'View file details' and 'View own private file
   // details' permissions to show which stream wrappers they apply to.
-  $wrappers = array();
-  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE) as $key => $wrapper) {
-    if (empty($wrapper['private'])) {
-      $wrappers['public'][$key] = $wrapper['name'];
-    }
-    else {
-      $wrappers['private'][$key] = $wrapper['name'];
-    }
-  }
+  $wrappers = file_entity_get_public_and_private_stream_wrapper_names();
   $wrappers += array('public' => array(t('None')), 'private' => array(t('None')));
 
   $permissions['view files']['description'] = t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['public'])));
@@ -1748,7 +1740,7 @@ function file_entity_query_file_access_alter(QueryAlterableInterface $query) {
  * access conditions are added for field values belonging to files only.
  */
 function file_entity_query_entity_field_access_alter(QueryAlterableInterface $query) {
-  _file_entity_query_file_entity_access_alter($query, 'entity');
+  //_file_entity_query_file_entity_access_alter($query, 'entity');
 }
 
 /**
@@ -1841,19 +1833,47 @@ function _file_entity_query_file_entity_access_alter($query, $type) {
     // then add it to the query at the end.
     $file_conditions = db_and();
   }
-  else {
-    $file_conditions = db_and();
-  }
   foreach ($tables as $falias => $tableinfo) {
     $table = $tableinfo['table'];
     if (!($table instanceof SelectQueryInterface) && $table == $base_table) {
-      // Now handle entities.
-      if ($type == 'entity') {
-        // Set a common alias for entities.
-        $base_alias = $falias;
+      $subquery = db_select('file_managed', 'fm_access')->fields('fm_access', array('fid'));
+      $subquery_conditions = db_or();
+
+      $wrappers = file_entity_get_public_and_private_stream_wrapper_names();
+      if (!empty($wrappers['public'])) {
+        if (user_access('view files', $account)) {
+          foreach (array_keys($wrappers['public']) as $wrapper) {
+            $subquery_conditions->condition('fm_access.uri', $wrapper . '%', 'LIKE');
+          }
+        }
+        elseif (user_access('view own files', $account)) {
+          foreach (array_keys($wrappers['public']) as $wrapper) {
+            $subquery_conditions->condition(db_and()
+              ->condition('fm_access.uri', $wrapper . '%', 'LIKE')
+              ->condition('fm_access.uid', $account->uid)
+            );
+          }
+        }
+      }
+      if (!empty($wrappers['private'])) {
+        if (user_access('view private files', $account)) {
+          foreach (array_keys($wrappers['private']) as $wrapper) {
+            $subquery_conditions->condition('fm_access.uri', $wrapper . '%', 'LIKE');
+          }
+        }
+        elseif (user_access('view own private files', $account)) {
+          foreach (array_keys($wrappers['private']) as $wrapper) {
+            $subquery_conditions->condition(db_and()
+              ->condition('fm_access.uri', $wrapper . '%', 'LIKE')
+              ->condition('fm_access.uid', $account->uid)
+            );
+          }
+        }
       }
 
-      if ($base_table != 'file_managed') {
+      if ($subquery_conditions->count()) {
+        $subquery->condition($subquery_conditions);
+
         $field = 'fid';
         // Now handle entities.
         if ($type == 'entity') {
@@ -1861,28 +1881,21 @@ function _file_entity_query_file_entity_access_alter($query, $type) {
           $base_alias = $falias;
           $field = 'entity_id';
         }
-        $file_managed_alias = $query->join('file_managed', 'fm', "fm.fid = $falias.$field");
-      }
-      else {
-        $file_managed_alias = $falias;
+        $subquery->where("$falias.$field = fm_access.fid");
+
+        // For an entity query, attach the subquery to entity conditions.
+        if ($type == 'entity') {
+          $file_conditions->exists($subquery);
+        }
+        // Otherwise attach it to the node query itself.
+        else {
+          $query->exists($subquery);
+        }
       }
     }
   }
 
-  // Add any applicable access conditions.
-  if (user_access('view own files')) {
-    $file_conditions->condition("$file_managed_alias.uid", $user->uid, '=');
-  }
-  elseif (user_access('view own private files')) {
-    $file_conditions->condition("$file_managed_alias.uri", db_like('private://') . '%', 'LIKE');
-    $file_conditions->condition("$file_managed_alias.uid", $user->uid, '=');
-  }
-
-  foreach (array_keys(file_entity_get_hidden_stream_wrappers()) as $name) {
-    $file_conditions->condition("$file_managed_alias.uri", $name . '%', 'NOT LIKE');
-  }
-
-  if ($type == 'entity') {
+  if ($type == 'entity' && $file_conditions->count()) {
     // All the file access conditions are only for field values belonging to
     // files.
     $file_conditions->condition("$base_alias.entity_type", 'file');
@@ -1893,9 +1906,6 @@ function _file_entity_query_file_entity_access_alter($query, $type) {
     $or->condition("$base_alias.entity_type", 'file', '<>');
     // Add the compiled set of rules to the query.
     $query->condition($or);
-  }
-  else {
-    $query->condition($file_conditions);
   }
 }
 
@@ -2502,4 +2512,17 @@ function file_entity_field_attach_load($entity_type, $entities, $age, $options) 
       }
     }
   }
+}
+
+function file_entity_get_public_and_private_stream_wrapper_names($flag = STREAM_WRAPPERS_VISIBLE) {
+  $wrappers = array();
+  foreach (file_get_stream_wrappers($flag) as $key => $wrapper) {
+    if (empty($wrapper['private'])) {
+      $wrappers['public'][$key] = $wrapper['name'];
+    }
+    else {
+      $wrappers['private'][$key] = $wrapper['name'];
+    }
+  }
+  return $wrappers;
 }
