@@ -1066,6 +1066,7 @@ function file_entity_file_formatter_info() {
     if ($is_file_formatter || $is_image_formatter) {
       $formatters['file_field_' . $field_formatter_type] = array(
         'label' => $field_formatter_info['label'],
+        'description' => !empty($field_formatter_info['description']) ? $field_formatter_info['description'] : '',
         'view callback' => 'file_entity_file_formatter_file_field_view',
         'hidden' => !empty($field_formatter_info['hidden file formatter']),
       );

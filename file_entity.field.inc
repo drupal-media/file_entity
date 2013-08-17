@@ -53,6 +53,24 @@ function file_entity_field_formatter_info() {
 }
 
 /**
+ * Implements hook_field_formatter_info_alter().
+ */
+function file_entity_field_formatter_info_alter(&$info) {
+  // Add descriptions to core formatters.
+  $descriptions = array(
+    'file_default' => t('Create a simple link to the file. The link is prefixed by a file type icon and the name of the file is used as the link text'),
+    'file_table' => t('Build a two-column table where the first column contains a generic link to the file and the second column displays the size of the file.'),
+    'file_url_plain' => t('Display a plain text URL to the file.'),
+    'image' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
+  );
+  foreach ($descriptions as $key => $description) {
+    if (isset($info[$key]) && empty($info[$key]['description'])) {
+      $info[$key]['description'] = $description;
+    }
+  }
+}
+
+/**
  * Implements hook_field_formatter_settings_form().
  */
 function file_entity_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
