@@ -906,7 +906,7 @@ function file_entity_update_7210() {
 }
 
 /**
- * Create the {image_dimensions} table.
+ * Create the {file_metadata} table.
  */
 function file_entity_update_7211() {
   $schema = array(
