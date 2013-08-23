@@ -1059,25 +1059,22 @@ function file_entity_file_formatter_info() {
 
   // Allow file field formatters to be reused for displaying the file entity's
   // file pseudo-field.
-  foreach (field_info_formatter_types() as $field_formatter_type => $field_formatter_info) {
-    $is_file_formatter = in_array('file', $field_formatter_info['field types']);
-    $is_image_formatter = in_array('image', $field_formatter_info['field types']);
-
-    if ($is_file_formatter || $is_image_formatter) {
-      $formatters['file_field_' . $field_formatter_type] = array(
-        'label' => $field_formatter_info['label'],
-        'description' => !empty($field_formatter_info['description']) ? $field_formatter_info['description'] : '',
+  foreach (field_info_formatter_types() as $key => $formatter) {
+    if (array_intersect($formatter['field types'], array('file', 'image'))) {
+      $key = 'file_field_' . $key;
+      $formatters[$key] = array(
+        'label' => $formatter['label'],
+        'description' => !empty($formatter['description']) ? $formatter['description'] : '',
         'view callback' => 'file_entity_file_formatter_file_field_view',
-        'hidden' => !empty($field_formatter_info['hidden file formatter']),
       );
-      if (!$is_file_formatter) {
-        $formatters['file_field_' . $field_formatter_type]['file types'] = array('image');
-      }
-      if (!empty($field_formatter_info['settings'])) {
-        $formatters['file_field_' . $field_formatter_type] += array(
-          'default settings' => $field_formatter_info['settings'],
+      if (!empty($formatter['settings'])) {
+        $formatters[$key] += array(
+          'default settings' => $formatter['settings'],
           'settings callback' => 'file_entity_file_formatter_file_field_settings',
         );
+      }
+      if (!empty($formatter['file formatter'])) {
+        $formatters[$key] += $formatter['file formatter'];
       }
     }
   }
@@ -1088,22 +1085,14 @@ function file_entity_file_formatter_info() {
       'label' => t('Image'),
       'default settings' => array(
         'image_style' => '',
-        'alt' => '',
-        'title' => ''
+        'alt' => '[file:field_file_image_alt_text]',
+        'title' => '[file:field_file_image_title_text]'
       ),
       'view callback' => 'file_entity_file_formatter_file_image_view',
       'settings callback' => 'file_entity_file_formatter_file_image_settings',
       'hidden' => TRUE,
+      'mime types' => array('image/*'),
     );
-    // Provide default token values.
-    if (module_exists('token')) {
-      $formatters['file_image']['default settings']['alt'] = '[file:field_file_image_alt_text]';
-      $formatters['file_image']['default settings']['title'] = '[file:field_file_image_title_text]';
-    }
-    elseif (module_exists('entity_token')) {
-      $formatters['file_image']['default settings']['alt'] = '[file:field-file-image-alt-text]';
-      $formatters['file_image']['default settings']['title'] = '[file:field-file-image-title-text]';
-    }
   }
 
   return $formatters;

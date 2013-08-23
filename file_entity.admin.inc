@@ -606,9 +606,7 @@ function file_entity_list_types_page() {
  * Form callback; presents file display settings for a given view mode.
  */
 function file_entity_file_display_form($form, &$form_state, $file_type, $view_mode) {
-  $file_type = $file_type->type;
-
-  $form['#file_type'] = $file_type;
+  $form['#file_type'] = $file_type->type;
   $form['#view_mode'] = $view_mode;
   $form['#tree'] = TRUE;
   $form['#attached']['js'][] = drupal_get_path('module', 'file_entity') . '/file_entity.admin.js';
@@ -617,11 +615,17 @@ function file_entity_file_display_form($form, &$form_state, $file_type, $view_mo
   // filters for existing text formats.
   $formatters = file_info_formatter_types();
   foreach ($formatters as $name => $formatter) {
-    if (!empty($formatter['hidden']) || isset($formatter['file types']) && !in_array($file_type, $formatter['file types'])) {
+    if (!empty($formatter['hidden'])) {
+      unset($formatters[$name]);
+    }
+    if (isset($formatter['mime types'])) {
+      if (file_entity_match_mimetypes($formatter['mime types'], $file_type->mimetypes)) {
+        continue;
+      }
       unset($formatters[$name]);
     }
   }
-  $current_displays = file_displays_load($file_type, $view_mode, TRUE);
+  $current_displays = file_displays_load($file_type->type, $view_mode, TRUE);
   foreach ($current_displays as $name => $display) {
     $current_displays[$name] = (array) $display;
   }
@@ -681,7 +685,7 @@ function file_entity_file_display_form($form, &$form_state, $file_type, $view_mo
       $defaults = !empty($formatter['default settings']) ? $formatter['default settings'] : array();
       $settings = !empty($current_displays[$name]['settings']) ? $current_displays[$name]['settings'] : array();
       $settings += $defaults;
-      $settings_form = $function($form, $form_state, $settings, $name, $file_type, $view_mode);
+      $settings_form = $function($form, $form_state, $settings, $name, $file_type->type, $view_mode);
       if (!empty($settings_form)) {
         $form['displays']['settings'][$name] = array(
           '#type' => 'fieldset',
@@ -696,7 +700,10 @@ function file_entity_file_display_form($form, &$form_state, $file_type, $view_mo
   }
 
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
 
   return $form;
 }

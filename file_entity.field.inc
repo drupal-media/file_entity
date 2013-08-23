@@ -13,8 +13,12 @@ function file_entity_field_formatter_info() {
     'label' => t('Rendered file'),
     'description' => t('Display the file in a specific view mode'),
     'field types' => array('file', 'image'),
-    'settings' => array('file_view_mode' => 'default'),
-    'hidden file formatter' => TRUE,
+    'settings' => array(
+      'file_view_mode' => 'default',
+    ),
+    'file formatter' => array(
+      'hidden' => TRUE,
+    ),
   );
   $info['file_download_link'] = array(
     'label' => t('Download link'),
@@ -34,6 +38,9 @@ function file_entity_field_formatter_info() {
       'loop' => FALSE,
       'multiple_file_behavior' => 'tags',
     ),
+    'file formatter' => array(
+      'mime types' => array('audio/*'),
+    ),
   );
   $info['file_video'] = array(
     'label' => t('Video'),
@@ -47,6 +54,9 @@ function file_entity_field_formatter_info() {
       'width' => NULL,
       'height' => NULL,
       'multiple_file_behavior' => 'tags',
+    ),
+    'file formatter' => array(
+      'mime types' => array('video/*'),
     ),
   );
   return $info;
@@ -66,6 +76,15 @@ function file_entity_field_formatter_info_alter(&$info) {
   foreach ($descriptions as $key => $description) {
     if (isset($info[$key]) && empty($info[$key]['description'])) {
       $info[$key]['description'] = $description;
+    }
+  }
+
+  // Formatters that can be used for images but not files, should have a
+  // default mimetype restriction added to the image/* mime type for use with
+  // file formatters.
+  foreach ($info as &$formatter) {
+    if (!isset($formatter['file formatter']) && in_array('image', $formatter['field types']) && !in_array('file', $formatter['field types'])) {
+      $formatter['file formatter']['mime types'] = array('image/*');
     }
   }
 }
