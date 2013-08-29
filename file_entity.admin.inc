@@ -1021,7 +1021,6 @@ function file_entity_settings_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),
     '#default_value' => variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'),
-    '#weight' => -10,
     '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
   );
 
@@ -1030,14 +1029,12 @@ function file_entity_settings_form($form, &$form_state) {
     '#title' => t('Alt attribute'),
     '#description' => t('The text to use as value for the <em>img</em> tag <em>alt</em> attribute.'),
     '#default_value' => variable_get('file_entity_alt', '[file:field_file_image_alt_text]'),
-    '#weight' => -9,
   );
   $form['file_entity_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title attribute'),
     '#description' => t('The text to use as value for the <em>img</em> tag <em>title</em> attribute.'),
     '#default_value' => variable_get('file_entity_title', '[file:field_file_image_title_text]'),
-    '#weight' => -8,
   );
 
   // Provide default token values.
@@ -1046,7 +1043,6 @@ function file_entity_settings_form($form, &$form_state) {
       '#theme' => 'token_tree',
       '#token_types' => array('file'),
       '#dialog' => TRUE,
-      '#weight' => -7,
     );
     $form['file_entity_alt']['#description'] .= t('This field supports tokens.');
     $form['file_entity_title']['#description'] .= t('This field supports tokens.');
@@ -1054,7 +1050,6 @@ function file_entity_settings_form($form, &$form_state) {
   $form['file_upload_wizard'] = array(
     '#type' => 'fieldset',
     '#title' => t('File upload wizard'),
-    '#weight' => -6,
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#description' => t('Configure the steps available when uploading a new file.'),
