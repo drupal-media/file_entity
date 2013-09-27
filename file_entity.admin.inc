@@ -1017,6 +1017,15 @@ function file_entity_type_delete_confirm_submit($form, &$form_state) {
  * Form callback for file_entity settings.
  */
 function file_entity_settings_form($form, &$form_state) {
+  $form['file_entity_max_filesize'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum upload size'),
+    '#default_value' => variable_get('file_entity_max_filesize', ''),
+    '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes) in order to restrict the allowed file size. If left empty the file sizes will be limited only by PHP\'s maximum post and file upload sizes (current max limit <strong>%limit</strong>).', array('%limit' => format_size(file_upload_max_size()))),
+    '#size' => 10,
+    '#element_validate' => array('_file_generic_settings_max_filesize'),
+  );
+
   $form['file_entity_default_allowed_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),

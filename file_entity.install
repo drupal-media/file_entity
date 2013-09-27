@@ -237,6 +237,7 @@ function file_entity_uninstall() {
   db_drop_field('file_managed', 'type');
 
   // Remove variables.
+  variable_del('file_entity_max_filesize');
   variable_del('file_entity_default_allowed_extensions');
   variable_del('file_entity_alt');
   variable_del('file_entity_title');

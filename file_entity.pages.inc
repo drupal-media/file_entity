@@ -948,14 +948,21 @@ function file_entity_get_upload_validators(array $options = array()) {
     $validators['file_validate_extensions'] = array(variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'));
   }
 
-  // Validate file size but do not allow anything higher than file_upload_max_size().
-  $max_filesize = file_upload_max_size();
+  // Cap the upload size according to the system or user defined limit.
+  $max_filesize = parse_size(file_upload_max_size());
+  $file_entity_max_filesize = parse_size(variable_get('file_entity_max_filesize', ''));
+
+  // If the user defined a size limit, use the smaller of the two.
+  if (!empty($file_entity_max_filesize)) {
+    $max_filesize = min($max_filesize, $file_entity_max_filesize);
+  }
+
   if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
-    $validators['file_validate_size'] = array(parse_size($options['max_filesize']));
+    $max_filesize = parse_size($options['max_filesize']);
   }
-  else {
-    $validators['file_validate_size'] = array($max_filesize);
-  }
+
+  // There is always a file size limit due to the PHP server limit.
+  $validators['file_validate_size'] = array($max_filesize);
 
   // Add image validators.
   $options += array('min_resolution' => 0, 'max_resolution' => 0);
