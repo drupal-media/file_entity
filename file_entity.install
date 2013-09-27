@@ -363,7 +363,16 @@ function file_entity_update_7104() {
       // Set permissions.
       $roles = user_roles();
       foreach ($roles as $rid => $role) {
-        user_role_grant_permissions($rid, array('view file'));
+        // Do not use user_role_grant_permission() since it relies on
+        // hook_permission(), which will not run for file entity module if it
+        // is disabled or the permission is renamed or removed.
+        db_merge('role_permission')
+          ->fields(array(
+            'rid' => $rid,
+            'permission' => 'view file',
+            'module' => 'file_entity',
+          ))
+          ->execute();
       }
     }
   }
