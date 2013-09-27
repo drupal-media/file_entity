@@ -71,36 +71,27 @@ function file_entity_file_default_displays() {
 
   $file_display = new stdClass();
   $file_display->api_version = 1;
-  $file_display->name = 'image__default__file_field_image';
+  $file_display->name = 'image__default__file_field_file_default';
   $file_display->weight = 50;
   $file_display->status = TRUE;
-  $file_display->settings = array(
-    'image_style' => '',
-    'image_link' => '',
-  );
-  $file_displays['image__default__file_field_image'] = $file_display;
+  $file_display->settings = '';
+  $file_displays['image__default__file_field_file_default'] = $file_display;
 
   $file_display = new stdClass();
   $file_display->api_version = 1;
-  $file_display->name = 'image__preview__file_field_image';
+  $file_display->name = 'image__preview__file_field_file_default';
   $file_display->weight = 50;
   $file_display->status = TRUE;
-  $file_display->settings = array(
-    'image_style' => 'thumbnail',
-    'image_link' => '',
-  );
-  $file_displays['image__preview__file_field_image'] = $file_display;
+  $file_display->settings = '';
+  $file_displays['image__preview__file_field_file_default'] = $file_display;
 
   $file_display = new stdClass();
   $file_display->api_version = 1;
-  $file_display->name = 'image__teaser__file_field_image';
+  $file_display->name = 'image__teaser__file_field_file_default';
   $file_display->weight = 50;
   $file_display->status = TRUE;
-  $file_display->settings = array(
-    'image_style' => 'medium',
-    'image_link' => 'content',
-  );
-  $file_displays['image__teaser__file_field_image'] = $file_display;
+  $file_display->settings = '';
+  $file_displays['image__teaser__file_field_file_default'] = $file_display;
 
   $file_display = new stdClass();
   $file_display->api_version = 1;
