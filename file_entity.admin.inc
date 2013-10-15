@@ -1,11 +1,10 @@
 <?php
-
-require_once dirname(__FILE__) . '/file_entity.pages.inc';
-
 /**
  * @file
  * File administration and module settings UI.
  */
+
+require_once dirname(__FILE__) . '/file_entity.pages.inc';
 
 /**
  * List file administration filters that can be applied.
@@ -34,21 +33,23 @@ function file_filters() {
 /**
  * Apply filters for file administration filters based on session.
  *
- * @param $query
+ * @param object $query
  *   A SelectQuery to which the filters should be applied.
  */
 function file_entity_build_filter_query(SelectQueryInterface $query) {
-  // Build query
+  // Build query.
   $filter_data = isset($_SESSION['file_entity_overview_filter']) ? $_SESSION['file_entity_overview_filter'] : array();
   foreach ($filter_data as $index => $filter) {
     list($key, $value) = $filter;
     switch ($key) {
       case 'uri':
         $query->condition('fm.' . $key, $value . '%', 'LIKE');
-      break;
+        break;
+
       case 'type':
         $query->condition('fm.' . $key, $value);
-      break;
+        break;
+
     }
   }
 }
@@ -138,27 +139,34 @@ function file_entity_filter_form_submit($form, &$form_state) {
       // Apply every filter that has a choice selected other than 'any'.
       foreach ($filters as $filter => $options) {
         if (isset($form_state['values'][$filter]) && $form_state['values'][$filter] != '[any]') {
-          // Flatten the options array to accommodate hierarchical/nested options.
+          // Flatten the options array to accommodate hierarchical/nested
+          // options.
           $flat_options = form_options_flatten($filters[$filter]['options']);
-          // Only accept valid selections offered on the dropdown, block bad input.
+          // Only accept valid selections offered on the dropdown, block bad
+          // input.
           if (isset($flat_options[$form_state['values'][$filter]])) {
             $_SESSION['file_entity_overview_filter'][] = array($filter, $form_state['values'][$filter]);
           }
         }
       }
       break;
+
     case t('Undo'):
       array_pop($_SESSION['file_entity_overview_filter']);
       break;
+
     case t('Reset'):
       $_SESSION['file_entity_overview_filter'] = array();
       break;
+
   }
 }
 
 /**
- * Make mass update of files, changing all files in the $files array
- * to update them with the field values in $updates.
+ * Make mass update of files.
+ *
+ * Change all files in the $files array to update them with the field values in
+ * $updates.
  *
  * IMPORTANT NOTE: This function is intended to work when called
  * from a form submit handler. Calling it outside of the form submission
@@ -176,7 +184,10 @@ function file_entity_mass_update($files, $updates) {
   if (count($files) > 10) {
     $batch = array(
       'operations' => array(
-        array('_file_entity_mass_update_batch_process', array($files, $updates))
+        array(
+          '_file_entity_mass_update_batch_process',
+          array($files, $updates),
+        ),
       ),
       'finished' => '_file_entity_mass_update_batch_finished',
       'title' => t('Processing'),
@@ -213,7 +224,7 @@ function _file_entity_mass_update_helper($fid, $updates) {
 }
 
 /**
- * File Mass Update Batch operation
+ * File Mass Update Batch operation.
  */
 function _file_entity_mass_update_batch_process($files, $updates, &$context) {
   if (!isset($context['sandbox']['progress'])) {
@@ -309,7 +320,10 @@ function file_entity_admin_files() {
     'type' => array('data' => t('Type'), 'field' => 'fm.type'),
     'size' => array('data' => t('Size'), 'field' => 'fm.filesize'),
     'author' => t('Author'),
-    'timestamp' => array('data' => t('Updated'), 'field' => 'fm.timestamp', 'sort' => 'desc'),
+    'timestamp' => array(
+      'data' => t('Updated'),
+      'field' => 'fm.timestamp',
+      'sort' => 'desc'),
     'usage' => array('data' => t('Usage'), 'field' => 'total_count'),
     'operations' => array('data' => t('Operations')),
   );
@@ -455,7 +469,7 @@ function file_entity_admin_files_validate($form, &$form_state) {
 function file_entity_admin_files_submit($form, &$form_state) {
   $operations = module_invoke_all('file_operations');
   $operation = $operations[$form_state['values']['operation']];
-  // Filter out unchecked files
+  // Filter out unchecked files.
   $files = array_filter($form_state['values']['files']);
   if ($function = $operation['callback']) {
     // Add in callback arguments if present.
@@ -476,9 +490,16 @@ function file_entity_admin_files_submit($form, &$form_state) {
   }
 }
 
+/**
+ * File entity delete confirmation.
+ */
 function file_entity_multiple_delete_confirm($form, &$form_state, $files) {
-  $form['files'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
-  // array_filter returns only elements with TRUE values
+  $form['files'] = array(
+    '#prefix' => '<ul>',
+    '#suffix' => '</ul>',
+    '#tree' => TRUE,
+  );
+  // array_filter returns only elements with TRUE values.
   foreach ($files as $fid => $value) {
     $filename = db_query('SELECT filename FROM {file_managed} WHERE fid = :fid', array(':fid' => $fid))->fetchField();
     $form['files'][$fid] = array(
@@ -499,6 +520,9 @@ function file_entity_multiple_delete_confirm($form, &$form_state, $files) {
                     t('Delete'), t('Cancel'));
 }
 
+/**
+ * Submit handler for delete confirmation.
+ */
 function file_entity_multiple_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     file_delete_multiple(array_keys($form_state['values']['files']));
@@ -527,7 +551,16 @@ function file_entity_list_types_page() {
   $count = count($types);
   foreach ($types as $type) {
     $weight++;
-    $row = array(array('data' => theme('file_entity_file_type_overview', array('label' => $type->label, 'description' => $type->description))));
+    $row = array(
+      array(
+        'data' => theme('file_entity_file_type_overview',
+          array(
+            'label' => $type->label,
+            'description' => $type->description,
+          )
+        ),
+      ),
+    );
     $path = isset($file_entity_info['bundles'][$type->type]['admin']['real path']) ? $file_entity_info['bundles'][$type->type]['admin']['real path'] : NULL;
 
     if (empty($type->disabled) && isset($path)) {
@@ -552,7 +585,7 @@ function file_entity_list_types_page() {
         else {
           $row[] = l(t('disable'), $admin_path . '/disable');
         }
-      break;
+        break;
 
       // Configuration is in DB.
       case 'Normal':
@@ -563,7 +596,7 @@ function file_entity_list_types_page() {
           $status = l(t('disable'), $admin_path . '/disable');
         }
         $row[] = $status . ' | ' . l(t('delete'), $admin_path . '/delete');
-      break;
+        break;
 
       // Configuration is in code, but overridden in DB.
       case 'Overridden':
@@ -573,7 +606,7 @@ function file_entity_list_types_page() {
         else {
           $row[] = l(t('disable'), $admin_path . '/disable') . ' | ' . l(t('revert'), $admin_path . '/revert');
         }
-      break;
+        break;
     }
 
     if (!empty($type->disabled)) {
@@ -637,7 +670,7 @@ function file_entity_file_display_form($form, &$form_state, $file_type, $view_mo
     '#prefix' => '<div id="file-displays-status-wrapper">',
     '#suffix' => '</div>',
   );
-  $i=0;
+  $i = 0;
   foreach ($formatters as $name => $formatter) {
     $form['displays']['status'][$name] = array(
       '#type' => 'checkbox',
@@ -679,7 +712,7 @@ function file_entity_file_display_form($form, &$form_state, $file_type, $view_mo
   $form['display_settings'] = array(
     '#type' => 'vertical_tabs',
   );
-  $i=0;
+  $i = 0;
   foreach ($formatters as $name => $formatter) {
     if (isset($formatter['settings callback']) && ($function = $formatter['settings callback']) && function_exists($function)) {
       $defaults = !empty($formatter['default settings']) ? $formatter['default settings'] : array();
@@ -725,7 +758,9 @@ function file_entity_file_display_form_submit($form, &$form_state) {
 }
 
 /**
- * Returns HTML for a file type label and description for the file type admin overview page.
+ * Returns HTML for the file type overview page.
+ *
+ * Specifically, this returns HTML for a file type label and description.
  */
 function theme_file_entity_file_type_overview($variables) {
   return check_plain($variables['label']) . '<div class="description">' . $variables['description'] . '</div>';
