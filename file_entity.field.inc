@@ -264,7 +264,8 @@ function file_entity_field_formatter_view($entity_type, $entity, $field, $instan
     // If no 'referencing entity' is set, we are starting a new 'reference
     // thread' and need to reset the queue.
     // @todo Bug: $entity->referencing_entity on files referenced in a different
-    // thread on the page. E.g: 1 references 1+2 / 2 references 1+2 / visit homepage.
+    // thread on the page.
+    // E.g: 1 references 1+2 / 2 references 1+2 / visit homepage.
     // We'd need a more accurate way...
     if (!isset($entity->referencing_entity)) {
       $recursion_queue = array();
@@ -341,7 +342,7 @@ function file_entity_field_formatter_view($entity_type, $entity, $field, $instan
       }
     }
 
-    // render each source list as an <audio> element
+    // Render each source list as an <audio> element.
     foreach ($source_lists as $delta => $sources) {
       $element[$delta] = array(
         '#theme' => 'file_entity_file_audio',
@@ -375,7 +376,7 @@ function file_entity_field_formatter_view($entity_type, $entity, $field, $instan
       }
     }
 
-    // render each source list as an <video> element
+    // Render each source list as an <video> element.
     foreach ($source_lists as $delta => $sources) {
       $width = $settings['width'];
       $height = $settings['height'];

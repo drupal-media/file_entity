@@ -77,7 +77,7 @@ function file_entity_file_insert($file) {
 }
 
 /**
- * Implement hook_file_update().
+ * Implements hook_file_update().
  */
 function file_entity_file_update($file) {
   // Ensure field data is saved since file_save() does not in Drupal 7.
@@ -143,9 +143,9 @@ function file_entity_file_delete($file) {
   db_delete('file_metadata')->condition('fid', $file->fid)->execute();
 
   // Remove this file from the search index if needed.
-  // This code is implemented in file entity module rather than in search module,
-  // because file entity module is implementing search module's API, not the other
-  // way around.
+  // This code is implemented in file entity module rather than in search
+  // module because file entity is implementing search module's API, not the
+  // other way around.
   if (module_exists('search')) {
     search_reindex($file->fid, 'file');
   }
