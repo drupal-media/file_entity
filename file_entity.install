@@ -101,8 +101,8 @@ function file_entity_schema() {
       'primary key' => 'name',
       // The {file_display}.status field is used to control whether the display
       // is active in the display chain. CTools-level disabling is something
-      // different, and it's not yet clear how to interpret it for file displays.
-      // Until that's figured out, prevent CTools-level disabling.
+      // different, and it's not yet clear how to interpret it for file
+      // displays. Until that's figured out, prevent CTools-level disabling.
       'can disable' => FALSE,
       'default hook' => 'file_default_displays',
       'identifier' => 'file_display',
@@ -201,7 +201,7 @@ function file_entity_install() {
     user_role_grant_permissions($rid, array('view files'));
   }
 
-  // Create the title and alt text fields
+  // Create the title and alt text fields.
   _file_entity_create_alt_title_fields();
 
   // Configure default pathauto variables if it is currently installed.
@@ -292,6 +292,8 @@ function file_entity_update_7000() {
 }
 
 /**
+ * Move file display configurations.
+ *
  * Move file display configurations from the 'file_displays' variable to the
  * {file_display} database table.
  */
@@ -499,11 +501,13 @@ function file_entity_update_7201() {
     ),
   );
   if (!db_table_exists('file_type_mimetypes')) {
-    db_create_table('file_type_mimetypes',  $schema);
+    db_create_table('file_type_mimetypes', $schema);
   }
 }
 
 /**
+ * Update empty {file_managed}.type records to 'undefined'.
+ *
  * Drupal 7.8 disallows empty string as the value for a bundle key, so update
  * empty {file_managed}.type records to 'undefined' instead.
  */
@@ -541,13 +545,11 @@ function file_entity_update_7204() {
 }
 
 /**
- * Function to create the title and alt text fields
- * and instances.
+ * Function to create the title and alt text fields and instances.
  */
 function _file_entity_create_alt_title_fields() {
   $t = get_t();
   // Create the alt text field and instance.
-
   // Define the alt text field.
   $alt_text_field = array(
     'active' => '1',
@@ -658,7 +660,6 @@ function _file_entity_create_alt_title_fields() {
   }
 
   // Create the title text field and instance.
-
   // Define the title text field.
   $title_text_field = array(
     'active' => '1',
@@ -823,18 +824,23 @@ function file_entity_update_7208() {
           case 'edit own files':
             $new_permissions[] = 'edit own ' . $type . ' files';
             break;
+
           case 'edit any files':
             $new_permissions[] = 'edit any ' . $type . ' files';
             break;
+
           case 'delete own files':
             $new_permissions[] = 'delete own ' . $type . ' files';
             break;
+
           case 'delete any files':
             $new_permissions[] = 'delete any ' . $type . ' files';
             break;
+
           case 'download own files':
             $new_permissions[] = 'download own ' . $type . ' files';
             break;
+
           case 'download any files':
             $new_permissions[] = 'download any ' . $type . ' files';
             break;
