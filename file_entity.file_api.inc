@@ -238,11 +238,13 @@ function file_view_file($file, $displays = 'full', $langcode = NULL) {
     if (!empty($display['status'])) {
       $formatter_info = file_info_formatter_types($formatter_type);
       // Under normal circumstances, the UI prevents enabling formatters for
-      // incompatible file types. In case this was somehow circumvented (for
+      // incompatible MIME types. In case this was somehow circumvented (for
       // example, a module updated its formatter definition without updating
       // existing display settings), perform an extra check here.
-      if (isset($formatter_info['file types']) && !in_array($file->type, $formatter_info['file types'])) {
-        continue;
+      if (isset($formatter_info['mime types'])) {
+        if (!file_entity_match_mimetypes($formatter['mime types'], $file->filemime)) {
+          continue;
+        }
       }
       if (isset($formatter_info['view callback']) && ($function = $formatter_info['view callback']) && function_exists($function)) {
         $display['type'] = $formatter_type;
