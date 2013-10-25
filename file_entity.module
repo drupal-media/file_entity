@@ -2427,7 +2427,7 @@ function file_entity_match_mimetypes($needle, $haystack) {
 
   foreach ($haystack as $mimetype) {
     foreach ($needle as $search) {
-      if (file_entity_fnmatch($search, $mimetype)) {
+      if (file_entity_fnmatch($search, $mimetype) || file_entity_fnmatch($mimetype, $search)) {
         return TRUE;
       }
     }
@@ -2444,7 +2444,7 @@ function file_entity_match_mimetypes($needle, $haystack) {
  */
 function file_entity_fnmatch($pattern, $string) {
   if (!function_exists('fnmatch')) {
-    return preg_match("#^".strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']'))."$#", $string);
+    return preg_match("#^" . strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']')) . "$#", $string);
   }
   return fnmatch($pattern, $string);
 }
