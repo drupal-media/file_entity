@@ -53,7 +53,7 @@ function theme_file_entity_download_link($variables) {
   // http://microformats.org/wiki/file-format-examples
   $uri['options']['attributes']['type'] = $file->filemime . '; length=' . $file->filesize;
 
-  // Provide the default link text
+  // Provide the default link text.
   if (!isset($variables['text'])) {
     $variables['text'] = t('Download [file:name]');
   }
@@ -72,11 +72,12 @@ function theme_file_entity_download_link($variables) {
 /**
  * Returns HTML for displaying an HTML5 <audio> tag.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - file: Associative array of file data, which must include "uri".
  *   - controls: Boolean indicating whether or not controls should be displayed.
- *   - autoplay: Boolean indicating whether or not the audio should start playing automatically.
+ *   - autoplay: Boolean indicating whether or not the audio should start
+ *     playing automatically.
  *   - loop: Boolean indicating whether or not the audio should loop.
  *
  * @ingroup themeable
@@ -111,11 +112,12 @@ function theme_file_entity_file_audio($variables) {
 /**
  * Returns HTML for displaying an HTML5 <video> tag.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - file: Associative array of file data, which must include "uri".
  *   - controls: Boolean indicating whether or not controls should be displayed.
- *   - autoplay: Boolean indicating whether or not the video should start playing automatically.
+ *   - autoplay: Boolean indicating whether or not the video should start
+ *     playing automatically.
  *   - loop: Boolean indicating whether or not the video should loop.
  *   - muted: Boolean indicating whether or not the sound should be muted.
  *   - width: Width, in pixels, of the video player.
