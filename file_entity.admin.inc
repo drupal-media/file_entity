@@ -324,7 +324,7 @@ function file_entity_admin_files() {
       'data' => t('Updated'),
       'field' => 'fm.timestamp',
       'sort' => 'desc'),
-    'usage' => array('data' => t('Usage'), 'field' => 'total_count'),
+    'usage' => array('data' => t('Used in'), 'field' => 'total_count'),
     'operations' => array('data' => t('Operations')),
   );
 
@@ -343,12 +343,16 @@ function file_entity_admin_files() {
     ->fetchAllAssoc('fid');
   $files = file_load_multiple(array_keys($result));
 
+  $uids = array();
+  foreach ($files as $file) {
+    $uids[] = $file->uid;
+  }
+  $accounts = !empty($uids) ? user_load_multiple(array_unique($uids)) : array();
+
   // Prepare the list of files.
   $destination = drupal_get_destination();
   $options = array();
-  $accounts = array();
   foreach ($files as $file) {
-    $accounts[$file->uid] = isset($accounts[$file->uid]) ? $accounts[$file->uid] : user_load($file->uid);
     $file_type = file_type_load($file->type);
     $options[$file->fid] = array(
       'title' => array(
@@ -362,7 +366,7 @@ function file_entity_admin_files() {
       'size' => format_size($file->filesize),
       'author' => theme('username', array('account' => $accounts[$file->uid])),
       'timestamp' => format_date($file->timestamp, 'short'),
-      'usage' => $result[$file->fid]->total_count == NULL ? 0 : $result[$file->fid]->total_count,
+      'usage' => format_plural((int) $result[$file->fid]->total_count, '1 place', '@count places'),
     );
 
     // Show a warning for files that do not exist.
@@ -379,16 +383,11 @@ function file_entity_admin_files() {
     // Build a list of all the accessible operations for the current file.
     $operations = array();
     if (file_entity_access('update', $file)) {
+      // Convert the usage count to a link.
+      $options[$file->fid]['usage'] = l($options[$file->fid]['usage'], 'file/' . $file->fid . '/usage');
       $operations['edit'] = array(
         'title' => t('Edit'),
         'href' => 'file/' . $file->fid . '/edit',
-        'query' => $destination,
-      );
-    }
-    if (file_entity_access('update', $file)) {
-      $operations['usage'] = array(
-        'title' => t('Usage'),
-        'href' => 'file/' . $file->fid . '/usage',
         'query' => $destination,
       );
     }

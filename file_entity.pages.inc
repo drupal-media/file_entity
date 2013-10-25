@@ -225,11 +225,11 @@ function file_entity_usage_page($file) {
 
         // Some entities do not have URL.
         if (empty($entity_uri)) {
-          $rows[] = array($entity_type, check_plain($label), $count);
+          $rows[] = array(check_plain($label), $entity_type, $module, $count);
         }
         else {
           $uri = $entity_uri['path'];
-          $rows[] = array($entity_type, l($label, $uri), $count);
+          $rows[] = array(l($label, $uri), $entity_type, $module, $count);
         }
 
         $occured_entities[$entity_type][$entity_id] = count($rows) - 1;
@@ -237,13 +237,16 @@ function file_entity_usage_page($file) {
     }
   }
   $header[] = array(
-    'data' => t('Type'),
+    'data' => t('Entity'),
   );
   $header[] = array(
-    'data' => t('Title'),
+    'data' => t('Entity type'),
   );
   $header[] = array(
-    'data' => t('Count'),
+    'data' => t('Registering module'),
+  );
+  $header[] = array(
+    'data' => t('Use count'),
   );
   $build['usage_table'] = array(
     '#theme' => 'table',
