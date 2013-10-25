@@ -242,7 +242,7 @@ function file_view_file($file, $displays = 'full', $langcode = NULL) {
       // example, a module updated its formatter definition without updating
       // existing display settings), perform an extra check here.
       if (isset($formatter_info['mime types'])) {
-        if (!file_entity_match_mimetypes($formatter['mime types'], $file->filemime)) {
+        if (!file_entity_match_mimetypes($formatter_info['mime types'], $file->filemime)) {
           continue;
         }
       }
