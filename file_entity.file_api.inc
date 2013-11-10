@@ -701,7 +701,7 @@ function file_uri_to_object($uri, $use_existing = TRUE) {
   if (empty($file)) {
     $file = new stdClass();
     $file->uid = $GLOBALS['user']->uid;
-    $file->filename = basename($uri);
+    $file->filename = drupal_basename($uri);
     $file->uri = $uri;
     $file->filemime = file_get_mimetype($uri);
     // This is gagged because some uris will not support it.
