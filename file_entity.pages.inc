@@ -44,7 +44,6 @@ function file_entity_download_page($file) {
     'Pragma' => 'no-cache',
     'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
     'Expires' => '0',
-    'Accept-Ranges' => 'bytes',
   );
 
   // Let other modules alter the download headers.
