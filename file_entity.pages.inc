@@ -50,6 +50,9 @@ function file_entity_download_page($file) {
   // Let other modules alter the download headers.
   drupal_alter('file_download_headers', $headers, $file);
 
+  // Let other modules know the file is being downloaded.
+  module_invoke_all('file_transfer', $file->uri, $headers);
+
   file_transfer($file->uri, $headers);
 }
 
