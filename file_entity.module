@@ -2265,7 +2265,7 @@ function pathauto_file_operations() {
  */
 function pathauto_file_update_alias(stdClass $file, $op, array $options = array()) {
   // Skip processing if the user has disabled pathauto for the file.
-  if (isset($file->path['pathauto']) && empty($file->path['pathauto'])) {
+  if (isset($file->path['pathauto']) && empty($file->path['pathauto']) && empty($options['force'])) {
     return;
   }
 
