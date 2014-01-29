@@ -482,6 +482,9 @@ function file_entity_add_upload_multiple_submit($form, &$form_state) {
     $form['upload']['#upload_location'] . '/' :
     variable_get('file_default_scheme', 'public') . '://';
 
+  // Ensure writable destination directory for the files.
+  file_prepare_directory($upload_location, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+
   // We can't use file_save_upload() because of
   // http://www.jacobsingh.name/content/tight-coupling-no-not.
   foreach ($form_state['values']['upload'] as $uploaded_file) {
