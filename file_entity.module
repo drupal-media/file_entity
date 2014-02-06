@@ -1878,6 +1878,13 @@ function _file_entity_query_file_entity_access_alter($query, $type) {
           $file_conditions->exists($subquery);
         }
         // Otherwise attach it to the node query itself.
+        elseif ($table == 'file_managed') {
+          // Fix for https://drupal.org/node/2073085
+          $db_or = db_or();
+          $db_or->exists($subquery);
+          $db_or->isNull($falias . '.' . $field);
+          $query->condition($db_or);
+        }
         else {
           $query->exists($subquery);
         }
