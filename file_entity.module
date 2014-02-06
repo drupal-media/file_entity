@@ -189,6 +189,20 @@ function file_entity_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  $items['file/add/upload/file'] = array(
+    'title' => 'File',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['file/add/upload/archive'] = array(
+    'title' => 'Archive',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('file_entity_upload_archive_form'),
+    'access arguments' => array('administer files'),
+    'file' => 'file_entity.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -5,
+  );
   $items['file/%file'] = array(
     'title callback' => 'entity_label',
     'title arguments' => array('file', 1),
