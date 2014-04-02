@@ -181,6 +181,16 @@ function file_entity_add_upload_step_fields($form, &$form_state, array $options 
   $file = file_load($form_state['storage']['upload']);
   $file->type = $form_state['storage']['type'];
 
+  // Let users modify the filename here.
+  $form['filename'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#default_value' => $file->filename,
+    '#required' => TRUE,
+    '#maxlength' => 255,
+    '#weight' => -10,
+  );
+
   // Add fields.
   field_attach_form('file', $file, $form, $form_state);
 
