@@ -2516,8 +2516,8 @@ function file_entity_admin_menu_map() {
  *   A CSRF token string.
  */
 function file_entity_get_download_token($file) {
-  $identifier = !empty($GLOBALS['user']->uid) ? session_id() : ip_address();
-  return drupal_hmac_base64("file/$file->fid/download", $identifier . drupal_get_private_key() . drupal_get_hash_salt());
+  $identifier = !empty($GLOBALS['user']->uid) ? session_id() : '';
+  return drupal_hmac_base64("file/$file->fid/download" . ':' . filemtime($file->uri) . ':' . $file->filesize, $identifier . drupal_get_private_key() . drupal_get_hash_salt());
 }
 
 /**
