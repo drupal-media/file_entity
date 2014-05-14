@@ -10,6 +10,7 @@ files[] = views/views_handler_argument_file_type.inc
 files[] = views/views_handler_field_file_rendered.inc
 files[] = views/views_handler_field_file_type.inc
 files[] = views/views_handler_filter_file_type.inc
+files[] = views/views_handler_filter_schema_type.inc
 files[] = views/views_handler_field_file_filename.inc
 files[] = views/views_handler_field_file_link.inc
 files[] = views/views_handler_field_file_link_edit.inc
