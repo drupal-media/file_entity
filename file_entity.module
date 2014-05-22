@@ -2503,21 +2503,25 @@ function file_entity_admin_menu_map() {
 }
 
 /*
- * Generate a file download CSRF token.
+ * Generates a token to protect a file download URL.
  *
- * This is essentially a duplicate of drupal_get_token, that attempts to still
- * work if the user is anonymous, by using ip_address() as the identifier
- * rather than session_id().
+ * This prevents unauthorized crawling of all file download URLs since the
+ * {file_managed}.fid column is an auto-incrementing serial field and is easy
+ * to guess or attempt many at once. This can be costly both in CPU time
+ * and bandwidth.
+ *
+ * @see image_style_path_token()
  *
  * @param object $file
  *   A file entity object.
  *
  * @return string
- *   A CSRF token string.
+ *   An eight-character token which can be used to protect file downloads
+ *   against denial-of-service attacks.
  */
 function file_entity_get_download_token($file) {
-  $identifier = !empty($GLOBALS['user']->uid) ? session_id() : '';
-  return drupal_hmac_base64("file/$file->fid/download" . ':' . filemtime($file->uri) . ':' . $file->filesize, $identifier . drupal_get_private_key() . drupal_get_hash_salt());
+  // Return the first eight characters.
+  return substr(drupal_hmac_base64("file/$file->fid/download:" . $file->uri, drupal_get_private_key() . drupal_get_hash_salt()), 0, 8);
 }
 
 /**

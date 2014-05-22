@@ -1188,16 +1188,19 @@ class FileEntityAccessTestCase extends FileEntityTestHelper {
     $url = "file/{$file->fid}/download";
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
-    $this->drupalGet($url, array('query' => array('token' => $this->drupalGetToken($url . ':' . filemtime($file->uri) . ':' . $file->filesize))));
+    $this->drupalGet($url, array('query' => array('token' => file_entity_get_download_token($file))));
     $this->assertResponse(403, 'Users without access can not download the file');
     $web_user = $this->drupalCreateUser(array('download any document files'));
     $this->drupalLogin($web_user);
-    $this->drupalGet($url, array('query' => array('token' => $this->drupalGetToken($url . ':' . filemtime($file->uri) . ':' . $file->filesize))));
+    $this->drupalGet($url, array('query' => array('token' => file_entity_get_download_token($file))));
     $this->assertResponse(200, 'Users with access can download the file');
     $this->drupalGet($url, array('query' => array('token' => 'invalid-token')));
     $this->assertResponse(403, 'Cannot download file with in invalid token.');
     $this->drupalGet($url);
     $this->assertResponse(403, 'Cannot download file without a token.');
+    variable_set('file_entity_allow_insecure_download', TRUE);
+    $this->drupalGet($url);
+    $this->assertResponse(200, 'Users with access can download the file without a token when file_entity_allow_insecure_download is set.');
 
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
