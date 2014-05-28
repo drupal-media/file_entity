@@ -1938,7 +1938,7 @@ function file_entity_file_download($uri) {
     return file_get_content_headers($file);
   }
 
-  return NULL;
+  return -1;
 }
 
 /**
