@@ -68,6 +68,7 @@ function file_entity_download_page($file) {
 function file_entity_add_upload($form, &$form_state, array $options = array()) {
   $step = (isset($form_state['step']) && in_array($form_state['step'], array(1, 2, 3, 4))) ? $form_state['step'] : 1;
   $form['#step'] = $step;
+  $form['#options'] = $options;
   switch ($step) {
     case 1:
       return file_entity_add_upload_step_upload($form, $form_state, $options);
