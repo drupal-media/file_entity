@@ -337,7 +337,12 @@ function file_entity_add_upload_submit($form, &$form_state) {
       else {
         // Check if we can skip step 3.
         $schemes = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
-        if (count($schemes) == 1) {
+        if (!file_entity_file_is_writeable($file)) {
+          // The file is read-only (remote) and must use its provided scheme.
+          $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
+          $form_state['storage']['scheme'] = file_uri_scheme($file->uri);
+        }
+        elseif (count($schemes) == 1) {
           // There is only one possible stream wrapper for this file.
           // Skip the third page.
           $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
