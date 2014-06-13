@@ -39,7 +39,6 @@ require_once dirname(__FILE__) . '/file_entity.field.inc';
 function file_entity_hook_info() {
   $hooks = array(
     'file_operations',
-    'file_operations',
     'file_type_info',
     'file_type_info_alter',
     'file_formatter_info',
