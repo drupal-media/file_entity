@@ -59,17 +59,15 @@ function file_entity_file_insert($file) {
 
   // Save file metadata.
   if (!empty($file->metadata)) {
+    $query = db_insert('file_metadata')->fields(array('fid', 'name', 'value'));
     foreach ($file->metadata as $name => $value) {
-      db_merge('file_metadata')
-        ->fields(array(
-          'value' => serialize($value),
-        ))
-        ->key(array(
-          'fid' => $file->fid,
-          'name' => $name,
-        ))
-        ->execute();
+      $query->values(array(
+        'fid' => $file->fid,
+        'name' => $name,
+        'value' => serialize($value),
+      ));
     }
+    $query->execute();
   }
 
   // Clear any related field caches.
@@ -84,34 +82,17 @@ function file_entity_file_update($file) {
   field_attach_update('file', $file);
 
   // Save file metadata.
+  db_delete('file_metadata')->condition('fid', $file->fid)->execute();
   if (!empty($file->metadata)) {
+    $query = db_insert('file_metadata')->fields(array('fid', 'name', 'value'));
     foreach ($file->metadata as $name => $value) {
-      db_merge('file_metadata')
-        ->fields(array(
-          'value' => serialize($value),
-        ))
-        ->key(array(
-          'fid' => $file->fid,
-          'name' => $name,
-        ))
-        ->execute();
+      $query->values(array(
+        'fid' => $file->fid,
+        'name' => $name,
+        'value' => serialize($value),
+      ));
     }
-  }
-
-  // Save file metadata.
-  db_delete('file_metadata')->condition('fid', $file->fid);
-  if (!empty($file->metadata)) {
-    foreach ($file->metadata as $name => $value) {
-      db_merge('file_metadata')
-        ->fields(array(
-          'value' => serialize($value),
-        ))
-        ->key(array(
-          'fid' => $file->fid,
-          'name' => $name,
-        ))
-        ->execute();
-    }
+    $query->execute();
   }
 
   if (module_exists('image') && file_entity_file_get_mimetype_type($file) == 'image' && $file->filesize) {
