@@ -4,37 +4,7 @@
  * @file
  * File hooks implemented by the File entity module.
  */
-
-/**
- * Implements hook_file_presave().
- */
-function file_entity_file_presave($file) {
-  // Always ensure the filemime property is current.
-  if (!empty($file->original) || empty($file->filemime)) {
-    $file->filemime = file_get_mimetype($file->uri);
-  }
-
-  // The file type is used as a bundle key, and therefore, must not be NULL.
-  // It defaults to FILE_TYPE_NONE when loaded via file_load(), but in case
-  // file_save() is called on a new file object, default it here too.
-  if (!isset($file->type)) {
-    $file->type = FILE_TYPE_NONE;
-  }
-
-  // If the file isn't already assigned a real type, determine what type should
-  // be assigned to it.
-  if ($file->type === FILE_TYPE_NONE) {
-    $type = file_get_type($file);
-    if (isset($type)) {
-      $file->type = $type;
-    }
-  }
-
-  field_attach_presave('file', $file);
-
-  // Fetch image dimensions.
-  file_entity_metadata_fetch_image_dimensions($file);
-}
+use Drupal\file\FileInterface;
 
 /**
  * Implements hook_file_type().
@@ -43,7 +13,7 @@ function file_entity_file_type($file) {
   $types = array();
   foreach (file_type_get_enabled_types() as $type) {
     if (file_entity_match_mimetypes($type->mimetypes, $file->filemime)) {
-      $types[] = $type->type;
+      $types[] = $type->id();
     }
   }
 
@@ -53,16 +23,13 @@ function file_entity_file_type($file) {
 /**
  * Implements hook_file_insert().
  */
-function file_entity_file_insert($file) {
-  // Ensure field data is saved since file_save() does not in Drupal 7.
-  field_attach_insert('file', $file);
-
+function file_entity_file_insert(FileInterface $file) {
   // Save file metadata.
   if (!empty($file->metadata)) {
     $query = db_insert('file_metadata')->fields(array('fid', 'name', 'value'));
     foreach ($file->metadata as $name => $value) {
       $query->values(array(
-        'fid' => $file->fid,
+        'fid' => $file->id(),
         'name' => $name,
         'value' => serialize($value),
       ));
@@ -71,23 +38,21 @@ function file_entity_file_insert($file) {
   }
 
   // Clear any related field caches.
-  file_entity_invalidate_field_caches($file);
+  // @todo: No longer needed?
+  //file_entity_invalidate_field_caches($file);
 }
 
 /**
  * Implements hook_file_update().
  */
-function file_entity_file_update($file) {
-  // Ensure field data is saved since file_save() does not in Drupal 7.
-  field_attach_update('file', $file);
-
+function file_entity_file_update(FileInterface $file) {
   // Save file metadata.
-  db_delete('file_metadata')->condition('fid', $file->fid)->execute();
+  db_delete('file_metadata')->condition('fid', $file->id())->execute();
   if (!empty($file->metadata)) {
     $query = db_insert('file_metadata')->fields(array('fid', 'name', 'value'));
     foreach ($file->metadata as $name => $value) {
       $query->values(array(
-        'fid' => $file->fid,
+        'fid' => $file->id(),
         'name' => $name,
         'value' => serialize($value),
       ));
@@ -95,7 +60,7 @@ function file_entity_file_update($file) {
     $query->execute();
   }
 
-  if (module_exists('image') && file_entity_file_get_mimetype_type($file) == 'image' && $file->filesize) {
+  if (\Drupal::moduleHandler()->moduleExists('image') && file_entity_file_get_mimetype_type($file) == 'image' && $file->getFileSize) {
     // If the image dimensions have changed, update any image field references
     // to this file and flush image style derivatives.
     if ($file->metadata['width'] != $file->metadata['width'] || $file->metadata['height'] != $file->metadata['height']) {
@@ -103,32 +68,32 @@ function file_entity_file_update($file) {
     }
 
     // Flush image style derivatives whenever an image is updated.
-    image_path_flush($file->uri);
+    image_path_flush($file->getFileUri());
   }
 
   // Clear any related field caches.
-  file_entity_invalidate_field_caches($file);
+  // @todo: No longer needed?
+  //file_entity_invalidate_field_caches($file);
 }
 
 /**
  * Implements hook_file_delete().
  */
 function file_entity_file_delete($file) {
-  field_attach_delete('file', $file);
-
   // This is safe to call since the file's records from the usage table have
   // not yet been deleted.
-  file_entity_invalidate_field_caches($file);
+  // @todo No longer needed?
+  //file_entity_invalidate_field_caches($file);
 
   // Remove file metadata.
-  db_delete('file_metadata')->condition('fid', $file->fid)->execute();
+  db_delete('file_metadata')->condition('fid', $file->id())->execute();
 
   // Remove this file from the search index if needed.
   // This code is implemented in file entity module rather than in search
   // module because file entity is implementing search module's API, not the
   // other way around.
-  if (module_exists('search')) {
-    search_reindex($file->fid, 'file');
+  if (\Drupal::moduleHandler()->moduleExists('search')) {
+    search_reindex($file->id(), 'file');
   }
 }
 
@@ -163,6 +128,7 @@ function file_entity_file_mimetype_mapping_alter(&$mapping) {
  * Implements hook_file_load().
  */
 function file_entity_file_load($files) {
+  /*
   $alt = variable_get('file_entity_alt', '[file:field_file_image_alt_text]');
   $title = variable_get('file_entity_title', '[file:field_file_image_title_text]');
 
@@ -181,7 +147,7 @@ function file_entity_file_load($files) {
     if (!empty($title)) {
       $file->title = token_replace($title, array('file' => $file), $replace_options);
     }
-  }
+  }*/
 
   // Load and unserialize metadata.
   $results = db_query("SELECT * FROM {file_metadata} WHERE fid IN (:fids)", array(':fids' => array_keys($files)));
@@ -193,10 +159,10 @@ function file_entity_file_load($files) {
 /**
  * Fetch the dimensions of an image and store them in the file metadata array.
  */
-function file_entity_metadata_fetch_image_dimensions($file) {
+function file_entity_metadata_fetch_image_dimensions(FileInterface $file) {
   // Prevent PHP notices when trying to read empty files.
   // @see http://drupal.org/node/681042
-  if (!$file->filesize) {
+  if (!$file->getSize()) {
     return;
   }
 
@@ -206,10 +172,10 @@ function file_entity_metadata_fetch_image_dimensions($file) {
   }
 
   // We have a non-empty image file.
-  $image_info = image_get_info($file->uri);
-  if ($image_info) {
-    $file->metadata['width'] = $image_info['width'];
-    $file->metadata['height'] = $image_info['height'];
+  $image = Drupal::service('image.factory')->get($file->getFileUri());
+  if ($image) {
+    $file->metadata['width'] = $image->getWidth();
+    $file->metadata['height'] = $image->getHeight();
   }
   else {
     // Fallback to NULL values.

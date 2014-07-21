@@ -1,0 +1,21 @@
+
+file_entity.type.*:
+  type: config_entity
+  label: 'File type'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    description:
+      type: text
+      label: 'Description'
+    mimetypes:
+      type: sequence
+      label: 'MIME types'
+      sequence:
+        - type: string
+          label: 'MIME type'
+

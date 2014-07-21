@@ -8,6 +8,7 @@ use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\file\Entity\File;
+use Drupal\file\FileInterface;
 
 /**
  * Modules should return this value from hook_file_entity_access() to allow
@@ -902,6 +903,7 @@ function file_entity_entity_type_alter(&$entity_types) {
   $keys = $entity_types['file']->getKeys();
   $keys['bundle'] = 'type';
   $entity_types['file']->set('entity_keys', $keys);
+  $entity_types['file']->set('bundle_entity_type', $keys);
 
   $entity_types['file']->setClass('Drupal\file_entity\FileEntity');
   //$entity_types['file']['uri callback'] = 'file_entity_uri';
@@ -1987,68 +1989,7 @@ function file_entity_permissions_get_configured_types() {
 
 /**
  * @} End of "defgroup file_entity_access".
- *
- * Implements hook_file_default_types().
  */
-function file_entity_file_default_types() {
-  $types = array();
-
-  // Image.
-  $types['image'] = (object) array(
-    'api_version' => 1,
-    'type' => 'image',
-    'label' => t('Image'),
-    'description' => t('An <em>Image</em> file is a still visual.'),
-    'mimetypes' => array(
-      'image/*',
-    ),
-  );
-
-  // Video.
-  $types['video'] = (object) array(
-    'api_version' => 1,
-    'type' => 'video',
-    'label' => t('Video'),
-    'description' => t('A <em>Video</em> file is a moving visual recording.'),
-    'mimetypes' => array(
-      'video/*',
-    ),
-  );
-
-  // Audio.
-  $types['audio'] = (object) array(
-    'api_version' => 1,
-    'type' => 'audio',
-    'label' => t('Audio'),
-    'description' => t('An <em>Audio</em> file is a sound recording.'),
-    'mimetypes' => array(
-      'audio/*',
-    ),
-  );
-
-  // Document.
-  $types['document'] = (object) array(
-    'api_version' => 1,
-    'type' => 'document',
-    'label' => t('Document'),
-    'description' => t('A <em>Document</em> file is written information.'),
-    'mimetypes' => array(
-      'text/plain',
-      'application/msword',
-      'application/vnd.ms-excel',
-      'application/pdf',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.oasis.opendocument.text',
-      'application/vnd.oasis.opendocument.spreadsheet',
-      'application/vnd.oasis.opendocument.presentation',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ),
-  );
-
-  return $types;
-}
 
 /**
  * Implements hook_file_operations().
@@ -2409,8 +2350,8 @@ function file_entity_download_uri($file) {
   return $uri;
 }
 
-function file_entity_file_get_mimetype_type($file) {
-  list($type, $subtype) = explode('/', $file->filemime, 2);
+function file_entity_file_get_mimetype_type(FileInterface $file) {
+  list($type, $subtype) = explode('/', $file->getMimeType(), 2);
   return $type;
 }
 

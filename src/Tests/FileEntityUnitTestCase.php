@@ -59,36 +59,36 @@ class FileEntityUnitTestCase extends FileEntityTestBase {
       $files[$file->id()] = $file->metadata;
       $this->assertTrue(
         isset($file->metadata['height']),
-        'Image height retrieved on file_save() for an image file.'
+        'Image height retrieved on file save for an image file.'
       );
       $this->assertTrue(
         isset($file->metadata['width']),
-        'Image width retrieved on file_save() for an image file.'
+        'Image width retrieved on file save for an image file.'
       );
     }
     foreach ($this->files['text'] as $file) {
       $text_fids[] = $file->id();
       $this->assertFalse(
         isset($file->metadata['height']),
-        'No image height retrieved on file_save() for an text file.'
+        'No image height retrieved on file save for an text file.'
       );
       $this->assertFalse(
         isset($file->metadata['width']),
-        'No image width retrieved on file_save() for an text file.'
+        'No image width retrieved on file save for an text file.'
       );
     }
 
-    // Test hook_file_load().
+    // Test hook_file load.
     // Clear the cache and load fresh files objects to test file_load behavior.
     entity_get_controller('file')->resetCache();
     foreach (file_load_multiple(array_keys($files)) as $file) {
       $this->assertTrue(
         isset($file->metadata['height']),
-        'Image dimensions retrieved on file_load() for an image file.'
+        'Image dimensions retrieved on file load for an image file.'
       );
       $this->assertTrue(
         isset($file->metadata['width']),
-        'Image dimensions retrieved on file_load() for an image file.'
+        'Image dimensions retrieved on file load for an image file.'
       );
       $this->assertEqual(
         $file->metadata['height'],
@@ -104,11 +104,11 @@ class FileEntityUnitTestCase extends FileEntityTestBase {
     foreach (file_load_multiple($text_fids) as $file) {
       $this->assertFalse(
         isset($file->metadata['height']),
-        'No image height retrieved on file_load() for an text file.'
+        'No image height retrieved on file load for an text file.'
       );
       $this->assertFalse(
         isset($file->metadata['width']),
-        'No image width retrieved on file_load() for an text file.'
+        'No image width retrieved on file load for an text file.'
       );
     }
 
@@ -116,32 +116,32 @@ class FileEntityUnitTestCase extends FileEntityTestBase {
     // Load the first image file and resize it.
     $image_files = array_keys($files);
     $file = File::load(reset($image_files));
-    $image = \Drupal::service('image.factory')->get($file->getUri());
+    $image = \Drupal::service('image.factory')->get($file->getFileUri());
     $image->resize($file->metadata['width'] / 2, $file->metadata['height'] / 2);
     $image->save();
     $file->save();
     $this->assertEqual(
       $file->metadata['height'],
       $files[$file->id()]['height'] / 2,
-      'Image file height updated by file_save().'
+      'Image file height updated by file save.'
     );
     $this->assertEqual(
       $file->metadata['width'],
-      $files[$file->fid]['width'] / 2,
-      'Image file width updated by file_save().'
+      $files[$file->id()]['width'] / 2,
+      'Image file width updated by file save.'
     );
     // Clear the cache and reload the file.
     entity_get_controller('file')->resetCache();
     $file = File::load($file->id());
     $this->assertEqual(
       $file->metadata['height'],
-      $files[$file->fid]['height'] / 2,
-      'Updated image height retrieved by file_load().'
+      $files[$file->id()]['height'] / 2,
+      'Updated image height retrieved by file load.'
     );
     $this->assertEqual(
       $file->metadata['width'],
-      $files[$file->fid]['width'] / 2,
-      'Updated image width retrieved by file_load().'
+      $files[$file->id()]['width'] / 2,
+      'Updated image width retrieved by file load.'
     );
 
     //Test hook_file_delete().
@@ -151,7 +151,7 @@ class FileEntityUnitTestCase extends FileEntityTestBase {
         'SELECT COUNT(*) FROM {file_metadata} WHERE fid = :fid',
         array(':fid' => 'fid')
       )->fetchField(),
-      'Row deleted in {file_dimensions} on file_delete().'
+      'Row deleted in {file_dimensions} when deleting the file.'
     );
   }
 }

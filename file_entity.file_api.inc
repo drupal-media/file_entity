@@ -4,6 +4,8 @@
  * @file
  * API extensions of Drupal core's file.inc.
  */
+use Drupal\file_entity\Entity\FileType;
+use Drupal\file_entity\FileTypeInterface;
 
 /**
  * The {file_managed}.type value when the file type has not yet been determined.
@@ -458,7 +460,7 @@ function file_type_load_all($reset = FALSE) {
  * Returns an array of enabled file types.
  */
 function file_type_get_enabled_types() {
-  $types = file_type_load_all();
+  $types = FileType::loadMultiple();
   return array_filter($types, 'file_type_is_enabled');
 }
 
@@ -473,8 +475,8 @@ function file_type_get_disabled_types() {
 /**
  * Returns TRUE if a file type is enabled, FALSE otherwise.
  */
-function file_type_is_enabled($type) {
-  return empty($type->disabled);
+function file_type_is_enabled(FileTypeInterface $type) {
+  return $type->status();
 }
 
 /**
@@ -623,8 +625,8 @@ function file_type_disable($type) {
  *   Machine name of file type that should be used for given file.
  */
 function file_get_type($file) {
-  $types = module_invoke_all('file_type', $file);
-  drupal_alter('file_type', $types, $file);
+  $types = \Drupal::moduleHandler()->invokeAll('file_type', array($file));
+  \Drupal::moduleHandler()->alter('file_type', $types, $file);
 
   return empty($types) ? NULL : reset($types);
 }
