@@ -4,6 +4,10 @@
  * @file
  * Extends Drupal file entities to be fieldable and viewable.
  */
+use Drupal\Core\Database\Query\SelectInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldDefinition;
+use Drupal\file\Entity\File;
 
 /**
  * Modules should return this value from hook_file_entity_access() to allow
@@ -429,6 +433,7 @@ function file_entity_permission() {
       'title' => t('View files'),
     ),
   );
+  return $permissions;
 
   // Add description for the 'View file details' and 'View own private file
   // details' permissions to show which stream wrappers they apply to.
@@ -447,9 +452,9 @@ function file_entity_permission() {
 }
 
 /*
- * Implements hook_cron_queue_info().
+ * Implements hook_queue_info().
  */
-function file_entity_cron_queue_info() {
+function file_entity_queue_info() {
   $queues['file_entity_type_determine'] = array(
     'worker callback' => 'file_entity_type_determine',
   );
@@ -463,9 +468,9 @@ function file_entity_cron_queue_info() {
  *   A file ID.
  */
 function file_entity_type_determine($fid) {
-  if ($file = file_load($fid)) {
+  if ($file = File::load($fid)) {
     // The file type will be automatically determined when saving the file.
-    file_save($file);
+    $file->save();
   }
 }
 
@@ -891,44 +896,47 @@ function file_entity_theme() {
  * administrator can override the default types or add custom ones via
  * admin/structure/file-types.
  */
-function file_entity_entity_info_alter(&$entity_info) {
-  $entity_info['file']['fieldable'] = TRUE;
-  $entity_info['file']['entity keys']['bundle'] = 'type';
-  $entity_info['file']['bundle keys']['bundle'] = 'type';
-  $entity_info['file']['bundles'] = array();
-  $entity_info['file']['uri callback'] = 'file_entity_uri';
-  $entity_info['file']['view modes']['teaser'] = array(
+function file_entity_entity_type_alter(&$entity_types) {
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  $entity_types['file']->set('fieldable', TRUE);
+  $keys = $entity_types['file']->getKeys();
+  $keys['bundle'] = 'type';
+  $entity_types['file']->set('entity_keys', $keys);
+
+  $entity_types['file']->setClass('Drupal\file_entity\FileEntity');
+  //$entity_types['file']['uri callback'] = 'file_entity_uri';
+  /*$entity_types['file']['view modes']['teaser'] = array(
     'label' => t('Teaser'),
     'custom settings' => TRUE,
   );
-  $entity_info['file']['view modes']['full'] = array(
+  $entity_types['file']['view modes']['full'] = array(
     'label' => t('Full content'),
     'custom settings' => FALSE,
   );
-  $entity_info['file']['view modes']['preview'] = array(
+  $entity_types['file']['view modes']['preview'] = array(
     'label' => t('Preview'),
     'custom settings' => TRUE,
   );
-  $entity_info['file']['view modes']['rss'] = array(
+  $entity_types['file']['view modes']['rss'] = array(
     'label' => t('RSS'),
     'custom settings' => FALSE,
-  );
+  );*/
 
   // Search integration is provided by file_entity.module, so search-related
   // view modes for files are defined here and not in search.module.
-  if (module_exists('search')) {
-    $entity_info['file']['view modes']['search_index'] = array(
+  /*if (module_exists('search')) {
+    $entity_types['file']['view modes']['search_index'] = array(
       'label' => t('Search index'),
       'custom settings' => FALSE,
     );
-    $entity_info['file']['view modes']['search_result'] = array(
+    $entity_types['file']['view modes']['search_result'] = array(
       'label' => t('Search result'),
       'custom settings' => FALSE,
     );
-  }
+  }*/
 
-  foreach (file_type_get_enabled_types() as $type) {
-    $entity_info['file']['bundles'][$type->type] = array(
+  /*foreach (file_type_get_enabled_types() as $type) {
+    $entity_types['file']['bundles'][$type->type] = array(
       'label' => $type->label,
       'admin' => array(
         'path' => 'admin/structure/file-types/manage/%file_type',
@@ -936,62 +944,35 @@ function file_entity_entity_info_alter(&$entity_info) {
         'bundle argument' => 4,
       ),
     );
-  }
+  }*/
 
   // Enable Metatag support.
-  $entity_info['file']['metatags'] = TRUE;
-
-  // Ensure some of the Entity API callbacks are supported.
-  $entity_info['file']['creation callback'] = 'entity_metadata_create_object';
-  $entity_info['file']['view callback'] = 'file_view_multiple';
-  $entity_info['file']['edit callback'] = 'file_entity_metadata_form_file';
-  $entity_info['file']['access callback'] = 'file_entity_access';
-
-  // Add integration with the Title module for file name replacement support.
-  $entity_info['file']['field replacement'] = array(
-    'filename' => array(
-      'field' => array(
-        'type' => 'text',
-        'cardinality' => 1,
-        'translatable' => TRUE,
-      ),
-      'instance' => array(
-        'label' => t('File name'),
-        'description' => t('A field replacing file name.'),
-        'required' => TRUE,
-        'settings' => array(
-          'text_processing' => 0,
-        ),
-        'widget' => array(
-          'weight' => -5,
-        ),
-        'display' => array(
-          'default' => array(
-            'type' => 'hidden',
-          ),
-        ),
-      ),
-      'preprocess_key' => 'filename',
-    ),
-  );
+  //$entity_types['file']['metatags'] = TRUE;
 }
 
 /**
- * Implements hook_entity_property_info().
+ * Implements hook_entity_base_field_info().
  */
-function file_entity_entity_property_info() {
-  $info['file']['properties']['type'] = array(
-    'label' => t('File type'),
-    'type' => 'token',
-    'description' => t('The type of the file.'),
-    'setter callback' => 'entity_property_verbatim_set',
-    'setter permission' => 'administer files',
-    'options list' => 'file_entity_type_get_names',
-    'required' => TRUE,
-    'schema field' => 'type',
-  );
+function file_entity_base_field_info(EntityTypeInterface $entity_type) {
+  if ($entity_type->id() == 'file') {
+    $fields['type'] = FieldDefinition::create('string')
+      ->setLabel(t('File type'))
+      ->setDescription(t('The type of the file.'));
+    return $fields;
+  }
 
-  return $info;
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function file_entity_storage_field_info(EntityTypeInterface $entity_type) {
+  if ($entity_type->id() == 'file') {
+    $fields['type'] = FieldDefinition::create('string')
+      ->setLabel(t('File type'))
+      ->setDescription(t('The type of the file.'));
+    return $fields;
+  }
 }
 
 /**
@@ -1611,6 +1592,7 @@ function file_entity_ctools_plugin_api($owner, $api) {
  *   TRUE if the operation may be performed, FALSE otherwise.
  */
 function file_entity_access($op, $file = NULL, $account = NULL) {
+  return;
   $rights = &drupal_static(__FUNCTION__, array());
 
   if (!$file && !in_array($op, array('view', 'download', 'update', 'delete', 'create'), TRUE)) {
@@ -1626,16 +1608,16 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
 
   // $file may be either an object or a file type. Since file types cannot be
   // an integer, use either fid or type as the static cache id.
-  $cache_id = is_object($file) ? $file->fid : $file;
+  $cache_id = is_object($file) ? $file->id() : $file;
 
   // If we've already checked access for this file, user and op, return from
   // cache.
-  if (isset($rights[$account->uid][$cache_id][$op])) {
-    return $rights[$account->uid][$cache_id][$op];
+  if (isset($rights[$account->id()][$cache_id][$op])) {
+    return $rights[$account->id()][$cache_id][$op];
   }
 
   if (user_access('bypass file access', $account)) {
-    return $rights[$account->uid][$cache_id][$op] = TRUE;
+    return $rights[$account->id()][$cache_id][$op] = TRUE;
   }
 
   // We grant access to the file if both of the following conditions are met:
@@ -1643,10 +1625,10 @@ function file_entity_access($op, $file = NULL, $account = NULL) {
   // - At least one module says to grant access.
   $access = module_invoke_all('file_entity_access', $op, $file, $account);
   if (in_array(FILE_ENTITY_ACCESS_DENY, $access, TRUE)) {
-    return $rights[$account->uid][$cache_id][$op] = FALSE;
+    return $rights[$account->id()][$cache_id][$op] = FALSE;
   }
   elseif (in_array(FILE_ENTITY_ACCESS_ALLOW, $access, TRUE)) {
-    return $rights[$account->uid][$cache_id][$op] = TRUE;
+    return $rights[$account->id()][$cache_id][$op] = TRUE;
   }
 
 
@@ -1731,7 +1713,7 @@ function file_entity_file_entity_access($op, $file, $account) {
  * file access checks for the user account given by the 'account' meta-data (or
  * global $user if not provided).
  */
-function file_entity_query_file_access_alter(QueryAlterableInterface $query) {
+function file_entity_query_file_access_alter(SelectInterface $query) {
   _file_entity_query_file_entity_access_alter($query, 'file');
 }
 
@@ -1742,7 +1724,7 @@ function file_entity_query_file_access_alter(QueryAlterableInterface $query) {
  * file_entity_query_file_access_alter() for the SQL field storage engine. File
  * access conditions are added for field values belonging to files only.
  */
-function file_entity_query_entity_field_access_alter(QueryAlterableInterface $query) {
+function file_entity_query_entity_field_access_alter(SelectInterface $query) {
   //_file_entity_query_file_entity_access_alter($query, 'entity');
 }
 

@@ -202,16 +202,16 @@ function file_entity_install() {
   }
 
   // Create the title and alt text fields.
-  _file_entity_create_alt_title_fields();
+  //_file_entity_create_alt_title_fields();
 
   // Configure default pathauto variables if it is currently installed.
-  if (module_exists('pathauto')) {
+  if (\Drupal::moduleHandler()->moduleExists('pathauto')) {
     variable_set('pathauto_file_pattern', 'file/[file:name]');
   }
 
   // Classify existing files according to the currently defined file types.
   // Queue all files to be classified during cron runs using the Queue API.
-  $queue = DrupalQueue::get('file_entity_type_determine');
+  $queue = \Drupal::queue('file_entity_type_determine');
   $result = db_query('SELECT fid FROM {file_managed}');
   foreach ($result as $record) {
     $queue->createItem($record->fid);
@@ -228,23 +228,8 @@ function file_entity_install() {
  * Implements hook_uninstall().
  */
 function file_entity_uninstall() {
-  drupal_load('module', 'file_entity');
-  foreach (file_type_load_all(TRUE) as $type) {
-    file_type_delete($type);
-  }
-
   // Remove the added column to the core {file_managed} table.
   db_drop_field('file_managed', 'type');
-
-  // Remove variables.
-  variable_del('file_entity_max_filesize');
-  variable_del('file_entity_default_allowed_extensions');
-  variable_del('file_entity_alt');
-  variable_del('file_entity_title');
-  variable_del('file_entity_allow_insecure_download');
-  variable_del('file_entity_file_upload_wizard_skip_file_type');
-  variable_del('file_entity_file_upload_wizard_skip_scheme');
-  variable_del('file_entity_file_upload_wizard_skip_fields');
 }
 
 /**
@@ -548,7 +533,6 @@ function file_entity_update_7204() {
  * Function to create the title and alt text fields and instances.
  */
 function _file_entity_create_alt_title_fields() {
-  $t = get_t();
   // Create the alt text field and instance.
   // Define the alt text field.
   $alt_text_field = array(
@@ -588,7 +572,7 @@ function _file_entity_create_alt_title_fields() {
     'bundle' => 'image',
     'default_value' => NULL,
     'deleted' => '0',
-    'description' => $t('Alternative text is used by screen readers, search engines, and when the image cannot be loaded. By adding alt text you improve accessibility and search engine optimization.'),
+    'description' => t('Alternative text is used by screen readers, search engines, and when the image cannot be loaded. By adding alt text you improve accessibility and search engine optimization.'),
     'display' => array(
       'default' => array(
         'label' => 'above',
@@ -698,7 +682,7 @@ function _file_entity_create_alt_title_fields() {
     'bundle' => 'image',
     'default_value' => NULL,
     'deleted' => '0',
-    'description' => $t('Title text is used in the tool tip when a user hovers their mouse over the image. Adding title text makes it easier to understand the context of an image and improves usability.'),
+    'description' => t('Title text is used in the tool tip when a user hovers their mouse over the image. Adding title text makes it easier to understand the context of an image and improves usability.'),
     'display' => array(
       'default' => array(
         'label' => 'above',

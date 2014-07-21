@@ -5,17 +5,22 @@
  * Test integration for the file_entity module.
  */
 
-class FileEntityTestHelper extends DrupalWebTestCase {
-  protected $files = array();
+namespace Drupal\file_entity\Tests;
 
-  function setUp() {
-    $modules = func_get_args();
-    if (isset($modules[0]) && is_array($modules[0])) {
-      $modules = $modules[0];
-    }
-    $modules[] = 'file_entity';
-    parent::setUp($modules);
-  }
+use Drupal\file\Entity\File;
+use Drupal\simpletest\WebTestBase;
+
+/**
+ * Base class for file entity tests.
+ */
+abstract class FileEntityTestBase extends WebTestBase {
+
+  /**
+   * @var array
+   */
+  public static $modules = array('file_entity');
+
+  protected $files = array();
 
   protected function setUpFiles($defaults = array()) {
     // Populate defaults array.
@@ -30,7 +35,9 @@ class FileEntityTestHelper extends DrupalWebTestCase {
         foreach ($defaults as $key => $value) {
           $file->$key = $value;
         }
-        $this->files[$type][] = file_save($file);
+        $file = File::create((array) $file);
+        $file->save();
+        $this->files[$type][] = $file;
       }
     }
   }
@@ -192,168 +199,7 @@ class FileEntityTestHelper extends DrupalWebTestCase {
   }
 }
 
-class FileEntityFileTypeClassificationTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File entity classification',
-      'description' => 'Test existing file entity classification functionality.',
-      'group' => 'File entity',
-    );
-  }
-
-  function setUp() {
-    parent::setUp();
-  }
-
-  /**
-   * Get the file type of a given file.
-   *
-   * @param $file
-   *   A file object.
-   *
-   * @return
-   *   The file's file type as a string.
-   */
-  function getFileType($file) {
-    $type = db_select('file_managed', 'fm')
-      ->fields('fm', array('type'))
-      ->condition('fid', $file->fid, '=')
-      ->execute()
-      ->fetchAssoc();
-
-    return $type;
-  }
-
-  /**
-   * Test that existing files are properly classified by file type.
-   */
-  function testFileTypeClassification() {
-    // Get test text and image files.
-    $file = current($this->drupalGetTestFiles('text'));
-    $text_file = file_save($file);
-    $file = current($this->drupalGetTestFiles('image'));
-    $image_file = file_save($file);
-
-    // Enable file entity which adds adds a file type property to files and
-    // queues up existing files for classification.
-    module_enable(array('file_entity'));
-
-    // Existing files have yet to be classified and should have an undefined
-    // file type.
-    $file_type = $this->getFileType($text_file);
-    $this->assertEqual($file_type['type'], 'undefined', t('The text file has an undefined file type.'));
-    $file_type = $this->getFileType($image_file);
-    $this->assertEqual($file_type['type'], 'undefined', t('The image file has an undefined file type.'));
-
-    // The classification queue is processed during cron runs. Run cron to
-    // trigger the classification process.
-    $this->cronRun();
-
-    // The classification process should assign a file type to any file whose
-    // MIME type is assigned to a file type. Check to see if each file was
-    // assigned a proper file type.
-    $file_type = $this->getFileType($text_file);
-    $this->assertEqual($file_type['type'], 'document', t('The text file was properly assigned the Document file type.'));
-    $file_type = $this->getFileType($image_file);
-    $this->assertEqual($file_type['type'], 'image', t('The image file was properly assigned the Image file type.'));
-  }
-}
-
-class FileEntityUnitTestCase extends FileEntityTestHelper {
-  public static function getInfo() {
-    return array(
-      'name' => 'File entity unit tests',
-      'description' => 'Test basic file entity functionality.',
-      'group' => 'File entity',
-    );
-  }
-
-  function setUp() {
-    parent::setUp();
-    $this->setUpFiles();
-  }
-
-  /**
-   * Regression tests for core issue http://drupal.org/node/1239376.
-   */
-  function testMimeTypeMappings() {
-    $tests = array(
-      'public://test.ogg' => 'audio/ogg',
-      'public://test.mkv' => 'video/x-m4v',
-      'public://test.mka' => 'audio/x-matroska',
-      'public://test.mkv' => 'video/x-matroska',
-      'public://test.webp' => 'image/webp',
-    );
-    foreach ($tests as $input => $expected) {
-      $this->assertEqual(file_get_mimetype($input), $expected);
-    }
-  }
-
-  function testFileEntity() {
-    $file = reset($this->files['text']);
-
-    // Test entity ID, revision ID, and bundle.
-    $ids = entity_extract_ids('file', $file);
-    $this->assertIdentical($ids, array($file->fid, NULL, 'document'));
-
-    // Test the entity URI callback.
-    $uri = entity_uri('file', $file);
-    $this->assertEqual($uri['path'], "file/{$file->fid}");
-  }
-
-  function testImageDimensions() {
-    $files = array();
-    $text_fids = array();
-    // Test hook_file_insert().
-    // Files have been saved as part of setup (in FileEntityTestHelper::setUpFiles).
-    foreach ($this->files['image'] as $file) {
-      $files[$file->fid] = $file->metadata;
-      $this->assertTrue(isset($file->metadata['height']), 'Image height retrieved on file_save() for an image file.');
-      $this->assertTrue(isset($file->metadata['width']), 'Image width retrieved on file_save() for an image file.');
-    }
-    foreach ($this->files['text'] as $file) {
-      $text_fids[] = $file->fid;
-      $this->assertFalse(isset($file->metadata['height']), 'No image height retrieved on file_save() for an text file.');
-      $this->assertFalse(isset($file->metadata['width']), 'No image width retrieved on file_save() for an text file.');
-    }
-
-    // Test hook_file_load().
-    // Clear the cache and load fresh files objects to test file_load behavior.
-    entity_get_controller('file')->resetCache();
-    foreach (file_load_multiple(array_keys($files)) as $file) {
-      $this->assertTrue(isset($file->metadata['height']), 'Image dimensions retrieved on file_load() for an image file.');
-      $this->assertTrue(isset($file->metadata['width']), 'Image dimensions retrieved on file_load() for an image file.');
-      $this->assertEqual($file->metadata['height'], $files[$file->fid]['height'], 'Loaded image height is equal to saved image height.');
-      $this->assertEqual($file->metadata['width'], $files[$file->fid]['width'], 'Loaded image width is equal to saved image width.');
-    }
-    foreach (file_load_multiple($text_fids) as $file) {
-      $this->assertFalse(isset($file->metadata['height']), 'No image height retrieved on file_load() for an text file.');
-      $this->assertFalse(isset($file->metadata['width']), 'No image width retrieved on file_load() for an text file.');
-    }
-
-    // Test hook_file_update().
-    // Load the first image file and resize it.
-    $image_files = array_keys($files);
-    $file = file_load(reset($image_files));
-    $image = image_load($file->uri);
-    image_resize($image, $file->metadata['width'] / 2, $file->metadata['height'] / 2);
-    image_save($image);
-    file_save($file);
-    $this->assertEqual($file->metadata['height'], $files[$file->fid]['height'] / 2, 'Image file height updated by file_save().');
-    $this->assertEqual($file->metadata['width'], $files[$file->fid]['width'] / 2, 'Image file width updated by file_save().');
-    // Clear the cache and reload the file.
-    entity_get_controller('file')->resetCache();
-    $file = file_load($file->fid);
-    $this->assertEqual($file->metadata['height'], $files[$file->fid]['height'] / 2, 'Updated image height retrieved by file_load().');
-    $this->assertEqual($file->metadata['width'], $files[$file->fid]['width'] / 2, 'Updated image width retrieved by file_load().');
-
-    //Test hook_file_delete().
-    file_delete($file, TRUE);
-    $this->assertFalse(db_query('SELECT COUNT(*) FROM {file_metadata} WHERE fid = :fid', array(':fid' => 'fid'))->fetchField(), 'Row deleted in {file_dimensions} on file_delete().');
-  }
-}
-
-class FileEntityEditTestCase extends FileEntityTestHelper {
+class FileEntityEditTestCase extends FileEntityTestBase {
   protected $web_user;
   protected $admin_user;
 
@@ -463,7 +309,7 @@ class FileEntityEditTestCase extends FileEntityTestHelper {
   }
 }
 
-class FileEntityCreationTestCase extends FileEntityTestHelper {
+class FileEntityCreationTestCase extends FileEntityTestBase {
   public static function getInfo() {
     return array(
       'name' => 'File entity creation',
@@ -506,7 +352,7 @@ class FileEntityCreationTestCase extends FileEntityTestHelper {
 /**
  * Test file administration page functionality.
  */
-class FileEntityAdminTestCase extends FileEntityTestHelper {
+class FileEntityAdminTestCase extends FileEntityTestBase {
   public static function getInfo() {
     return array(
       'name' => 'File administration',
@@ -663,7 +509,7 @@ class FileEntityAdminTestCase extends FileEntityTestHelper {
   }
 }
 
-class FileEntityReplaceTestCase extends FileEntityTestHelper {
+class FileEntityReplaceTestCase extends FileEntityTestBase {
   public static function getInfo() {
     return array(
       'name' => 'File replacement',
@@ -745,7 +591,7 @@ class FileEntityReplaceTestCase extends FileEntityTestHelper {
   }
 }
 
-class FileEntityTokenTestCase extends FileEntityTestHelper {
+class FileEntityTokenTestCase extends FileEntityTestBase {
   public static function getInfo() {
     return array(
       'name' => 'File entity tokens',
@@ -799,7 +645,7 @@ class FileEntityTokenTestCase extends FileEntityTestHelper {
   }
 }
 
-class FileEntityTypeTestCase extends FileEntityTestHelper {
+class FileEntityTypeTestCase extends FileEntityTestBase {
   public static function getInfo() {
     return array(
       'name' => 'File entity types',
@@ -1067,7 +913,7 @@ class FileEntityTypeTestCase extends FileEntityTestHelper {
   }
 }
 
-class FileEntityAccessTestCase extends FileEntityTestHelper {
+class FileEntityAccessTestCase extends FileEntityTestBase {
 
   public static function getInfo() {
     return array(
