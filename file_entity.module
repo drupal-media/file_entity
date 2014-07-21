@@ -1741,7 +1741,7 @@ function file_entity_query_entity_field_access_alter(SelectInterface $query) {
  *   file_entity_query_entity_field_access_alter() for more.
  */
 function _file_entity_query_file_entity_access_alter($query, $type) {
-  global $user;
+  $user = \Drupal::currentUser();
 
   // Read meta-data from query, if provided.
   if (!$account = $query->getMetaData('account')) {
@@ -1749,7 +1749,7 @@ function _file_entity_query_file_entity_access_alter($query, $type) {
   }
 
   // If $account can bypass file access, we don't need to alter the query.
-  if (user_access('bypass file access', $account)) {
+  if ($account->hasPermission('bypass file access')) {
     return;
   }
 
@@ -1759,7 +1759,7 @@ function _file_entity_query_file_entity_access_alter($query, $type) {
   if (!$base_table) {
     $fallback = '';
     foreach ($tables as $alias => $table_info) {
-      if (!($table_info instanceof SelectQueryInterface)) {
+      if (!($table_info instanceof SelectInterface)) {
         $table = $table_info['table'];
         // If the file_managed table is in the query, it wins immediately.
         if ($table == 'file_managed') {
@@ -1822,37 +1822,37 @@ function _file_entity_query_file_entity_access_alter($query, $type) {
   }
   foreach ($tables as $falias => $tableinfo) {
     $table = $tableinfo['table'];
-    if (!($table instanceof SelectQueryInterface) && $table == $base_table) {
+    if (!($table instanceof SelectInterface) && $table == $base_table) {
       $subquery = db_select('file_managed', 'fm_access')->fields('fm_access', array('fid'));
       $subquery_conditions = db_or();
 
       $wrappers = file_entity_get_public_and_private_stream_wrapper_names();
       if (!empty($wrappers['public'])) {
-        if (user_access('view files', $account)) {
+        if ($account->hasPermission('view files')) {
           foreach (array_keys($wrappers['public']) as $wrapper) {
             $subquery_conditions->condition('fm_access.uri', $wrapper . '%', 'LIKE');
           }
         }
-        elseif (user_access('view own files', $account)) {
+        elseif ($account->hasPermission('view own files')) {
           foreach (array_keys($wrappers['public']) as $wrapper) {
             $subquery_conditions->condition(db_and()
               ->condition('fm_access.uri', $wrapper . '%', 'LIKE')
-              ->condition('fm_access.uid', $account->uid)
+              ->condition('fm_access.uid', $account->id())
             );
           }
         }
       }
       if (!empty($wrappers['private'])) {
-        if (user_access('view private files', $account)) {
+        if ($account->hasPermission('view private files')) {
           foreach (array_keys($wrappers['private']) as $wrapper) {
             $subquery_conditions->condition('fm_access.uri', $wrapper . '%', 'LIKE');
           }
         }
-        elseif (user_access('view own private files', $account)) {
+        elseif ($account->hasPermission('view own private files')) {
           foreach (array_keys($wrappers['private']) as $wrapper) {
             $subquery_conditions->condition(db_and()
               ->condition('fm_access.uri', $wrapper . '%', 'LIKE')
-              ->condition('fm_access.uid', $account->uid)
+              ->condition('fm_access.uid', $account->id())
             );
           }
         }

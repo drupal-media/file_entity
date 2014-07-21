@@ -7,6 +7,7 @@
 
 namespace Drupal\file_entity\Tests;
 
+use Drupal\file\Entity\File;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -15,6 +16,13 @@ use Drupal\simpletest\WebTestBase;
  * @group file_entity
  */
 class FileEntityFileTypeClassificationTestCase extends WebTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array('file');
 
   /**
    * Get the file type of a given file.
@@ -28,7 +36,7 @@ class FileEntityFileTypeClassificationTestCase extends WebTestBase {
   function getFileType($file) {
     $type = db_select('file_managed', 'fm')
       ->fields('fm', array('type'))
-      ->condition('fid', $file->fid, '=')
+      ->condition('fid', $file->id(), '=')
       ->execute()
       ->fetchAssoc();
 
@@ -41,13 +49,15 @@ class FileEntityFileTypeClassificationTestCase extends WebTestBase {
   function testFileTypeClassification() {
     // Get test text and image files.
     $file = current($this->drupalGetTestFiles('text'));
-    $text_file = file_save($file);
+    $text_file = File::create((array) $file);
+    $text_file->save();
     $file = current($this->drupalGetTestFiles('image'));
-    $image_file = file_save($file);
+    $image_file = File::create((array) $file);
+    $image_file->save();
 
     // Enable file entity which adds adds a file type property to files and
     // queues up existing files for classification.
-    module_enable(array('file_entity'));
+    \Drupal::moduleHandler()->install(array('file_entity'));
 
     // Existing files have yet to be classified and should have an undefined
     // file type.
