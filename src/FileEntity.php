@@ -69,22 +69,14 @@ class FileEntity extends File {
    * Updates the file bundle.
    */
   protected function updateBundle() {
-    $type = file_get_type($this);
-    // Update the type field.
-    $this->get('type')->value = $type;
-    // Clear the field definitions, so that they will be fetched for the new bundle.
-    $this->fieldDefinitions = NULL;
-    // Update the entity keys cache.
-    $this->entityKeys['bundle'] = $type;
+    if ($type = file_get_type($this)) {
+      // Update the type field.
+      $this->get('type')->value = $type;
+      // Clear the field definitions, so that they will be fetched for the new bundle.
+      $this->fieldDefinitions = NULL;
+      // Update the entity keys cache.
+      $this->entityKeys['bundle'] = $type;
+    }
   }
-
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = parent::baseFieldDefinitions($entity_type);
-    $fields['type'] = FieldDefinition::create('string')
-      ->setLabel(t('File type'))
-      ->setDescription(t('The type of the file.'));
-    return $fields;
-  }
-
 
 } 
