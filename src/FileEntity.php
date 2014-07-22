@@ -50,7 +50,6 @@ class FileEntity extends File {
     }
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -78,5 +77,17 @@ class FileEntity extends File {
       $this->entityKeys['bundle'] = $type;
     }
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields = parent::baseFieldDefinitions($entity_type);
+    $fields['type'] = FieldDefinition::create('string')
+      ->setLabel(t('File type'))
+      ->setDescription(t('The type of the file.'));
+    return $fields;
+  }
+
 
 } 

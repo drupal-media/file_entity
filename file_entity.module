@@ -93,33 +93,6 @@ function file_get_type(FileInterface $file) {
   return empty($types) ? NULL : reset($types);
 }
 
-/**
- * Implements hook_entity_base_field_info().
- */
-function file_entity_base_field_info(EntityTypeInterface $entity_type) {
-  if ($entity_type->id() == 'file') {
-    $fields['type'] = FieldDefinition::create('string')
-      ->setLabel(t('File type'))
-      ->setDescription(t('The type of the file.'));
-
-    return $fields;
-  }
-
-}
-
-/**
- * Implements hook_entity_base_field_info().
- */
-function file_entity_storage_field_info(EntityTypeInterface $entity_type) {
-  if ($entity_type->id() == 'file') {
-    $fields['type'] = FieldDefinition::create('string')
-      ->setLabel(t('File type'))
-      ->setDescription(t('The type of the file.'));
-
-    return $fields;
-  }
-}
-
 
 /**
  * The {file_managed}.type value when the file type has not yet been determined.
