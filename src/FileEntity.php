@@ -10,7 +10,6 @@ namespace Drupal\file_entity;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\file\Entity\File;
 
 /**
@@ -64,9 +63,6 @@ class FileEntity extends File {
     if ($this->bundle() === FILE_TYPE_NONE) {
       $this->updateBundle();
     }
-
-    // Fetch image dimensions.
-    file_entity_metadata_fetch_image_dimensions($this);
   }
 
   /**
