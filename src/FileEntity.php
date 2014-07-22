@@ -47,8 +47,7 @@ class FileEntity extends File {
     parent::postCreate($storage);
 
     // Update the bundle if necessary.
-    // @todo Is this actually necessary?
-    $this->bundle();
+    $this->updateBundle();
   }
 
   /**
@@ -63,8 +62,7 @@ class FileEntity extends File {
     }
 
     // Update the bundle if necessary.
-    // @todo Is this actually necessary?
-    $this->bundle();
+    $this->updateBundle();
   }
 
   /**
@@ -78,25 +76,22 @@ class FileEntity extends File {
     return $fields;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function bundle() {
-    $bundle = parent::bundle();
-    if ($bundle === static::FILE_TYPE_NONE && ($type = $this->getFileType())) {
-      $bundle = $type;
-      $this->setBundle($bundle);
+  public function updateBundle($force = FALSE) {
+    $bundle = $this->bundle();
+    if (!$bundle || $bundle === static::FILE_TYPE_NONE || $force) {
+      $this->setBundle($this->getFileType());
     }
-    return $bundle;
   }
 
   public function setBundle($bundle) {
-    // Set the bundle value.
-    $this->get('type')->value = $bundle;
-    // Clear the field definitions, so that they will be fetched for the new bundle.
-    $this->fieldDefinitions = NULL;
-    // Update the entity keys cache.
-    $this->entityKeys['bundle'] = $bundle;
+    if ($this->bundle() != $bundle) {
+      // Set the bundle value.
+      $this->get('type')->value = $bundle;
+      // Clear the field definitions, so that they will be fetched for the new bundle.
+      $this->fieldDefinitions = NULL;
+      // Update the entity keys cache.
+      $this->entityKeys['bundle'] = $bundle;
+    }
   }
 
   /**
