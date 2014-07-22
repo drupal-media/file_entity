@@ -4,6 +4,7 @@
  * @file
  * API extensions of Drupal core's file.inc.
  */
+use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileType;
 use Drupal\file_entity\FileTypeInterface;
 
@@ -618,13 +619,13 @@ function file_type_disable($type) {
 /**
  * Determines file type for a given file.
  *
- * @param object $file
+ * @param \Drupal\file\FileInterface $file
  *   File object.
  *
  * @return string
  *   Machine name of file type that should be used for given file.
  */
-function file_get_type($file) {
+function file_get_type(FileInterface $file) {
   $types = \Drupal::moduleHandler()->invokeAll('file_type', array($file));
   \Drupal::moduleHandler()->alter('file_type', $types, $file);
 

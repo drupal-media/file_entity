@@ -458,6 +458,10 @@ function file_entity_permission() {
 function file_entity_queue_info() {
   $queues['file_entity_type_determine'] = array(
     'worker callback' => 'file_entity_type_determine',
+    // Only needed if this queue should be processed by cron.
+    'cron' => array(
+      'time' => 60,
+    ),
   );
   return $queues;
 }
@@ -469,6 +473,7 @@ function file_entity_queue_info() {
  *   A file ID.
  */
 function file_entity_type_determine($fid) {
+  debug($fid);
   if ($file = File::load($fid)) {
     // The file type will be automatically determined when saving the file.
     $file->save();

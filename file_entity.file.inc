@@ -9,10 +9,10 @@ use Drupal\file\FileInterface;
 /**
  * Implements hook_file_type().
  */
-function file_entity_file_type($file) {
+function file_entity_file_type(FileInterface $file) {
   $types = array();
   foreach (file_type_get_enabled_types() as $type) {
-    if (file_entity_match_mimetypes($type->mimetypes, $file->filemime)) {
+    if (file_entity_match_mimetypes($type->mimetypes, $file->getMimeType())) {
       $types[] = $type->id();
     }
   }

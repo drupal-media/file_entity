@@ -212,9 +212,11 @@ function file_entity_install() {
   // Classify existing files according to the currently defined file types.
   // Queue all files to be classified during cron runs using the Queue API.
   $queue = \Drupal::queue('file_entity_type_determine');
-  $result = db_query('SELECT fid FROM {file_managed}');
-  foreach ($result as $record) {
-    $queue->createItem($record->fid);
+  $ids = \Drupal::entityQuery('file')
+    ->execute();
+  foreach ($ids as $id) {
+    debug($id);
+    $queue->createItem($id);
   }
 
   // Warn users that existing files will not have a file type until the queue
