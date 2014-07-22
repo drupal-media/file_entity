@@ -15,10 +15,7 @@ use Drupal\file_entity\FileTypeInterface;
  * Implements hook_entity_info_alter().
  *
  * Extends the core file entity to be fieldable. The file type is used as the
- * bundle key. File types are implemented as CTools exportables, so modules can
- * define default file types via hook_file_default_types(), and the
- * administrator can override the default types or add custom ones via
- * admin/structure/file-types.
+ * bundle key.
  */
 function file_entity_entity_type_alter(&$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
@@ -76,25 +73,3 @@ function file_entity_file_type(FileInterface $file) {
   }
   return $types;
 }
-
-/**
- * Determines file type for a given file.
- *
- * @param \Drupal\file\FileInterface $file
- *   File object.
- *
- * @return string
- *   Machine name of file type that should be used for given file.
- */
-function file_get_type(FileInterface $file) {
-  $types = \Drupal::moduleHandler()->invokeAll('file_type', array($file));
-  \Drupal::moduleHandler()->alter('file_type', $types, $file);
-
-  return empty($types) ? NULL : reset($types);
-}
-
-
-/**
- * The {file_managed}.type value when the file type has not yet been determined.
- */
-define('FILE_TYPE_NONE', 'undefined');
