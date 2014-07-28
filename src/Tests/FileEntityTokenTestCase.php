@@ -38,8 +38,8 @@ class FileEntityTokenTestCase extends FileEntityTestBase {
   }
 
   function assertTokens($type, array $data, array $tokens, array $options = array()) {
-    $token_input = drupal_map_assoc(array_keys($tokens));
-    $values = token_generate($type, $token_input, $data, $options);
+    $token_input = array_combine(array_keys($tokens), array_keys($tokens));
+    $values = \Drupal::token()->generate($type, $token_input, $data, $options);
     foreach ($tokens as $token => $expected) {
       if (!isset($expected)) {
         $this->assertTrue(!isset($values[$token]), t("Token value for [@type:@token] was not generated.", array('@type' => $type, '@token' => $token)));

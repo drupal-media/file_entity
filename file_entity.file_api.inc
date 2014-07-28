@@ -50,9 +50,11 @@ function file_info_formatter_types($formatter_type = NULL) {
  */
 function file_info_cache_clear() {
   // Clear the CTools managed caches.
+  /* @todo Clear caches properly.
   ctools_include('export');
   ctools_export_load_object_reset('file_type');
   ctools_export_load_object_reset('file_display');
+  */
 
   // Clear the formatter type cache, managed by file_info_formatter_types().
   drupal_static_reset('file_info_formatter_types');
@@ -417,9 +419,7 @@ function file_display_new($file_type, $view_mode, $formatter_name) {
  *   The file type object, or FALSE if it does not exist.
  */
 function file_type_load($name) {
-  ctools_include('export');
-  $type = ctools_export_crud_load('file_type', $name);
-  return isset($type) ? $type : FALSE;
+  return \Drupal::entityManager()->getStorage('file_type')->load($name) ?: FALSE;
 }
 
 /**
@@ -432,8 +432,7 @@ function file_type_load($name) {
  *   An array of file type objects, keyed by machine name.
  */
 function file_type_load_multiple(array $names) {
-  ctools_include('export');
-  return ctools_export_crud_load_multiple('file_type', $names);
+  return \Drupal::entityManager()->getStorage('file_type')->loadMultiple($names) ?: FALSE;
 }
 
 /**
@@ -453,8 +452,7 @@ function file_type_load_multiple(array $names) {
  * @see file_type_get_disabled_types()
  */
 function file_type_load_all($reset = FALSE) {
-  ctools_include('export');
-  return ctools_export_crud_load_all('file_type', $reset);
+  return \Drupal::entityManager()->getStorage('file_type')->loadMultiple() ?: FALSE;
 }
 
 /**
@@ -531,9 +529,9 @@ function file_type_save($type) {
         ->execute();
     }
     if ($rename_bundle) {
-      field_attach_rename_bundle('file', $old_type->type, $type->type);
+      entity_invoke_bundle_hook('rename', 'file', $old_type->type, $type->type);
     }
-    module_invoke_all('file_type_update', $type);
+    \Drupal::moduleHandler()->invokeAll('file_type_update', $type);
     $status = SAVED_UPDATED;
   }
   // Insert a new type object.
@@ -541,8 +539,8 @@ function file_type_save($type) {
     db_insert('file_type')
       ->fields($fields)
       ->execute();
-    field_attach_create_bundle('file', $type->type);
-    module_invoke_all('file_type_insert', $type);
+    entity_invoke_bundle_hook('create', 'file', $type->type);
+    \Drupal::moduleHandler()->invokeAll('file_type_insert', $type);
     $status = SAVED_NEW;
   }
 

@@ -185,7 +185,7 @@ function file_entity_menu() {
     'access arguments' => array('create'),
     'file' => 'file_entity.pages.inc',
   );
-  if (module_exists('plupload') && module_exists('multiform')) {
+  if (\Drupal::moduleHandler()->moduleExists('plupload') && \Drupal::moduleHandler()->moduleExists('multiform')) {
     $items['file/add']['page arguments'] = array('file_entity_add_upload_multiple');
   }
   $items['file/add/upload'] = array(
@@ -269,12 +269,12 @@ function file_entity_menu() {
   // Field UI attaches "Manage fields" and "Manage display" tabs. Note that
   // Field UI does not have to be enabled; we're just using the same IA pattern
   // here for attaching the "Manage file display" page.
-  $entity_info = entity_get_info('file');
-  foreach ($entity_info['bundles'] as $file_type => $bundle_info) {
+  $bundles = \Drupal::entityManager()->getBundleInfo('file');
+  foreach ($bundles as $file_type => $bundle_info) {
     if (isset($bundle_info['admin'])) {
       // Get the base path and access.
       $path = $bundle_info['admin']['path'];
-      $access = array_intersect_key($bundle_info['admin'], drupal_map_assoc(array('access callback', 'access arguments')));
+      $access = array_intersect_key($bundle_info['admin'], array('access callback' => NULL, 'access argument' => NULL));
       $access += array(
         'access callback' => 'user_access',
         'access arguments' => array('administer file types'),
@@ -340,7 +340,7 @@ function file_entity_menu() {
   );
 
   // Optional devel module integration
-  if (module_exists('devel')) {
+  if (\Drupal::moduleHandler()->moduleExists('devel')) {
     $items['file/%file/devel'] = array(
       'title' => 'Devel',
       'page callback' => 'devel_load_object',
@@ -365,7 +365,7 @@ function file_entity_menu() {
       'type' => MENU_LOCAL_TASK,
       'weight' => 100,
     );
-    if (module_exists('token')) {
+    if (\Drupal::moduleHandler()->moduleExists('token')) {
       $items['file/%file/devel/token'] = array(
         'title' => 'Tokens',
         'page callback' => 'token_devel_token_object',
@@ -486,7 +486,7 @@ function file_entity_type_determine($fid) {
  *   A query object that has been extended with the Search DB Extender.
  */
 function _file_entity_rankings(SelectQueryExtender $query) {
-  if ($ranking = module_invoke_all('file_ranking')) {
+  if ($ranking = \Drupal::moduleHandler()->invokeAll('file_ranking')) {
     $tables = &$query->getTables();
     foreach ($ranking as $rank => $values) {
       if ($file_rank = \Drupal::config('file_entity')->get('rank_' . $rank, 0)) {
@@ -831,7 +831,7 @@ function file_entity_admin_paths() {
  * Implements hook_action_info_alter().
  */
 function file_entity_action_info_alter(&$actions) {
-  if (module_exists('pathauto')) {
+  if (\Drupal::moduleHandler()->moduleExists('pathauto')) {
     $actions['pathauto_file_update_action'] = array(
       'type' => 'file',
       'label' => t('Update file alias'),
@@ -1080,7 +1080,7 @@ function file_entity_file_formatter_info() {
   }
 
   // Add a simple file formatter for displaying an image in a chosen style.
-  if (module_exists('image')) {
+  if (\Drupal::moduleHandler()->moduleExists('image')) {
     $formatters['file_image'] = array(
       'label' => t('Image'),
       'default settings' => array(
@@ -1281,7 +1281,7 @@ function file_entity_file_formatter_file_image_settings($form, &$form_state, $se
     '#default_value' => $settings['title'],
   );
 
-  if (module_exists('token')) {
+  if (\Drupal::moduleHandler()->moduleExists('token')) {
     $element['alt']['#description'] .= t('This field supports tokens.');
     $element['title']['#description'] .= t('This field supports tokens.');
     $element['tokens'] = array(
@@ -2367,7 +2367,7 @@ function file_entity_admin_menu_map() {
  */
 function file_entity_get_download_token($file) {
   // Return the first eight characters.
-  return substr(drupal_hmac_base64("file/$file->fid/download:" . $file->uri, drupal_get_private_key() . drupal_get_hash_salt()), 0, 8);
+  return substr(\Drupal\Component\Utility\Crypt::hmacBase64("file/$file->fid/download:" . $file->uri, \Drupal::service('private_key')->get() . \Drupal\Core\Site\Settings::getHashSalt()), 0, 8);
 }
 
 /**

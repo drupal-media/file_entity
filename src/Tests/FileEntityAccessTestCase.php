@@ -183,7 +183,7 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
       if (!empty($case['owner'])) {
         $file = next($this->files['text']);
         $file->uid = $account->uid;
-        file_save($file);
+        $file->save();
         $file = file_move($file, 'private://');
 
         // Check if the physical file is there.

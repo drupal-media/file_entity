@@ -68,7 +68,7 @@ class FileEntityReplaceTestCase extends FileEntityTestBase {
     $this->assertRaw(t('The specified file %file could not be uploaded. Only files with the following extensions are allowed:', array('%file' => $image->filename)), 'File validation works, upload failed correctly.');
 
     // Create a non-local file record.
-    $file2 = new stdClass();
+    $file2 = new \stdClass();
     $file2->uri = 'oembed://' . $this->randomName();
     $file2->filename = drupal_basename($file2->uri);
     $file2->filemime = 'image/oembed';

@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Tests;
 
 use Drupal\file\Entity\File;
+use Drupal\file_entity\FileEntity;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -43,7 +44,7 @@ abstract class FileEntityTestBase extends WebTestBase {
   }
 
   protected function createFileType($overrides = array()) {
-    $type = new stdClass();
+    $type = new \stdClass();
     $type->type = 'test';
     $type->label = "Test";
     $type->description = '';
@@ -138,7 +139,7 @@ abstract class FileEntityTestBase extends WebTestBase {
   }
 
   protected function createFileEntity($settings = array()) {
-    $file = new stdClass();
+    $file = new \stdClass();
 
     // Populate defaults array.
     $settings += array(
@@ -157,7 +158,7 @@ abstract class FileEntityTestBase extends WebTestBase {
     file_put_contents($filepath, $settings['contents']);
     $this->assertTrue(is_file($filepath), t('The test file exists on the disk.'), 'Create test file');
 
-    $file = new stdClass();
+    $file = new \stdClass();
     $file->uri = $filepath;
     $file->filename = drupal_basename($file->uri);
     $file->filemime = $settings['filemime'];
@@ -175,15 +176,12 @@ abstract class FileEntityTestBase extends WebTestBase {
     // If the file isn't already assigned a real type, determine what type should
     // be assigned to it.
     if ($file->type === FILE_TYPE_NONE) {
-      $type = file_get_type($file);
-      if (isset($type)) {
-        $file->type = $type;
-      }
+      $file->type = $file->filemime;
     }
 
-    // Write the record directly rather than calling file_save() so we don't
-    // invoke the hooks.
-    $this->assertNotIdentical(drupal_write_record('file_managed', $file), FALSE, t('The file was added to the database.'), 'Create test file');
+    // Save the file and assert success.
+    $result = FileEntity::create((array) $file)->save();
+    $this->assertIdentical(SAVED_NEW, $result, t('The file was added to the database.'), 'Create test file');
 
     return $file;
   }

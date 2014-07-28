@@ -6,6 +6,8 @@
  */
 
 namespace Drupal\file_entity\Tests;
+use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Tests the file entity types.
@@ -73,18 +75,19 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
       'image1' => $this->createFileType(array('type' => 'image1', 'label' => 'Image 1')),
       'image2' => $this->createFileType(array('type' => 'image2', 'label' => 'Image 2'))
     );
+    $field_name = drupal_strtolower($this->randomName());
 
     // Attach a text field to one of the file types.
-    $field = array(
-      'field_name' => drupal_strtolower($this->randomName()),
+    $field_storage = FieldStorageConfig::create(array(
+      'name' => $field_name,
       'type' => 'text',
       'settings' => array(
         'max_length' => 255,
-      )
-    );
-    field_create_field($field);
-    $instance = array(
-      'field_name' => $field['field_name'],
+      ),
+    ));
+    $field_storage->save();
+    $field_instance = FieldInstanceConfig::create(array(
+      'field_name' => $field_name,
       'entity_type' => 'file',
       'bundle' => 'image2',
       'widget' => array(
@@ -95,8 +98,8 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
           'type' => 'text_default',
         ),
       ),
-    );
-    field_create_instance($instance);
+    ));
+    $field_instance->save();
 
     // Create a user with file creation access.
     $user = $this->drupalCreateUser(array('create files'));
@@ -125,10 +128,10 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     // Step 4: Complete field widgets
     $langcode = LANGUAGE_NONE;
     $edit = array();
-    $edit["{$field['field_name']}[$langcode][0][value]"] = $this->randomName();
+    $edit["{$field_name}[$langcode][0][value]"] = $this->randomName();
     $this->drupalPost(NULL, $edit, t('Save'));
     $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $file->filename)), t('Image 2 file updated.'));
-    $this->assertText($field['field_name'], 'File text field was found.');
+    $this->assertText($field_name, 'File text field was found.');
   }
 
   /**
@@ -137,16 +140,17 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
    */
   function testTypeWithoutCandidates() {
     // Attach a text field to the default image file type.
-    $field = array(
-      'field_name' => drupal_strtolower($this->randomName()),
+    $field_name = drupal_strtolower($this->randomName());
+    $field_storage = FieldStorageConfig::create(array(
+      'name' => $field_name,
       'type' => 'text',
       'settings' => array(
         'max_length' => 255,
-      )
-    );
-    field_create_field($field);
-    $instance = array(
-      'field_name' => $field['field_name'],
+      ),
+    ));
+    $field_storage->save();
+    $field_instance = FieldInstanceConfig::create(array(
+      'field_name' => $field_name,
       'entity_type' => 'file',
       'bundle' => 'image',
       'widget' => array(
@@ -157,8 +161,8 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
           'type' => 'text_default',
         ),
       ),
-    );
-    field_create_instance($instance);
+    ));
+    $field_instance->save();
 
     // Create a user with file creation access.
     $user = $this->drupalCreateUser(array('create files'));
@@ -178,10 +182,10 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     // Step 3: Complete field widgets
     $langcode = LANGUAGE_NONE;
     $edit = array();
-    $edit["{$field['field_name']}[$langcode][0][value]"] = $this->randomName();
+    $edit["{$field_name}[$langcode][0][value]"] = $this->randomName();
     $this->drupalPost(NULL, $edit, t('Save'));
     $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $file->filename)), t('Image file uploaded.'));
-    $this->assertText($field['field_name'], 'File text field was found.');
+    $this->assertText($field_name, 'File text field was found.');
   }
 
   /**

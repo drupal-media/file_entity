@@ -91,11 +91,12 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
     }
 
     // Chained token relationships.
-    if (($file_type_tokens = token_find_with_prefix($tokens, 'type')) && $file_type = file_type_load($file->type)) {
-      $replacements += token_generate('file-type', $file_type_tokens, array('file_type' => $file_type), $options);
+    $token_service = \Drupal::service('token');
+    if (($file_type_tokens = $token_service->findWithPrefix($tokens, 'type')) && $file_type = file_type_load($file->type)) {
+      $replacements += $token_service->generate('file-type', $file_type_tokens, array('file_type' => $file_type), $options);
     }
-    if ($download_url_tokens = token_find_with_prefix($tokens, 'download-url')) {
-      $replacements += token_generate('url', $download_url_tokens, file_entity_download_uri($file), $options);
+    if ($download_url_tokens = $token_service->findWithPrefix($tokens, 'download-url')) {
+      $replacements += $token_service->generate('url', $download_url_tokens, file_entity_download_uri($file), $options);
     }
   }
 

@@ -64,6 +64,7 @@ class FileEntity extends File {
     }
 
     // Fetch image dimensions.
+    module_load_include('inc', 'file_entity', 'file_entity.file');
     file_entity_metadata_fetch_image_dimensions($this);
   }
 

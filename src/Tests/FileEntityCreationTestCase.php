@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\file_entity\Tests;
+use Drupal\file_entity\Entity\FileType;
 
 /**
  * Tests creating and saving a file.
