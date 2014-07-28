@@ -1,13 +1,18 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\file_entity\Tests\FileEntityReplaceTestCase.
+ */
+
+namespace Drupal\file_entity\Tests;
+
+/**
+ * Tests file replace functionality.
+ *
+ * @group file_entity
+ */
 class FileEntityReplaceTestCase extends FileEntityTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File replacement',
-      'description' => 'Test file replace functionality.',
-      'group' => 'File entity',
-    );
-  }
 
   function setUp() {
     parent::setUp();

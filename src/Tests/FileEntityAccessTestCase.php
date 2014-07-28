@@ -1,14 +1,18 @@
 <?php
 
-class FileEntityAccessTestCase extends FileEntityTestBase {
+/**
+ * @file
+ * Contains \Drupal\file_entity\Tests\FileEntityAccessTestCase.
+ */
 
-  public static function getInfo() {
-    return array(
-      'name' => 'File entity access',
-      'description' => 'Test the access aspects of file entity.',
-      'group' => 'File entity',
-    );
-  }
+namespace Drupal\file_entity\Tests;
+
+/**
+ * Tests the access aspects of file entity.
+ *
+ * @group file_entity
+ */
+class FileEntityAccessTestCase extends FileEntityTestBase {
 
   function setUp() {
     parent::setUp();

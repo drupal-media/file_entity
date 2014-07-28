@@ -1,13 +1,18 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\file_entity\Tests\FileEntityCreationTestCase.
+ */
+
+namespace Drupal\file_entity\Tests;
+
+/**
+ * Tests creating and saving a file.
+ *
+ * @group file_entity
+ */
 class FileEntityCreationTestCase extends FileEntityTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File entity creation',
-      'description' => 'Create a file and test saving it.',
-      'group' => 'File entity',
-    );
-  }
 
   function setUp() {
     parent::setUp();

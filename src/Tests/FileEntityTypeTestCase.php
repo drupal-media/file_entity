@@ -1,13 +1,18 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\file_entity\Tests\FileEntityTypeTestCase.
+ */
+
+namespace Drupal\file_entity\Tests;
+
+/**
+ * Tests the file entity types.
+ *
+ * @group file_entity
+ */
 class FileEntityTypeTestCase extends FileEntityTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File entity types',
-      'description' => 'Test the file entity types.',
-      'group' => 'File entity',
-    );
-  }
 
   function setUp() {
     parent::setUp();

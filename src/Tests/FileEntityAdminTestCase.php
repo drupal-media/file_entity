@@ -1,16 +1,18 @@
 <?php
 
 /**
+ * @file
+ * Contains \Drupal\file_entity\Tests\FileEntityAdminTestCase.
+ */
+
+namespace Drupal\file_entity\Tests;
+
+/**
  * Test file administration page functionality.
+ *
+ * @group file_entity
  */
 class FileEntityAdminTestCase extends FileEntityTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File administration',
-      'description' => 'Test file administration page functionality.',
-      'group' => 'File entity',
-    );
-  }
 
   function setUp() {
     parent::setUp();

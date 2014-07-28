@@ -1,13 +1,18 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\file_entity\Tests\FileEntityTokenTestCase.
+ */
+
+namespace Drupal\file_entity\Tests;
+
+/**
+ * Tests the file entity tokens.
+ *
+ * @group file_entity
+ */
 class FileEntityTokenTestCase extends FileEntityTestBase {
-  public static function getInfo() {
-    return array(
-      'name' => 'File entity tokens',
-      'description' => 'Test the file entity tokens.',
-      'group' => 'File entity',
-    );
-  }
 
   function setUp() {
     parent::setUp();

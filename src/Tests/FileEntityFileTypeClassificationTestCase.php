@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Test integration for the file_entity module.
+ * Contains \Drupal\file_entity\Tests\FileEntityFileTypeClassificationTestCase.
  */
 
 namespace Drupal\file_entity\Tests;

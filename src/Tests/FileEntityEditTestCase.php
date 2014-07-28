@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Test integration for the file_entity module.
+ * Contains \Drupal\file_entity\Tests\FileEntityEditTestCase.
  */
 
 namespace Drupal\file_entity\Tests;
@@ -12,7 +12,6 @@ namespace Drupal\file_entity\Tests;
  *
  * @group file_entity
  */
-
 class FileEntityEditTestCase extends FileEntityTestBase {
   protected $web_user;
   protected $admin_user;
