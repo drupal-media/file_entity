@@ -144,7 +144,7 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
     $this->assertResponse(403, 'Cannot download file with in invalid token.');
     $this->drupalGet($url);
     $this->assertResponse(403, 'Cannot download file without a token.');
-    variable_set('file_entity_allow_insecure_download', TRUE);
+    \Drupal::config('file_entity')->set('allow_insecure_download', TRUE);
     $this->drupalGet($url);
     $this->assertResponse(200, 'Users with access can download the file without a token when file_entity_allow_insecure_download is set.');
 

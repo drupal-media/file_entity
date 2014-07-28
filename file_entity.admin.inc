@@ -1054,7 +1054,7 @@ function file_entity_settings_form($form, &$form_state) {
   $form['file_entity_max_filesize'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum upload size'),
-    '#default_value' => variable_get('file_entity_max_filesize', ''),
+    '#default_value' => \Drupal::config('file_entity')->get('max_filesize', ''),
     '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes) in order to restrict the allowed file size. If left empty the file sizes will be limited only by PHP\'s maximum post and file upload sizes (current max limit <strong>%limit</strong>).', array('%limit' => format_size(file_upload_max_size()))),
     '#size' => 10,
     '#element_validate' => array('_file_generic_settings_max_filesize'),
@@ -1063,7 +1063,7 @@ function file_entity_settings_form($form, &$form_state) {
   $form['file_entity_default_allowed_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),
-    '#default_value' => variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'),
+    '#default_value' => \Drupal::config('file_entity')->get('default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'),
     '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
     '#maxlength' => NULL,
   );
@@ -1072,13 +1072,13 @@ function file_entity_settings_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Alt attribute'),
     '#description' => t('The text to use as value for the <em>img</em> tag <em>alt</em> attribute.'),
-    '#default_value' => variable_get('file_entity_alt', '[file:field_file_image_alt_text]'),
+    '#default_value' => \Drupal::config('file_entity')->get('alt', '[file:field_file_image_alt_text]'),
   );
   $form['file_entity_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title attribute'),
     '#description' => t('The text to use as value for the <em>img</em> tag <em>title</em> attribute.'),
-    '#default_value' => variable_get('file_entity_title', '[file:field_file_image_title_text]'),
+    '#default_value' => \Drupal::config('file_entity')->get('title', '[file:field_file_image_title_text]'),
   );
 
   // Provide default token values.
@@ -1101,19 +1101,19 @@ function file_entity_settings_form($form, &$form_state) {
   $form['file_upload_wizard']['file_entity_file_upload_wizard_skip_file_type'] = array(
     '#type' => 'checkbox',
     '#title' => t('Skip filetype selection.'),
-    '#default_value' => variable_get('file_entity_file_upload_wizard_skip_file_type', FALSE),
+    '#default_value' => \Drupal::config('file_entity')->get('file_upload_wizard_skip_file_type', FALSE),
     '#description' => t('The file type selection step is only available if the uploaded file falls into two or more file types. If this step is skipped, files with no available file type or two or more file types will not be assigned a file type.'),
   );
   $form['file_upload_wizard']['file_entity_file_upload_wizard_skip_scheme'] = array(
     '#type' => 'checkbox',
     '#title' => t('Skip scheme selection.'),
-    '#default_value' => variable_get('file_entity_file_upload_wizard_skip_scheme', FALSE),
+    '#default_value' => \Drupal::config('file_entity')->get('file_upload_wizard_skip_scheme', FALSE),
     '#description' => t('The scheme selection step is only available if two or more file destinations, such as public local files served by the webserver and private local files served by Drupal, are available. If this step is skipped, files will automatically be saved using the default download method.'),
   );
   $form['file_upload_wizard']['file_entity_file_upload_wizard_skip_fields'] = array(
     '#type' => 'checkbox',
     '#title' => t('Skip available fields.'),
-    '#default_value' => variable_get('file_entity_file_upload_wizard_skip_fields', FALSE),
+    '#default_value' => \Drupal::config('file_entity')->get('file_upload_wizard_skip_fields', FALSE),
     '#description' => t('The field selection step is only available if the file type the file belongs to has any available fields. If this step is skipped, any fields on the file will be left blank.'),
   );
 

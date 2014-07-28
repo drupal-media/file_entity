@@ -25,7 +25,7 @@ function file_entity_view_page($file) {
  */
 function file_entity_download_page($file) {
   // Ensure there is a valid token to download this file.
-  if (!variable_get('file_entity_allow_insecure_download', FALSE)) {
+  if (!\Drupal::config('file_entity')->get('allow_insecure_download', FALSE)) {
     if (!isset($_GET['token']) || $_GET['token'] !== file_entity_get_download_token($file)) {
       return MENU_ACCESS_DENIED;
     }
@@ -328,7 +328,7 @@ function file_entity_add_upload_submit($form, &$form_state) {
           $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
           $form_state['storage']['type'] = reset($candidates_keys);
         }
-        elseif (variable_get('file_entity_file_upload_wizard_skip_file_type', FALSE)) {
+        elseif (\Drupal::config('file_entity')->get('file_upload_wizard_skip_file_type', FALSE)) {
           // Do not assign the file a file type.
           $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
           $form_state['storage']['type'] = FILE_TYPE_NONE;
@@ -348,7 +348,7 @@ function file_entity_add_upload_submit($form, &$form_state) {
           $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
           $form_state['storage']['scheme'] = key($schemes);
         }
-        elseif (variable_get('file_entity_file_upload_wizard_skip_scheme', FALSE)) {
+        elseif (\Drupal::config('file_entity')->get('file_upload_wizard_skip_scheme', FALSE)) {
           // Assign the file the default scheme.
           $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
           $form_state['storage']['scheme'] = file_default_scheme();
@@ -364,7 +364,7 @@ function file_entity_add_upload_submit($form, &$form_state) {
       // This filetype doesn't have fields, save the file.
       $save = TRUE;
     }
-    elseif (variable_get('file_entity_file_upload_wizard_skip_fields', FALSE)) {
+    elseif (\Drupal::config('file_entity')->get('file_upload_wizard_skip_fields', FALSE)) {
       // Save the file with blanks fields.
       $save = TRUE;
     }
@@ -976,12 +976,12 @@ function file_entity_get_upload_validators(array $options = array()) {
     $validators['file_validate_extensions'] = array($options['file_extensions']);
   }
   else {
-    $validators['file_validate_extensions'] = array(variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'));
+    $validators['file_validate_extensions'] = array(\Drupal::config('file_entity')->get('default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'));
   }
 
   // Cap the upload size according to the system or user defined limit.
   $max_filesize = parse_size(file_upload_max_size());
-  $file_entity_max_filesize = parse_size(variable_get('file_entity_max_filesize', ''));
+  $file_entity_max_filesize = parse_size(\Drupal::config('file_entity')->get('max_filesize', ''));
 
   // If the user defined a size limit, use the smaller of the two.
   if (!empty($file_entity_max_filesize)) {
