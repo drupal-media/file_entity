@@ -50,7 +50,6 @@ class FileEntity extends File {
     }
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -83,6 +82,9 @@ class FileEntity extends File {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
     $fields['type'] = FieldDefinition::create('string')
