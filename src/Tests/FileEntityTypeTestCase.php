@@ -40,7 +40,7 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
   function testCreate() {
     $type_machine_type = 'foo';
     $type_machine_label = 'foobar';
-    $type = $this->createFileType(array('type' => $type_machine_type, 'label' => $type_machine_label));
+    $type = $this->createFileType(array('id' => $type_machine_type, 'label' => $type_machine_label));
     $loaded_type = FileType::load($type_machine_type);
     $this->assertEqual($loaded_type->label, $type_machine_label, "Was able to create a type and retreive it.");
   }
@@ -110,27 +110,27 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     $file = reset($this->files['image']);
     $edit = array();
     $edit['files[upload]'] = drupal_realpath($file->uri);
-    $this->drupalPost('file/add', $edit, t('Next'));
+    $this->drupalPostForm('file/add', $edit, t('Next'));
 
     // Step 2: Select file type candidate
     $this->assertText('Image 1', 'File type candidate list item found.');
     $this->assertText('Image 2', 'File type candidate list item found.');
     $edit = array();
     $edit['type'] = 'image2';
-    $this->drupalPost(NULL, $edit, t('Next'));
+    $this->drupalPostForm(NULL, $edit, t('Next'));
 
     // Step 3: Select file scheme candidate
     $this->assertText('Public local files served by the webserver.', 'File scheme candidate list item found.');
     $this->assertText('Private local files served by Drupal.', 'File scheme candidate list item found.');
     $edit = array();
     $edit['scheme'] = 'public';
-    $this->drupalPost(NULL, $edit, t('Next'));
+    $this->drupalPostForm(NULL, $edit, t('Next'));
 
     // Step 4: Complete field widgets
     $langcode = LANGUAGE_NONE;
     $edit = array();
     $edit["{$field_name}[$langcode][0][value]"] = $this->randomName();
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $file->filename)), t('Image 2 file updated.'));
     $this->assertText($field_name, 'File text field was found.');
   }
@@ -173,18 +173,18 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     $file = reset($this->files['image']);
     $edit = array();
     $edit['files[upload]'] = drupal_realpath($file->uri);
-    $this->drupalPost('file/add', $edit, t('Next'));
+    $this->drupalPostForm('file/add', $edit, t('Next'));
 
     // Step 2: Scheme selection
     if ($this->xpath('//input[@name="scheme"]')) {
-      $this->drupalPost(NULL, array(), t('Next'));
+      $this->drupalPostForm(NULL, array(), t('Next'));
     }
 
     // Step 3: Complete field widgets
     $langcode = LANGUAGE_NONE;
     $edit = array();
     $edit["{$field_name}[$langcode][0][value]"] = $this->randomName();
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $file->filename)), t('Image file uploaded.'));
     $this->assertText($field_name, 'File text field was found.');
   }
@@ -210,7 +210,7 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
       'mimetypes' => 'image/png',
     );
     $this->drupalGet('admin/structure/file-types/add');
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertText(t('The file type @type has been updated.', array('@type' => $edit['label'])), 'New file type successfully created.');
     $this->assertText($edit['label'], 'New file type created: label found.');
     $this->assertText($edit['description'], 'New file type created: description found.');
@@ -231,28 +231,28 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
 
     // Modify file type.
     $edit['label'] = t('New type label');
-    $this->drupalPost(NULL, array('label' => $edit['label']), t('Save'));
+    $this->drupalPostForm(NULL, array('label' => $edit['label']), t('Save'));
     $this->assertText(t('The file type @type has been updated.', array('@type' => $edit['label'])), 'File type was modified.');
     $this->assertText($edit['label'], 'Modified label found on file types list.');
 
     // Disable and re-enable file type.
     $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/disable');
     $this->assertText(t('Are you sure you want to disable the file type @type?', array('@type' => $edit['label'])), 'Disable confirmation page found.');
-    $this->drupalPost(NULL, array(), t('Disable'));
+    $this->drupalPostForm(NULL, array(), t('Disable'));
     $this->assertText(t('The file type @type has been disabled.', array('@type' => $edit['label'])), 'Disable confirmation message found.');
     $this->assertFieldByXPath("//table//tr[5]//td[1]", $edit['label'], 'Disabled type moved to the tail of the list.');
     $this->assertLink(t('enable'), 0, 'Able to re-enable newly created file type.');
     $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['type'] . '/enable', 0, 'Enable link points to enable confirmation page.');
     $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/enable');
     $this->assertText(t('Are you sure you want to enable the file type @type?', array('@type' => $edit['label'])), 'Enable confirmation page found.');
-    $this->drupalPost(NULL, array(), t('Enable'));
+    $this->drupalPostForm(NULL, array(), t('Enable'));
     $this->assertText(t('The file type @type has been enabled.', array('@type' => $edit['label'])), 'Enable confirmation message found.');
     $this->assertFieldByXPath("//table//tr[1]//td[1]", $edit['label'], 'Enabled type moved to the top of the list.');
 
     // Delete newly created type.
     $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/delete');
     $this->assertText(t('Are you sure you want to delete the file type @type?', array('@type' => $edit['label'])), 'Delete confirmation page found.');
-    $this->drupalPost(NULL, array(), t('Delete'));
+    $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->assertText(t('The file type @type has been deleted.', array('@type' => $edit['label'])), 'Delete confirmation message found.');
     $this->drupalGet('admin/structure/file-types');
     $this->assertNoText($edit['label'], 'File type successfully deleted.');
@@ -261,7 +261,7 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     $this->drupalGet('admin/structure/file-types/manage/image/edit');
     $this->assertRaw(t('Image'), 'Label found on file type edit page');
     $this->assertText("image/*", 'Mime-type configuration found on file type edit page');
-    $this->drupalPost(NULL, array('label' => t('Funky images')), t('Save'));
+    $this->drupalPostForm(NULL, array('label' => t('Funky images')), t('Save'));
     $this->assertText(t('The file type @type has been updated.', array('@type' => t('Funky images'))), 'File type was modified.');
     $this->assertText(t('Funky image'), 'Modified label found on file types list.');
     $this->assertFieldByXPath("//table//tr[1]//td[7]", t('Overridden'), 'Modified type overrides configuration from code.');
@@ -271,7 +271,7 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     // Revert file type.
     $this->drupalGet('admin/structure/file-types/manage/image/revert');
     $this->assertText(t('Are you sure you want to revert the file type @type?', array('@type' => t('Funky images'))), 'Revert confirmation page found.');
-    $this->drupalPost(NULL, array(), t('Revert'));
+    $this->drupalPostForm(NULL, array(), t('Revert'));
     $this->assertText(t('The file type @type has been reverted.', array('@type' => t('Funky images'))), 'Revert confirmation message found.');
     $this->assertText(t('Image'), 'Reverted file type found in list.');
     $this->assertFieldByXPath("//table//tr[1]//td[7]", t('Default'), 'Reverted file type shows correct state.');

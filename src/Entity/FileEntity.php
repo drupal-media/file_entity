@@ -2,13 +2,12 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\FileEntity.
+ * Contains \Drupal\file_entity\Entity\FileEntity.
  */
 
-namespace Drupal\file_entity;
+namespace Drupal\file_entity\Entity;
 
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\file\Entity\File;
 
 /**
@@ -81,4 +80,4 @@ class FileEntity extends File {
     $this->entityKeys['bundle'] = $type;
   }
 
-} 
+}

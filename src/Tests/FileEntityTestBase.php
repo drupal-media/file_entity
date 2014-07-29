@@ -54,7 +54,7 @@ abstract class FileEntityTestBase extends WebTestBase {
    */
   protected function createFileType($overrides = array()) {
     $type = FileType::create(array(
-      'type' => 'test',
+      'id' => strtolower($this->randomName()),
       'label' => 'Test',
       'mimetypes' => array('image/jpeg', 'image/gif', 'image/png', 'image/tiff'),
     ));
