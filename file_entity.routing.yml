@@ -1,0 +1,151 @@
+file_entity.file_types_overview:
+  path: 'admin/structure/file-types'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesOverview'
+    _title: 'File types'
+  requirements:
+    _permission: 'administer file types'
+
+file_entity.file_types_add:
+  path: 'admin/structure/file-types/add'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesAdd'
+    _title: 'Add file type'
+  requirements:
+    _permission: 'administer file types'
+
+file_entity.file_types_manage:
+  path: 'admin/structure/file-types/manage/{file_type}'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManage'
+    _title: 'Manage file types'
+  requirements:
+    _permission: 'access content'
+
+file_entity.file_types_manage_enable:
+  path: 'admin/structure/file-types/manage/{file_type}/enable'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManageEnable'
+    _title: 'Enable'
+  requirements:
+    _permission: 'administer file types'
+
+file_entity.file_types_manage_disable:
+  path: 'admin/structure/file-types/manage/{file_type}/disable'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManageDisable'
+    _title: 'Disable'
+  requirements:
+    _permission: 'administer file types'
+
+file_entity.file_types_manage_revert:
+  path: 'admin/structure/file-types/manage/{file_type}/revert'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManageRevert'
+    _title: 'Revert'
+  requirements:
+    _permission: 'administer file types'
+
+file_entity.file_types_manage_delete:
+  path: 'admin/structure/file-types/manage/{file_type}/delete'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManageDelete'
+    _title: 'Delete'
+  requirements:
+    _permission: 'administer file types'
+
+file_entity.file_content:
+  path: 'admin/content/file'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileContent'
+    _title: 'Files'
+  requirements:
+    _permission: 'administer files'
+
+file_entity.file_content_list:
+  path: 'admin/content/file/list'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileContentList'
+    _title: 'List'
+  requirements:
+      _permission: 'access content'
+
+file_entity.file_add:
+  path: 'file/add'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileAdd'
+    _title: 'Add file'
+  requirements:
+    _permission: 'create'
+
+file_entity.file_add_upload:
+  path: 'file/add/upload'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileAddUpload'
+    _title: 'Upload'
+  requirements:
+      _permission: 'access content'
+
+file_entity.file_add_upload_file:
+  path: 'file/add/upload/file'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileAddUploadFile'
+    _title: 'File'
+  requirements:
+      _permission: 'access content'
+
+file_entity.file_add_upload_archive:
+  path: 'file/add/upload/archive'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileAddUploadArchive'
+    _title: 'Archive'
+  requirements:
+    _permission: 'administer files'
+
+file_entity.file:
+  path: 'file/{file}'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::File'
+    _title: 'File Name'
+  requirements:
+      _permission: 'access content'
+
+file_entity.file_view:
+  path: 'file/{file}/view'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileView'
+    _title: 'View'
+  requirements:
+      _permission: 'access content'
+
+file_entity.file_usage:
+  path: 'file/{file}/usage'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileUsage'
+    _title: 'Usage'
+  requirements:
+      _permission: 'access content'
+
+file_entity.file_download:
+  path: 'file/{file}/download'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileDownload'
+    _title: 'Download'
+  requirements:
+      _permission: 'access content'
+
+file_entity.file_edit:
+  path: 'file/{file}/edit'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileEdit'
+    _title: 'Edit'
+  requirements:
+      _permission: 'access content'
+
+file_entity.file_delete:
+  path: 'file/{file}/delete'
+  defaults:
+    _content: '\Drupal\file_entity\Controller\FileController::FileDelete'
+    _title: 'Delete'
+  requirements:
+      _permission: 'access content'
