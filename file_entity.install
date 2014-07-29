@@ -103,39 +103,9 @@ function file_entity_schema() {
  * Implements hook_install().
  */
 function file_entity_install() {
-  $schema = array();
-  $schema['file_managed']['fields']['type'] = array(
-    'description' => 'The type of this file.',
-    'type' => 'varchar',
-    'length' => 50,
-    'not null' => TRUE,
-    // If the FILE_TYPE_NONE constant ever changes, then change the value here
-    // too, and add an update function to deal with existing records. The
-    // constant isn't used here, because there may be cases where this function
-    // runs without the module file loaded.
-    'default' => 'undefined',
-  );
-  $schema['file_managed']['indexes']['file_type'] = array('type');
-  $spec = $schema['file_managed']['fields']['type'];
-  $indexes_new = array('indexes' => $schema['file_managed']['indexes']);
-
-  // If another module (e.g., Media) had added a {file_managed}.type field,
-  // then change it to the expected specification. Otherwise, add the field.
-  if (db_field_exists('file_managed', 'type')) {
-    // db_change_field() will fail if any records have type=NULL, so update
-    // them to the new default value.
-    db_update('file_managed')->fields(array('type' => $spec['default']))->isNull('type')->execute();
-
-    // Indexes using a field being changed must be dropped prior to calling
-    // db_change_field(). However, the database API doesn't provide a way to do
-    // this without knowing what the old indexes are. Therefore, it is the
-    // responsibility of the module that added them to drop them prior to
-    // allowing this module to be installed.
-    db_change_field('file_managed', 'type', 'type', $spec, $indexes_new);
-  }
-  else {
-    db_add_field('file_managed', 'type', $spec, $indexes_new);
-  }
+  $type_storage_definition = \Drupal::entityManager()->getFieldStorageDefinitions('file')['type'];
+  $type_storage_definition->setSetting('initial', FILE_TYPE_NONE);
+  \Drupal::entityManager()->getStorage('file')->onFieldStorageDefinitionCreate($type_storage_definition);
 
   // Set permissions.
   $roles = user_roles();
