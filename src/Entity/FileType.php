@@ -17,6 +17,11 @@ use Drupal\file_entity\FileTypeInterface;
  * @ConfigEntityType(
  *   id = "file_type",
  *   label = @Translation("File type"),
+ *   controllers = {
+ *     "form" = {
+ *       "default" = "Drupal\file_entity\Form\FileTypeForm",
+ *     },
+ *   },
  *   admin_permission = "administer file types",
  *   config_prefix = "type",
  *   bundle_of = "file",
@@ -51,6 +56,8 @@ class FileType extends ConfigEntityBundleBase implements FileTypeInterface {
   public $description;
 
   /**
+   * MIME types associated with this file type.
+   *
    * @var array
    */
   public $mimetypes = array();

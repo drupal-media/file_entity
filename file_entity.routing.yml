@@ -9,7 +9,7 @@ file_entity.file_types_overview:
 file_entity.file_types_add:
   path: 'admin/structure/file-types/add'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesAdd'
+    _entity_form: 'file_type.default'
     _title: 'Add file type'
   requirements:
     _permission: 'administer file types'
