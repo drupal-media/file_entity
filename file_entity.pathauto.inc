@@ -7,6 +7,8 @@
  * @ingroup pathauto
  */
 
+use Drupal\file_entity\Entity\FileType;
+
 /**
  * Implements hook_path_alias_types().
  */
@@ -31,7 +33,7 @@ function file_entity_pathauto($op) {
       $settings['batch_update_callback'] = 'file_entity_pathauto_bulk_update_batch_process';
       $settings['batch_file'] = drupal_get_path('module', 'file_entity') . '/file_entity.pathauto.inc';
 
-      foreach (file_type_get_enabled_types() as $file_type => $type) {
+      foreach (FileType::loadEnabled() as $file_type => $type) {
         $settings['patternitems'][$file_type] = t('Pattern for all @file_type paths.', array('@file_type' => $type->label));
       }
       return (object) $settings;

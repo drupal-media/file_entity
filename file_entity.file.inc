@@ -4,14 +4,16 @@
  * @file
  * File hooks implemented by the File entity module.
  */
+
 use Drupal\file\FileInterface;
+use Drupal\file_entity\Entity\FileType;
 
 /**
  * Implements hook_file_type().
  */
 function file_entity_file_type(FileInterface $file) {
   $types = array();
-  foreach (file_type_get_enabled_types() as $type) {
+  foreach (FileType::loadEnabled() as $type) {
     if (file_entity_match_mimetypes($type->mimetypes, $file->getMimeType())) {
       $types[] = $type->id();
     }

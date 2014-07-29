@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Tests;
 use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\file_entity\Entity\FileType;
 
 /**
  * Tests the file entity types.
@@ -40,7 +41,7 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     $type_machine_type = 'foo';
     $type_machine_label = 'foobar';
     $type = $this->createFileType(array('type' => $type_machine_type, 'label' => $type_machine_label));
-    $loaded_type = file_type_load($type_machine_type);
+    $loaded_type = FileType::load($type_machine_type);
     $this->assertEqual($loaded_type->label, $type_machine_label, "Was able to create a type and retreive it.");
   }
 

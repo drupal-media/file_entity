@@ -6,6 +6,9 @@
 
 require_once dirname(__FILE__) . '/file_entity.pages.inc';
 
+use Drupal\file_entity\Entity\FileType;
+use Drupal\user\Entity\User;
+
 /**
  * List file administration filters that can be applied.
  */
@@ -341,19 +344,19 @@ function file_entity_admin_files() {
     ->addTag('file_access')
     ->execute()
     ->fetchAllAssoc('fid');
-  $files = file_load_multiple(array_keys($result));
+  $files = FileType::loadMultiple(array_keys($result));
 
   $uids = array();
   foreach ($files as $file) {
     $uids[] = $file->uid;
   }
-  $accounts = !empty($uids) ? user_load_multiple(array_unique($uids)) : array();
+  $accounts = !empty($uids) ? User::loadMultiple(array_unique($uids)) : array();
 
   // Prepare the list of files.
   $destination = drupal_get_destination();
   $options = array();
   foreach ($files as $file) {
-    $file_type = file_type_load($file->type);
+    $file_type = FileType::load($file->type);
     $options[$file->fid] = array(
       'title' => array(
         'data' => array(
@@ -546,7 +549,7 @@ function file_entity_list_types_page() {
   );
   $rows = array();
   $weight = 0;
-  $types = file_type_load_all(TRUE);
+  $types = FileType::loadMultiple();
   $count = count($types);
   foreach ($types as $type) {
     $weight++;
@@ -824,7 +827,7 @@ function file_entity_file_type_form($form, &$form_state, $type = NULL) {
     '#maxlength' => 255,
     '#disabled' => (bool) $type->type,
     '#machine_name' => array(
-      'exists' => 'file_type_load',
+      'exists' => 'Drupal\file_entity\Entity\FileType::load',
       'source' => array('label'),
     ),
     '#description' => t('A unique machine-readable name for this file type. It must only contain lowercase letters, numbers, and underscores.'),
@@ -905,22 +908,23 @@ function file_entity_file_type_form_validate($form, &$form_state) {
  */
 function file_entity_file_type_form_submit($form, &$form_state) {
   if (!empty($form['#file_type']->type)) {
-    $type = file_type_load($form['#file_type']->type);
+    $type = FileType::load($form['#file_type']->type);
   }
   else {
-    $type = (object) array(
+    $type = FileType::create(array(
       'type' => $form_state['values']['type'],
-    );
+    ));
   }
+  /* @var $type FileType */
   if ($form_state['values']['op'] == t('Delete')) {
-    $form_state['redirect'] = 'admin/structure/file-types/manage/' . $type->type . '/delete';
+    $form_state['redirect'] = 'admin/structure/file-types/manage/' . $type->get('type') . '/delete';
     return;
   }
-  $type->label = $form_state['values']['label'];
-  $type->description = $form_state['values']['description'];
-  $type->mimetypes = array_filter(array_map('trim', explode("\n", $form_state['values']['mimetypes'])));
+  $type->set('label', $form_state['values']['label']);
+  $type->set('description', $form_state['values']['description']);
+  $type->set('mimetypes', array_filter(array_map('trim', explode("\n", $form_state['values']['mimetypes']))));
 
-  file_type_save($type);
+  $type->save();
 
   drupal_set_message(t('The file type %type has been updated.', array('%type' => $type->label)));
   $form_state['redirect'] = 'admin/structure/file-types';
@@ -942,12 +946,11 @@ function file_entity_type_enable_confirm($form, &$form_state, $type) {
  * Process file type disable confirm submissions.
  */
 function file_entity_type_enable_confirm_submit($form, &$form_state) {
-  file_type_enable($form_state['values']['type']);
+  FileType::load($form_state['values']['type'])->disable()->save();
   $t_args = array('%label' => $form_state['values']['label']);
   drupal_set_message(t('The file type %label has been enabled.', $t_args));
   watchdog('file_entity', 'Enabled file type %label.', $t_args, WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/file-types';
-  return;
 }
 
 
@@ -979,12 +982,11 @@ function file_entity_type_disable_confirm($form, &$form_state, $type) {
  * Process file type disable confirm submissions.
  */
 function file_entity_type_disable_confirm_submit($form, &$form_state) {
-  file_type_disable($form_state['values']['type']);
+  FileType::load($form_state['values']['type'])->disable()->save();
   $t_args = array('%label' => $form_state['values']['label']);
   drupal_set_message(t('The file type %label has been disabled.', $t_args));
   watchdog('file_entity', 'Disabled file type %label.', $t_args, WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/file-types';
-  return;
 }
 
 
@@ -1004,12 +1006,11 @@ function file_entity_type_revert_confirm($form, &$form_state, $type) {
  */
 function file_entity_type_revert_confirm_submit($form, &$form_state) {
   // @NOTE deleting the file_type from the DB actually reverts it to code.
-  file_type_delete($form_state['values']['type']);
+  FileType::load($form_state['values']['type'])->delete();
   $t_args = array('%label' => $form_state['values']['label']);
   drupal_set_message(t('The file type %label has been reverted.', $t_args));
   watchdog('file_entity', 'Reverted file type %label.', $t_args, WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/file-types';
-  return;
 }
 
 
@@ -1037,14 +1038,13 @@ function file_entity_type_delete_confirm($form, &$form_state, $type) {
  * Process file type delete confirm submissions.
  */
 function file_entity_type_delete_confirm_submit($form, &$form_state) {
-  file_type_delete($form_state['values']['type']);
+  FileType::load($form_state['values']['type'])->delete();
 
   $t_args = array('%label' => $form_state['values']['label']);
   drupal_set_message(t('The file type %label has been deleted.', $t_args));
   watchdog('file_entity', 'Deleted file type %label.', $t_args, WATCHDOG_NOTICE);
 
   $form_state['redirect'] = 'admin/structure/file-types';
-  return;
 }
 
 /**

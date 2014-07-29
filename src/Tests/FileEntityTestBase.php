@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Tests;
 
 use Drupal\file\Entity\File;
+use Drupal\file_entity\Entity\FileType;
 use Drupal\file_entity\FileEntity;
 use Drupal\simpletest\WebTestBase;
 
@@ -43,18 +44,24 @@ abstract class FileEntityTestBase extends WebTestBase {
     }
   }
 
+  /**
+   * Creates a test file type.
+   *
+   * @param array $overrides
+   *   (optional) An array of values indexed by FileType property names.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|static
+   */
   protected function createFileType($overrides = array()) {
-    $type = new \stdClass();
-    $type->type = 'test';
-    $type->label = "Test";
-    $type->description = '';
-    $type->mimetypes = array('image/jpeg', 'image/gif', 'image/png', 'image/tiff');
-
+    $type = FileType::create(array(
+      'type' => 'test',
+      'label' => 'Test',
+      'mimetypes' => array('image/jpeg', 'image/gif', 'image/png', 'image/tiff'),
+    ));
     foreach ($overrides as $k => $v) {
       $type->$k = $v;
     }
-
-    file_type_save($type);
+    $type->save();
     return $type;
   }
 
