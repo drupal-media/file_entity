@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Form\FileForm.
+ * Contains \Drupal\file_entity\Form\FileTypeForm.
  */
 
 namespace Drupal\file_entity\Form;
@@ -10,13 +10,13 @@ namespace Drupal\file_entity\Form;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\file_entity\Entity\File;
+use Drupal\file_entity\Entity\FileType;
 use Drupal\file_entity\Mimetypes;
 
 /**
  * Form controller for file type forms.
  */
-class FileForm extends EntityForm {
+class FileTypeForm extends EntityForm {
 
   /**
    * {@inheritdoc}
@@ -24,7 +24,7 @@ class FileForm extends EntityForm {
   public function form(array $form, array &$form_state) {
     $form = parent::form($form, $form_state);
 
-    /* @var File $type */
+    /* @var FileType $type */
     $type = $this->entity;
 
     $form['label'] = array(
@@ -41,7 +41,7 @@ class FileForm extends EntityForm {
       '#default_value' => $type->id(),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#machine_name' => array(
-        'exists' => 'Drupal\file_entity\Entity\File::load',
+        'exists' => 'Drupal\file_entity\Entity\FileType::load',
         'source' => array('label'),
       ),
       '#description' => t('A unique machine-readable name for this file type. It must only contain lowercase letters, numbers, and underscores.'),

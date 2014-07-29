@@ -35,6 +35,7 @@ class FileEntity extends File {
       $values['type'] = FILE_TYPE_NONE;
       $bundle = FILE_TYPE_NONE;
     }
+
     parent::__construct($values, $entity_type, $bundle, $translations);
   }
 

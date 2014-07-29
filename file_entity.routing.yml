@@ -73,7 +73,7 @@ file_entity.file_content_list:
 file_entity.file_add:
   path: 'file/add'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileAdd'
+    _form: '\Drupal\file_entity\Form\FileAddForm'
     _title: 'Add file'
   requirements:
     _permission: 'create'

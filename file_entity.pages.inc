@@ -434,33 +434,6 @@ function file_entity_add_upload_submit($form, &$form_state) {
 }
 
 /**
- * Determines the upload location for the file add upload form.
- *
- * @param array $params
- *   An array of parameters from the media browser.
- * @param array $data
- *   (optional) An array of token objects to pass to token_replace().
- *
- * @return string
- *   A file directory URI with tokens replaced.
- *
- * @see token_replace()
- */
-function file_entity_upload_destination_uri(array $params, array $data = array()) {
-  $params += array(
-    'uri_scheme' => file_default_scheme(),
-    'file_directory' => '',
-  );
-
-  $destination = trim($params['file_directory'], '/');
-
-  // Replace tokens.
-  $destination = token_replace($destination, $data);
-
-  return $params['uri_scheme'] . '://' . $destination;
-}
-
-/**
  * Form for uploading multiple files.
  */
 function file_entity_add_upload_multiple($form, &$form_state, $params = array()) {
