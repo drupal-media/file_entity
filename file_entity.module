@@ -107,9 +107,9 @@ function file_entity_help($path, $arg) {
  * Implements hook_menu().
  */
 function file_entity_menu() {
-  // File Configuration
-  // @todo Move this back to admin/config/media/file-types in Drupal 8 if
-  // MENU_MAX_DEPTH is increased to a value higher than 9.
+//   File Configuration
+//   @todo Move this back to admin/config/media/file-types in Drupal 8 if
+//   MENU_MAX_DEPTH is increased to a value higher than 9.
   $items['admin/structure/file-types'] = array(
     'title' => 'File types',
     'description' => 'Manage settings for the type of files used on your site.',
@@ -185,6 +185,7 @@ function file_entity_menu() {
     'access arguments' => array('create'),
     'file' => 'file_entity.pages.inc',
   );
+//   @TODO: Check how to translate this into D8
   if (\Drupal::moduleHandler()->moduleExists('plupload') && \Drupal::moduleHandler()->moduleExists('multiform')) {
     $items['file/add']['page arguments'] = array('file_entity_add_upload_multiple');
   }

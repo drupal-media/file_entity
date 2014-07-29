@@ -30,11 +30,11 @@ class FileEntityCreationTestCase extends FileEntityTestBase {
     // Create a file.
     $edit = array();
     $edit['files[upload]'] = drupal_realpath($test_file->uri);
-    $this->drupalPost('file/add', $edit, t('Next'));
+    $this->drupalPostForm('file/add', $edit, t('Next'));
 
     // Step 2: Scheme selection
     if ($this->xpath('//input[@name="scheme"]')) {
-      $this->drupalPost(NULL, array(), t('Next'));
+      $this->drupalPostForm(NULL, array(), t('Next'));
     }
 
     // Check that the document file has been uploaded.
