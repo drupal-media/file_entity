@@ -5,6 +5,8 @@
  * Token integration for the file_entity module.
  */
 
+use Drupal\file_entity\Entity\FileType;
+
 /**
  * Implements hook_token_info().
  */
@@ -78,7 +80,7 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'type':
-          if ($file_type = file_type_load($file->type)) {
+          if ($file_type = FileType::load($file->type)) {
             $replacements[$original] = $sanitize ? check_plain($file_type->label) : $file_type->label;
           }
           break;
@@ -92,7 +94,7 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
 
     // Chained token relationships.
     $token_service = \Drupal::service('token');
-    if (($file_type_tokens = $token_service->findWithPrefix($tokens, 'type')) && $file_type = file_type_load($file->type)) {
+    if (($file_type_tokens = $token_service->findWithPrefix($tokens, 'type')) && $file_type = FileType::load($file->type)) {
       $replacements += $token_service->generate('file-type', $file_type_tokens, array('file_type' => $file_type), $options);
     }
     if ($download_url_tokens = $token_service->findWithPrefix($tokens, 'download-url')) {

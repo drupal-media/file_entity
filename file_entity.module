@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
+use Drupal\file_entity\Entity\FileType;
 
 /**
  * Modules should return this value from hook_file_entity_access() to allow
@@ -444,7 +445,7 @@ function file_entity_permission() {
   $permissions['view own private files']['description'] = t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['private'])));
 
   // Generate standard file permissions for all applicable file types.
-  foreach (file_type_get_enabled_types() as $type) {
+  foreach (FileType::loadEnabled() as $type) {
     $permissions += file_entity_list_permissions($type->id());
   }
 
@@ -1937,27 +1938,28 @@ function file_entity_file_download($uri) {
  *   An array of permission names and descriptions.
  */
 function file_entity_list_permissions($type) {
-  $info = file_type_load($type);
+  /* @var $info FileType */
+  $info = FileType::load($type);
 
   // Build standard list of file permissions for this type.
   $permissions = array(
     "edit own $type files" => array(
-      'title' => t('%type_name: Edit own files', array('%type_name' => $info->label)),
+      'title' => t('%type_name: Edit own files', array('%type_name' => $info->get('label'))),
     ),
     "edit any $type files" => array(
-      'title' => t('%type_name: Edit any files', array('%type_name' => $info->label)),
+      'title' => t('%type_name: Edit any files', array('%type_name' => $info->get('label'))),
     ),
     "delete own $type files" => array(
-      'title' => t('%type_name: Delete own files', array('%type_name' => $info->label)),
+      'title' => t('%type_name: Delete own files', array('%type_name' => $info->get('label'))),
     ),
     "delete any $type files" => array(
-      'title' => t('%type_name: Delete any files', array('%type_name' => $info->label)),
+      'title' => t('%type_name: Delete any files', array('%type_name' => $info->get('label'))),
     ),
     "download own $type files" => array(
-      'title' => t('%type_name: Download own files', array('%type_name' => $info->label)),
+      'title' => t('%type_name: Download own files', array('%type_name' => $info->get('label'))),
     ),
     "download any $type files" => array(
-      'title' => t('%type_name: Download any files', array('%type_name' => $info->label)),
+      'title' => t('%type_name: Download any files', array('%type_name' => $info->get('label'))),
     ),
   );
 

@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
+use Drupal\file\FileInterface;
 use Drupal\file_entity\FileTypeInterface;
 
 /**
@@ -55,15 +56,15 @@ class FileType extends ConfigEntityBundleBase implements FileTypeInterface {
   public $mimetypes = array();
 
   /**
-   * @var bool
-   */
-  public $status = TRUE;
-
-  /**
    * {@inheritdoc}
    */
-  public function id() {
-    return $this->id;
+  public static function loadEnabled($status = TRUE) {
+    $types = array();
+    foreach (self::loadMultiple() as $id => $type) {
+      if ($type->status == $status) {
+        $types[$id] = $type;
+      }
+    }
+    return $types;
   }
-
 }

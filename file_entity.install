@@ -5,61 +5,12 @@
  * Install, update and uninstall functions for the file_entity module.
  */
 
+use Drupal\file_entity\Entity\FileType;
+
 /**
  * Implements hook_schema().
  */
 function file_entity_schema() {
-  $schema['file_type'] = array(
-    'description' => 'Stores the settings for file types.',
-    'fields' => array(
-      'type' => array(
-        'description' => 'The machine name of the file type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'label' => array(
-        'description' => 'The human readable name of the file type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'translatable' => TRUE,
-      ),
-      'description' => array(
-        'description' => 'A brief description of this file type.',
-        'type' => 'text',
-        'not null' => TRUE,
-        'size' => 'medium',
-        'translatable' => TRUE,
-      ),
-      'mimetypes' => array(
-        'description' => 'Mimetypes mapped to this file type.',
-        'type' => 'blob',
-        'size' => 'big',
-        'not null' => FALSE,
-        'serialize' => TRUE,
-      ),
-    ),
-    'primary key' => array('type'),
-    'export' => array(
-      'key' => 'type',
-      'key name' => 'Type',
-      'primary key' => 'type',
-      'default hook' => 'file_default_types',
-      'identifier' => 'file_type',
-      'export type string' => 'ctools_type',
-      'save callback' => 'file_type_save',
-      'delete callback' => 'file_type_delete',
-      'api' => array(
-        'owner' => 'file_entity',
-        'api' => 'file_type',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
-  );
   $schema['file_display'] = array(
     'description' => 'Stores configuration options for file displays.',
     'fields' => array(
