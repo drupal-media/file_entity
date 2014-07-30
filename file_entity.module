@@ -913,6 +913,7 @@ function file_entity_entity_type_alter(&$entity_types) {
 
   $entity_types['file']->setClass('Drupal\file_entity\Entity\FileEntity');
   $entity_types['file']->setFormClass('default', 'Drupal\file_entity\Form\FileForm');
+  $entity_types['file']->setAccessClass('Drupal\file_entity\FileEntityAccessController');
   //$entity_types['file']['uri callback'] = 'file_entity_uri';
   /*$entity_types['file']['view modes']['teaser'] = array(
     'label' => t('Teaser'),
