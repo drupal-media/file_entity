@@ -18,6 +18,7 @@ use Drupal\file_entity\FileTypeInterface;
  *   id = "file_type",
  *   label = @Translation("File type"),
  *   controllers = {
+ *     "list_builder" = "Drupal\file_entity\FileTypeListBuilder",
  *     "form" = {
  *       "default" = "Drupal\file_entity\Form\FileTypeForm",
  *     },
@@ -28,8 +29,12 @@ use Drupal\file_entity\FileTypeInterface;
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "name",
- *     "status" = "status"
- *   }
+ *     "status" = "status",
+ *   },
+ *   links = {
+ *     "canonical" = "file_entity.file_types_overview",
+ *     "edit-form" = "file_entity.file_types_manage",
+ *   },
  * )
  */
 class FileType extends ConfigEntityBundleBase implements FileTypeInterface {

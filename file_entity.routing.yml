@@ -1,7 +1,7 @@
 file_entity.file_types_overview:
   path: 'admin/structure/file-types'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesOverview'
+    _entity_list: 'file_type'
     _title: 'File types'
   requirements:
     _permission: 'administer file types'
@@ -17,7 +17,7 @@ file_entity.file_types_add:
 file_entity.file_types_manage:
   path: 'admin/structure/file-types/manage/{file_type}'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManage'
+    _entity_form: 'file_type.default'
     _title: 'Manage file types'
   requirements:
     _permission: 'access content'

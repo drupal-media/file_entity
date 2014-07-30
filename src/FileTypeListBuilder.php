@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * Contains \Drupal\file_entity\FileTypeListBuilder.
+ */
+
+namespace Drupal\file_entity;
+
+use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\file_entity\Entity\FileType;
+
+/**
+ * Builds a list of file types.
+ *
+ * @see \Drupal\file_entity\Entity\FileType
+ */
+class FileTypeListBuilder extends ConfigEntityListBuilder {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildHeader() {
+    $header['label'] = t('Label');
+    $header['description'] = t('Description');
+    return $header + parent::buildHeader();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildRow(EntityInterface $entity) {
+    /** @var FileType $entity */
+    $row['label'] = $this->getLabel($entity);
+    $row['description'] = $entity->description;
+    return $row + parent::buildRow($entity);
+  }
+}
