@@ -14,7 +14,7 @@ use Drupal\file_entity\Entity\FileType;
 function file_entity_file_type(FileInterface $file) {
   $types = array();
   foreach (FileType::loadEnabled() as $type) {
-    if (file_entity_match_mimetypes($type->mimetypes, $file->getMimeType())) {
+    if (file_entity_match_mimetypes($type->getMimeTypes(), $file->getMimeType())) {
       $types[] = $type->id();
     }
   }

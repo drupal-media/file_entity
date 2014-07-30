@@ -7,8 +7,8 @@
 
 namespace Drupal\file_entity\Form;
 
-use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\file_entity\Entity\FileType;
 use Drupal\file_entity\Mimetypes;
@@ -36,7 +36,7 @@ class FileTypeForm extends EntityForm {
       '#size' => 30,
     );
 
-    $form['type'] = array(
+    $form['id'] = array(
       '#type' => 'machine_name',
       '#default_value' => $type->id(),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
@@ -50,26 +50,25 @@ class FileTypeForm extends EntityForm {
     $form['description'] = array(
       '#title' => t('Description'),
       '#type' => 'textarea',
-      '#default_value' => $type->description,
+      '#default_value' => $type->getDescription(),
       '#description' => t('A brief description of this file type.'),
     );
 
     $form['mimetypes'] = array(
       '#type' => 'textarea',
-      '#title' => t('Mimetypes'),
-      '#description' => t('Enter one mimetype per line.'),
-      '#default_value' => implode("\n", $type->mimetypes),
+      '#title' => t('MIME types'),
+      '#description' => t('Enter one MIME type per line.'),
+      '#default_value' => implode("\n", $type->getMimeTypes()),
     );
 
     $mimetypes = new Mimetypes(\Drupal::moduleHandler());
 
-    $form['mimetype_mapping'] = array(
+    $form['mimetype_list'] = array(
       '#type' => 'details',
-      '#title' => t('Mimetype List'),
-      '#collapsible' => TRUE,
+      '#title' => t('Known MIME types'),
       '#collapsed' => TRUE,
     );
-    $form['mimetype_mapping']['mapping'] = array(
+    $form['mimetype_list']['list'] = array(
       '#theme' => 'item_list',
       '#items' => $mimetypes->get(),
     );
@@ -80,7 +79,9 @@ class FileTypeForm extends EntityForm {
       '#type' => 'submit',
       '#value' => t('Save'),
     );
-    if (!empty($type->type)) {
+    // Arbitrary expressions in empty() allowed in PHP 5.5 only.
+    $id = $type->id();
+    if (!empty($id)) {
       $form['actions']['delete'] = array(
         '#type' => 'submit',
         '#value' => t('Delete'),
@@ -90,27 +91,16 @@ class FileTypeForm extends EntityForm {
     return $form;
   }
 
-  // @todo delete?
-  /**
-   * {@inheritdoc}
-   */
-  protected function actions(array $form, array &$form_state) {
-    $actions = parent::actions($form, $form_state);
-    $actions['submit']['#value'] = t('Save file type');
-    $actions['delete']['#value'] = t('Delete file type');
-    return $actions;
-  }
-
   /**
    * {@inheritdoc}
    */
   public function validate(array $form, array &$form_state) {
     parent::validate($form, $form_state);
 
-    $id = trim($form_state['values']['type']);
+    $id = trim($form_state['values']['id']);
     // '0' is invalid, since elsewhere we check it using empty().
     if ($id == '0') {
-      $this->setFormError('type', $form_state, $this->t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $id)));
+      $this->setFormError('id', $form_state, $this->t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $id)));
     }
   }
 
@@ -118,13 +108,9 @@ class FileTypeForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
-    $type = $this->entity;
-    $type->type = trim($type->type());
-    $type->label = trim($type->label());
+    $status = $this->entity->save();
 
-    $status = $type->save();
-
-    $t_args = array('%name' => $type->label());
+    $t_args = array('%name' => $this->entity->label());
 
     if ($status == SAVED_UPDATED) {
       drupal_set_message(t('The file type %name has been updated.', $t_args));
@@ -137,4 +123,12 @@ class FileTypeForm extends EntityForm {
     $form_state['redirect_route']['route_name'] = 'file_entity.file_types_overview';
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, array &$form_state) {
+    // Convert multi-line string to array before copying.
+    $form_state['values']['mimetypes'] = explode("\n", $form_state['values']['mimetypes']);
+    parent::copyFormValuesToEntity($entity, $form, $form_state);
+  }
 }

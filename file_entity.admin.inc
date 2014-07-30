@@ -557,15 +557,15 @@ function file_entity_list_types_page() {
       array(
         'data' => theme('file_entity_file_type_overview',
           array(
-            'label' => $type->label,
-            'description' => $type->description,
+            'label' => $type->label(),
+            'description' => $type->getDescription(),
           )
         ),
       ),
     );
-    $path = isset($file_entity_info['bundles'][$type->type]['admin']['real path']) ? $file_entity_info['bundles'][$type->type]['admin']['real path'] : NULL;
+    $path = isset($file_entity_info['bundles'][$type->id()]['admin']['real path']) ? $file_entity_info['bundles'][$type->id()]['admin']['real path'] : NULL;
 
-    if (empty($type->disabled) && isset($path)) {
+    if (!$type->status() && isset($path)) {
       $row[] = array('data' => l(t('edit file type'), $path . '/edit'));
       if ($field_ui) {
         $row[] = array('data' => l(t('manage fields'), $path . '/fields'));
@@ -577,7 +577,7 @@ function file_entity_list_types_page() {
       $row += array_fill(1, $colspan - 1, '');
     }
 
-    $admin_path = 'admin/structure/file-types/manage/' . $type->type;
+    $admin_path = 'admin/structure/file-types/manage/' . $type->id();
     switch ($type->ctools_type) {
       // Configuration is in code.
       case 'Default':
@@ -802,7 +802,7 @@ function theme_file_entity_file_display_order($variables) {
  * @see file_entity_file_type_form_submit()
  */
 function file_entity_file_type_form($form, &$form_state, $type = NULL) {
-  if (!isset($type->type)) {
+  if (!$type->id() && $type->id() !== '0') {
     // This is a new type.
     $type = (object) array(
       'type' => '',
@@ -818,14 +818,14 @@ function file_entity_file_type_form($form, &$form_state, $type = NULL) {
     '#title' => t('Name'),
     '#description' => t('This is the human readable name of the file type.'),
     '#required' => TRUE,
-    '#default_value' => $type->label,
+    '#default_value' => $type->label(),
   );
 
   $form['type'] = array(
     '#type' => 'machine_name',
-    '#default_value' => $type->type,
+    '#default_value' => $type->id(),
     '#maxlength' => 255,
-    '#disabled' => (bool) $type->type,
+    '#disabled' => (bool) $type->id(),
     '#machine_name' => array(
       'exists' => 'Drupal\file_entity\Entity\FileType::load',
       'source' => array('label'),
@@ -837,14 +837,14 @@ function file_entity_file_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'textarea',
     '#title' => t('Description'),
     '#description' => t('This is the description of the file type.'),
-    '#default_value' => $type->description,
+    '#default_value' => $type->getDescription(),
   );
 
   $form['mimetypes'] = array(
     '#type' => 'textarea',
     '#title' => t('Mimetypes'),
     '#description' => t('Enter one mimetype per line.'),
-    '#default_value' => implode("\n", $type->mimetypes),
+    '#default_value' => implode("\n", $type->getMimeTypes()),
   );
 
   include_once DRUPAL_ROOT . '/includes/file.mimetypes.inc';
@@ -926,7 +926,7 @@ function file_entity_file_type_form_submit($form, &$form_state) {
 
   $type->save();
 
-  drupal_set_message(t('The file type %type has been updated.', array('%type' => $type->label)));
+  drupal_set_message(t('The file type %type has been updated.', array('%type' => $type->label())));
   $form_state['redirect'] = 'admin/structure/file-types';
 }
 
@@ -935,9 +935,9 @@ function file_entity_file_type_form_submit($form, &$form_state) {
  * Menu callback; disable a single file type.
  */
 function file_entity_type_enable_confirm($form, &$form_state, $type) {
-  $form['type'] = array('#type' => 'value', '#value' => $type->type);
-  $form['label'] = array('#type' => 'value', '#value' => $type->label);
-  $message = t('Are you sure you want to enable the file type %type?', array('%type' => $type->label));
+  $form['type'] = array('#type' => 'value', '#value' => $type->id());
+  $form['label'] = array('#type' => 'value', '#value' => $type->label());
+  $message = t('Are you sure you want to enable the file type %type?', array('%type' => $type->label()));
   return confirm_form($form, $message, 'admin/structure/file-types', '', t('Enable'));
 }
 
@@ -958,20 +958,20 @@ function file_entity_type_enable_confirm_submit($form, &$form_state) {
  * Menu callback; disable a single file type.
  */
 function file_entity_type_disable_confirm($form, &$form_state, $type) {
-  $form['type'] = array('#type' => 'value', '#value' => $type->type);
-  $form['label'] = array('#type' => 'value', '#value' => $type->label);
+  $form['type'] = array('#type' => 'value', '#value' => $type->id());
+  $form['label'] = array('#type' => 'value', '#value' => $type->label());
 
-  $message = t('Are you sure you want to disable the file type %type?', array('%type' => $type->label));
+  $message = t('Are you sure you want to disable the file type %type?', array('%type' => $type->label()));
   $caption = '';
 
-  $num_files = db_query("SELECT COUNT(*) FROM {file_managed} WHERE type = :type", array(':type' => $type->type))->fetchField();
+  $num_files = db_query("SELECT COUNT(*) FROM {file_managed} WHERE type = :type", array(':type' => $type->id()))->fetchField();
   if ($num_files) {
     $caption .= '<p>' . format_plural($num_files, '%type is used by 1 file on
       your site. If you disable this file type, you will not be able to edit
       the %type file and it may not display correctly.', '%type is used by
       @count files on your site. If you remove %type, you will not be able to
       edit the %type file and it may not display correctly.',
-    array('%type' => $type->label)) . '</p>';
+    array('%type' => $type->label())) . '</p>';
   }
 
   return confirm_form($form, $message, 'admin/structure/file-types', $caption, t('Disable'));
@@ -994,9 +994,9 @@ function file_entity_type_disable_confirm_submit($form, &$form_state) {
  * Menu callback; revert a single file type.
  */
 function file_entity_type_revert_confirm($form, &$form_state, $type) {
-  $form['type'] = array('#type' => 'value', '#value' => $type->type);
-  $form['label'] = array('#type' => 'value', '#value' => $type->label);
-  $message = t('Are you sure you want to revert the file type %type?', array('%type' => $type->label));
+  $form['type'] = array('#type' => 'value', '#value' => $type->id());
+  $form['label'] = array('#type' => 'value', '#value' => $type->label());
+  $message = t('Are you sure you want to revert the file type %type?', array('%type' => $type->label()));
   return confirm_form($form, $message, 'admin/structure/file-types', '', t('Revert'));
 }
 
@@ -1018,15 +1018,15 @@ function file_entity_type_revert_confirm_submit($form, &$form_state) {
  * Menu callback; delete a single file type.
  */
 function file_entity_type_delete_confirm($form, &$form_state, $type) {
-  $form['type'] = array('#type' => 'value', '#value' => $type->type);
-  $form['label'] = array('#type' => 'value', '#value' => $type->label);
+  $form['type'] = array('#type' => 'value', '#value' => $type->id());
+  $form['label'] = array('#type' => 'value', '#value' => $type->label());
 
-  $message = t('Are you sure you want to delete the file type %type?', array('%type' => $type->label));
+  $message = t('Are you sure you want to delete the file type %type?', array('%type' => $type->label()));
   $caption = '';
 
-  $num_files = db_query("SELECT COUNT(*) FROM {file_managed} WHERE type = :type", array(':type' => $type->type))->fetchField();
+  $num_files = db_query("SELECT COUNT(*) FROM {file_managed} WHERE type = :type", array(':type' => $type->id()))->fetchField();
   if ($num_files) {
-    $caption .= '<p>' . format_plural($num_files, '%type is used by 1 file on your site. If you remove this file type, you will not be able to edit the %type file and it may not display correctly.', '%type is used by @count pieces of file on your site. If you remove %type, you will not be able to edit the %type file and it may not display correctly.', array('%type' => $type->label)) . '</p>';
+    $caption .= '<p>' . format_plural($num_files, '%type is used by 1 file on your site. If you remove this file type, you will not be able to edit the %type file and it may not display correctly.', '%type is used by @count pieces of file on your site. If you remove %type, you will not be able to edit the %type file and it may not display correctly.', array('%type' => $type->label())) . '</p>';
   }
 
   $caption .= '<p>' . t('This action cannot be undone.') . '</p>';
