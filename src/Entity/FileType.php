@@ -10,6 +10,7 @@ namespace Drupal\file_entity\Entity;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\file\FileInterface;
 use Drupal\file_entity\FileTypeInterface;
+use string;
 
 /**
  * Defines the File type configuration entity.
@@ -28,7 +29,7 @@ use Drupal\file_entity\FileTypeInterface;
  *   bundle_of = "file",
  *   entity_keys = {
  *     "id" = "id",
- *     "label" = "name",
+ *     "label" = "label",
  *     "status" = "status",
  *   },
  *   links = {
@@ -44,28 +45,63 @@ class FileType extends ConfigEntityBundleBase implements FileTypeInterface {
    *
    * @var string
    */
-  public $id;
+  protected $id;
 
   /**
    * The human-readable name of the file type.
    *
    * @var string
    */
-  public $label;
+  protected $label;
 
   /**
    * A brief description of this file type.
    *
    * @var string
    */
-  public $description;
+  protected $description;
 
   /**
    * MIME types associated with this file type.
    *
    * @var array
    */
-  public $mimetypes = array();
+  protected $mimetypes = array();
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription() {
+    return $this->description;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMimeTypes() {
+    return $this->mimetypes;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setLabel($label) {
+    $this->label = $label;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDescription($description) {
+    $this->description = $description;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMimeTypes($mimetypes) {
+    $this->mimetypes = array_values($mimetypes);
+  }
 
   /**
    * {@inheritdoc}
