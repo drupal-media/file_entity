@@ -212,12 +212,11 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     );
     $this->drupalGet('admin/structure/file-types/add');
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('The file type @type has been updated.', array('@type' => $edit['label'])), 'New file type successfully created.');
+    $this->assertText(t('The file type @type has been added.', array('@type' => $edit['label'])), 'New file type successfully created.');
     $this->assertText($edit['label'], 'New file type created: label found.');
     $this->assertText($edit['description'], 'New file type created: description found.');
-    $this->assertFieldByXPath("//table//tr[1]//td[7]", t('Normal'), 'Newly created file type is stored in DB.');
-    $this->assertLink(t('disable'), 0, 'Able to disable newly created file type.');
-    $this->assertLink(t('delete'), 0, 'Able to delete newly created file type.');
+    $this->assertLink(t('Disable'), 0, 'Able to disable newly created file type.');
+    $this->assertLink(t('Delete'), 0, 'Able to delete newly created file type.');
     $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['id'] . '/disable', 0, 'Disable link points to disable confirmation page.');
     $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['id'] . '/delete', 0, 'Delete link points to delete confirmation page.');
 

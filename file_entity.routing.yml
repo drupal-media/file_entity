@@ -15,12 +15,12 @@ file_entity.file_types_add:
     _permission: 'administer file types'
 
 file_entity.file_types_manage:
-  path: 'admin/structure/file-types/manage/{file_type}'
+  path: 'admin/structure/file-types/manage/{file_type}/edit'
   defaults:
     _entity_form: 'file_type.default'
     _title: 'Manage file types'
   requirements:
-    _permission: 'access content'
+    _permission: 'administer file types'
 
 file_entity.file_types_manage_enable:
   path: 'admin/structure/file-types/manage/{file_type}/enable'
@@ -49,8 +49,8 @@ file_entity.file_types_manage_revert:
 file_entity.file_types_manage_delete:
   path: 'admin/structure/file-types/manage/{file_type}/delete'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManageDelete'
-    _title: 'Delete'
+    _entity_form: 'file_type.delete'
+    _title: 'Delete file type'
   requirements:
     _permission: 'administer file types'
 

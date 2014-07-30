@@ -22,6 +22,7 @@ use string;
  *     "list_builder" = "Drupal\file_entity\FileTypeListBuilder",
  *     "form" = {
  *       "default" = "Drupal\file_entity\Form\FileTypeForm",
+ *       "delete" = "Drupal\file_entity\Form\FileTypeDeleteForm",
  *     },
  *   },
  *   admin_permission = "administer file types",
@@ -35,6 +36,7 @@ use string;
  *   links = {
  *     "canonical" = "file_entity.file_types_overview",
  *     "edit-form" = "file_entity.file_types_manage",
+ *     "delete-form" = "file_entity.file_types_manage_delete",
  *   },
  * )
  */
@@ -79,7 +81,7 @@ class FileType extends ConfigEntityBundleBase implements FileTypeInterface {
    * {@inheritdoc}
    */
   public function getMimeTypes() {
-    return $this->mimetypes;
+    return $this->mimetypes ?: array();
   }
 
   /**
