@@ -909,7 +909,7 @@ function file_entity_entity_type_alter(&$entity_types) {
   $keys = $entity_types['file']->getKeys();
   $keys['bundle'] = 'type';
   $entity_types['file']->set('entity_keys', $keys);
-  $entity_types['file']->set('bundle_entity_type', $keys);
+  $entity_types['file']->set('bundle_entity_type', 'file_type');
 
   $entity_types['file']->setClass('Drupal\file_entity\Entity\FileEntity');
   $entity_types['file']->setFormClass('default', 'Drupal\file_entity\Form\FileForm');

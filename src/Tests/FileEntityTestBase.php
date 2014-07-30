@@ -52,15 +52,12 @@ abstract class FileEntityTestBase extends WebTestBase {
    *
    * @return \Drupal\Core\Entity\EntityInterface|static
    */
-  protected function createFileType($overrides = array()) {
-    $type = array(
+  protected function createFileType($type = array()) {
+    $type += array(
       'id' => strtolower($this->randomName()),
       'label' => 'Test',
       'mimetypes' => array('image/jpeg', 'image/gif', 'image/png', 'image/tiff'),
     );
-    foreach ($overrides as $k => $v) {
-      $type[$k] = $v;
-    }
     $entity = FileType::create($type);
     $entity->save();
     return $entity;

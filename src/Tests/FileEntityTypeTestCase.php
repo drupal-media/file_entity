@@ -18,7 +18,10 @@ use Drupal\file_entity\Entity\FileType;
  */
 class FileEntityTypeTestCase extends FileEntityTestBase {
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp();
     $this->setUpFiles();
   }
@@ -26,7 +29,7 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
   /**
    * Test admin pages access and functionality.
    */
-  function testAdminPages() {
+  public function testAdminPages() {
     // Create a user with file type administration access.
     $user = $this->drupalCreateUser(array('administer file types'));
     $this->drupalLogin($user);
@@ -38,142 +41,123 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
   /**
    * Test creating a new type. Basic CRUD.
    */
-  function testCreate() {
+  public function testCreate() {
     $type_machine_type = 'foo';
     $type_machine_label = 'foobar';
-    $type = $this->createFileType(array('id' => $type_machine_type, 'label' => $type_machine_label));
+    $this->createFileType(array('id' => $type_machine_type, 'label' => $type_machine_label));
     $loaded_type = FileType::load($type_machine_type);
     $this->assertEqual($loaded_type->label(), $type_machine_label, "Was able to create a type and retreive it.");
   }
 
   /**
-   * Make sure candidates are presented in the case of multiple
-   * file types.
+   * Make sure candidates are presented in the case of multiple file types.
    */
-  function testTypeWithCandidates() {
+  public function testTypeWithCandidates() {
     // Create multiple file types with the same mime types.
     $types = array(
-      'image1' => $this->createFileType(array('type' => 'image1', 'label' => 'Image 1')),
-      'image2' => $this->createFileType(array('type' => 'image2', 'label' => 'Image 2')),
+      'image1' => $this->createFileType(array('id' => 'image1', 'label' => 'Image 1')),
+      'image2' => $this->createFileType(array('id' => 'image2', 'label' => 'Image 2')),
     );
-    $field_name = drupal_strtolower($this->randomName());
 
     // Attach a text field to one of the file types.
-    // @todo @see node_add_body_field() in node.module
+    $field_name = drupal_strtolower($this->randomName());
     $field_storage = FieldStorageConfig::create(array(
       'name' => $field_name,
-      'type' => 'text',
-      'settings' => array(
-        'max_length' => 255,
-      ),
+      'entity_type' => 'file',
+      'type' => 'string',
     ));
     $field_storage->save();
     $field_instance = FieldInstanceConfig::create(array(
-      'field_name' => $field_name,
+      'field_storage' => $field_storage,
       'entity_type' => 'file',
       'bundle' => 'image2',
-      'widget' => array(
-        'type' => 'text_textfield',
-      ),
-      'display' => array(
-        'default' => array(
-          'type' => 'text_default',
-        ),
-      ),
     ));
     $field_instance->save();
+    entity_get_form_display('file', 'image2', 'default')->setComponent($field_name, array(
+      'type' => 'text_textfield',
+    ));
 
     // Create a user with file creation access.
     $user = $this->drupalCreateUser(array('create files'));
     $this->drupalLogin($user);
 
-    // Step 1: Upload file
+    // Step 1: Upload file.
     $file = reset($this->files['image']);
     $edit = array();
-    $edit['files[upload]'] = drupal_realpath($file->uri);
+    $edit['files[upload]'] = drupal_realpath($file->getFileUri());
     $this->drupalPostForm('file/add', $edit, t('Next'));
 
-    // Step 2: Select file type candidate
+    // Step 2: Select file type candidate.
     $this->assertText('Image 1');
     $this->assertText('Image 2');
     $edit = array();
     $edit['type'] = 'image2';
     $this->drupalPostForm(NULL, $edit, t('Next'));
 
-    // Step 3: Select file scheme candidate
+    // Step 3: Select file scheme candidate.
     $this->assertText('Public local files served by the webserver.');
     $this->assertText('Private local files served by Drupal.');
     $edit = array();
     $edit['scheme'] = 'public';
     $this->drupalPostForm(NULL, $edit, t('Next'));
 
-    // Step 4: Complete field widgets
-    $langcode = LANGUAGE_NONE;
+    // Step 4: Complete field widgets.
     $edit = array();
-    $edit["{$field_name}[$langcode][0][value]"] = $this->randomName();
+    $edit["{$field_name}[0][value]"] = $this->randomName();
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $file->filename)));
+    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $file->getFilename())));
     $this->assertText($field_name);
   }
 
   /**
    * Make sure no candidates appear when only one mime type is available.
-   * NOTE: Depends on file_entity.module default 'image' type.
    */
-  function testTypeWithoutCandidates() {
+  public function testTypeWithoutCandidates() {
     // Attach a text field to the default image file type.
     $field_name = drupal_strtolower($this->randomName());
     $field_storage = FieldStorageConfig::create(array(
       'name' => $field_name,
-      'type' => 'text',
-      'settings' => array(
-        'max_length' => 255,
-      ),
+      'entity_type' => 'file',
+      'type' => 'string',
     ));
     $field_storage->save();
     $field_instance = FieldInstanceConfig::create(array(
-      'field_name' => $field_name,
+      'field_storage' => $field_storage,
       'entity_type' => 'file',
       'bundle' => 'image',
-      'widget' => array(
-        'type' => 'text_textfield',
-      ),
-      'display' => array(
-        'default' => array(
-          'type' => 'text_default',
-        ),
-      ),
     ));
     $field_instance->save();
+    entity_get_form_display('file', 'image', 'default')->setComponent($field_name, array(
+      'type' => 'text_textfield',
+    ));
 
     // Create a user with file creation access.
     $user = $this->drupalCreateUser(array('create files'));
     $this->drupalLogin($user);
 
-    // Step 1: Upload file
+    // Step 1: Upload file.
     $file = reset($this->files['image']);
     $edit = array();
-    $edit['files[upload]'] = drupal_realpath($file->uri);
+    $edit['files[upload]'] = drupal_realpath($file->getFileUri());
     $this->drupalPostForm('file/add', $edit, t('Next'));
 
-    // Step 2: Scheme selection
+    // Step 2: Scheme selection.
     if ($this->xpath('//input[@name="scheme"]')) {
       $this->drupalPostForm(NULL, array(), t('Next'));
     }
 
-    // Step 3: Complete field widgets
-    $langcode = LANGUAGE_NONE;
+    // Step 3: Complete field widgets.
     $edit = array();
-    $edit["{$field_name}[$langcode][0][value]"] = $this->randomName();
+    $edit["{$field_name}[0][value]"] = $this->randomName();
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $file->filename)));
+    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $file->getFilename())));
     $this->assertText($field_name);
   }
 
   /**
    * Test file types CRUD UI.
    */
-  function testTypesCrudUi() {
+  public function testTypesCrudUi() {
     $this->drupalGet('admin/structure/file-types');
     $this->assertResponse(403);
 
