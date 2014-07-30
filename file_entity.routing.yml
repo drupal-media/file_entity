@@ -25,16 +25,16 @@ file_entity.file_types_manage:
 file_entity.file_types_manage_enable:
   path: 'admin/structure/file-types/manage/{file_type}/enable'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManageEnable'
-    _title: 'Enable'
+    _entity_form: 'file_type.enable'
+    _title: 'Enable file type'
   requirements:
     _permission: 'administer file types'
 
 file_entity.file_types_manage_disable:
   path: 'admin/structure/file-types/manage/{file_type}/disable'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManageDisable'
-    _title: 'Disable'
+    _entity_form: 'file_type.disable'
+    _title: 'Disable file type'
   requirements:
     _permission: 'administer file types'
 

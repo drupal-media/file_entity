@@ -23,6 +23,8 @@ use string;
  *     "form" = {
  *       "default" = "Drupal\file_entity\Form\FileTypeForm",
  *       "delete" = "Drupal\file_entity\Form\FileTypeDeleteForm",
+ *       "enable" = "Drupal\file_entity\Form\FileTypeEnableForm",
+ *       "disable" = "Drupal\file_entity\Form\FileTypeDisableForm",
  *     },
  *   },
  *   admin_permission = "administer file types",
@@ -37,6 +39,8 @@ use string;
  *     "canonical" = "file_entity.file_types_overview",
  *     "edit-form" = "file_entity.file_types_manage",
  *     "delete-form" = "file_entity.file_types_manage_delete",
+ *     "enable" = "file_entity.file_types_manage_enable",
+ *     "disable" = "file_entity.file_types_manage_disable",
  *   },
  * )
  */

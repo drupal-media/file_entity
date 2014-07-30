@@ -242,7 +242,7 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     $this->assertText(t('The file type @type has been disabled.', array('@type' => $edit['label'])), 'Disable confirmation message found.');
     $this->assertFieldByXPath("//table//tr[5]//td[1]", $edit['label'], 'Disabled type moved to the tail of the list.');
     $this->assertLink(t('enable'), 0, 'Able to re-enable newly created file type.');
-    $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['type'] . '/enable', 0, 'Enable link points to enable confirmation page.');
+    $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['id'] . '/enable', 0, 'Enable link points to enable confirmation page.');
     $this->drupalGet('admin/structure/file-types/manage/' . $edit['id'] . '/enable');
     $this->assertText(t('Are you sure you want to enable the file type @type?', array('@type' => $edit['label'])), 'Enable confirmation page found.');
     $this->drupalPostForm(NULL, array(), t('Enable'));
