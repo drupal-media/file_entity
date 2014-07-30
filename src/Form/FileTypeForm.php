@@ -36,7 +36,7 @@ class FileTypeForm extends EntityForm {
       '#size' => 30,
     );
 
-    $form['type'] = array(
+    $form['id'] = array(
       '#type' => 'machine_name',
       '#default_value' => $type->id(),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
@@ -92,27 +92,16 @@ class FileTypeForm extends EntityForm {
     return $form;
   }
 
-  // @todo delete?
-  /**
-   * {@inheritdoc}
-   */
-  protected function actions(array $form, array &$form_state) {
-    $actions = parent::actions($form, $form_state);
-    $actions['submit']['#value'] = t('Save file type');
-    $actions['delete']['#value'] = t('Delete file type');
-    return $actions;
-  }
-
   /**
    * {@inheritdoc}
    */
   public function validate(array $form, array &$form_state) {
     parent::validate($form, $form_state);
 
-    $id = trim($form_state['values']['type']);
+    $id = trim($form_state['values']['id']);
     // '0' is invalid, since elsewhere we check it using empty().
     if ($id == '0') {
-      $this->setFormError('type', $form_state, $this->t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $id)));
+      $this->setFormError('id', $form_state, $this->t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $id)));
     }
   }
 
@@ -120,10 +109,9 @@ class FileTypeForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
-    $type = $this->entity;
-    $status = $type->save();
+    $status = $this->entity->save();
 
-    $t_args = array('%name' => $type->label());
+    $t_args = array('%name' => $this->entity->label());
 
     if ($status == SAVED_UPDATED) {
       drupal_set_message(t('The file type %name has been updated.', $t_args));
