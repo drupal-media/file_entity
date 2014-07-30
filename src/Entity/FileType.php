@@ -27,7 +27,7 @@ use Drupal\file_entity\FileTypeInterface;
  *   bundle_of = "file",
  *   entity_keys = {
  *     "id" = "id",
- *     "label" = "name",
+ *     "label" = "label",
  *     "status" = "status"
  *   }
  * )

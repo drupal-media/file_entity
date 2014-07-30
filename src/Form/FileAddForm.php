@@ -8,7 +8,11 @@
 namespace Drupal\file_entity\Form;
 
 use Drupal\Component\Utility\Bytes;
+use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Url;
+use Drupal\file\Entity\File;
+use Drupal\file\FileInterface;
 
 /**
  * Form controller for file type forms.
@@ -35,34 +39,32 @@ class FileAddForm extends FormBase {
 
     switch ($step) {
       case 1:
-        return $this->stepUpload($form, $form_state);
+        return $this->stepUpload($form, $form_state, $options);
 
       case 2:
-        return file_entity_add_upload_step_filetype($form, $form_state);
+        return $this->stepFileType($form, $form_state);
 
       case 3:
-        return file_entity_add_upload_step_scheme($form, $form_state);
+        return $this->stepScheme($form, $form_state);
 
       case 4:
-        return file_entity_add_upload_step_fields($form, $form_state);
+        return $this->stepFields($form, $form_state);
 
     }
+
+    return FALSE;
   }
 
   /**
+   * Step 1
    * Generate form fields for the first step in the add file wizard.
    *
    * @param $form
-   * @param $type
+   *   Form
+   * @param $form_state
+   *   Form State
    */
   function stepUpload($form, $form_state) {
-    $form['upload'] = array(
-      '#title' => t('Description'),
-      '#type' => 'textarea',
-      '#default_value' => 'description',
-      '#description' => t('A brief description of this file type.'),
-    );
-
     $form['upload'] = array(
       '#type' => 'managed_file',
       '#title' => t('Upload a new file'),
@@ -79,6 +81,119 @@ class FileAddForm extends FormBase {
     $form['actions']['next'] = array(
       '#type' => 'submit',
       '#value' => t('Next'),
+    );
+
+    return $form;
+  }
+
+  /**
+   * Form Step 2
+   * Select file types.
+   *
+   * Skipped if there is only one file type known for the uploaded file.
+   *
+   * @param $form
+   * @param $form_state
+   */
+  function stepFileType($form, $form_state) {
+    /** @var $file File */
+    $file = File::load($form_state['storage']['upload'][0]);
+
+    $form['type'] = array(
+      '#type' => 'radios',
+      '#title' => t('File type'),
+      '#options' => $this->getCandidateFileTypes($file),
+      '#default_value' => isset($form_state['storage']['type']) ? $form_state['storage']['type'] : NULL,
+      '#required' => TRUE,
+    );
+
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['previous'] = array(
+      '#type' => 'submit',
+      '#value' => t('Previous'),
+      '#limit_validation_errors' => array(),
+    );
+
+    $form['actions']['next'] = array(
+      '#type' => 'submit',
+      '#value' => t('Next'),
+    );
+
+    return $form;
+  }
+
+
+  /**
+   * Form Step 3
+   *
+   *
+   *
+   * @param $form
+   * @param $form_state
+   * @return mixed
+   */
+  function stepScheme($form, $form_state) {
+    $options = array();
+    foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
+      $options[$scheme] = String::checkPlain($info['description']);
+    }
+
+    $form['scheme'] = array(
+      '#type' => 'radios',
+      '#title' => t('Destination'),
+      '#options' => $options,
+      '#default_value' => isset($form_state['storage']['scheme']) ? $form_state['storage']['scheme'] : file_default_scheme(),
+      '#required' => TRUE,
+    );
+
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['previous'] = array(
+      '#type' => 'submit',
+      '#value' => t('Previous'),
+      '#limit_validation_errors' => array(),
+    );
+    $form['actions']['next'] = array(
+      '#type' => 'submit',
+      '#value' => t('Next'),
+    );
+
+    return $form;
+  }
+
+  /**
+   * Step 4
+   *
+   * @param $form
+   * @param $form_state
+   */
+  function stepFields($form, $form_state) {
+    // Load the file and overwrite the filetype set on the previous screen.
+    /** @var $file File */
+    $file = File::load($form_state['storage']['upload'][0]);
+
+    // Let users modify the filename here.
+    $form['filename'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Name'),
+      '#default_value' => $file->getFilename(),
+      '#required' => TRUE,
+      '#maxlength' => 255,
+      '#weight' => -10,
+    );
+
+    // Add fields.
+    // @TODO: Add configurable fields
+    //field_attach_form('file', $file, $form, $form_state);
+
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['previous'] = array(
+      '#type' => 'submit',
+      '#value' => t('Previous'),
+      '#limit_validation_errors' => array(),
+    );
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
     );
 
     return $form;
@@ -109,13 +224,16 @@ class FileAddForm extends FormBase {
       $steps_to_check = array_reverse($steps_to_check);
     }
 
+    /** @var $file File */
+    $file = File::load($form_state['storage']['upload'][0]);
+
     foreach ($steps_to_check as $step) {
       // Check if we can skip step 2 and 3.
       if (($form['#step'] == $step - 1 && $trigger == 'edit-next') || ($form['#step'] == $step + 1 && $trigger == 'edit-previous')) {
-        $file = file_load($form_state['storage']['upload']);
+
         if ($step == 2) {
           // Check if we can skip step 2.
-          $candidates = file_entity_get_filetype_candidates($file);
+          $candidates = $this->getCandidateFileTypes($file);
           if (count($candidates) == 1) {
             $candidates_keys = array_keys($candidates);
             // There is only one possible filetype for this file.
@@ -123,7 +241,7 @@ class FileAddForm extends FormBase {
             $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
             $form_state['storage']['type'] = reset($candidates_keys);
           }
-          elseif (\Drupal::config('file_entity')->get('file_upload_wizard_skip_file_type', FALSE)) {
+          elseif (\Drupal::config('file_entity.settings')->get('file_upload_wizard_skip_file_type')) {
             // Do not assign the file a file type.
             $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
             $form_state['storage']['type'] = FILE_TYPE_NONE;
@@ -135,7 +253,7 @@ class FileAddForm extends FormBase {
           if (!file_entity_file_is_writeable($file)) {
             // The file is read-only (remote) and must use its provided scheme.
             $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
-            $form_state['storage']['scheme'] = file_uri_scheme($file->uri);
+            $form_state['storage']['scheme'] = file_uri_scheme($file->getFileUri());
           }
           elseif (count($schemes) == 1) {
             // There is only one possible stream wrapper for this file.
@@ -143,7 +261,7 @@ class FileAddForm extends FormBase {
             $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
             $form_state['storage']['scheme'] = key($schemes);
           }
-          elseif (\Drupal::config('file_entity')->get('file_upload_wizard_skip_scheme', FALSE)) {
+          elseif (\Drupal::config('file_entity.settings')->get('file_upload_wizard_skip_scheme')) {
             // Assign the file the default scheme.
             $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
             $form_state['storage']['scheme'] = file_default_scheme();
@@ -154,15 +272,20 @@ class FileAddForm extends FormBase {
 
     // We have the filetype, check if we can skip step 4.
     if (($form['#step'] == 3 && $trigger == 'edit-next')) {
-      $file = file_load($form_state['storage']['upload']);
-      if (!field_info_instances('file', $form_state['storage']['type'])) {
-        // This filetype doesn't have fields, save the file.
-        $save = TRUE;
-      }
-      elseif (\Drupal::config('file_entity')->get('file_upload_wizard_skip_fields', FALSE)) {
+
+//      @TODO: Check this out how can we replace field_info_instance?
+//      if (!field_info_instances('file', $form_state['storage']['type'])) {
+//        // This filetype doesn't have fields, save the file.
+//        $save = TRUE;
+//      }
+
+
+      if (\Drupal::config('file_entity')->get('file_upload_wizard_skip_fields', FALSE)) {
         // Save the file with blanks fields.
         $save = TRUE;
       }
+
+      $save = TRUE;
     }
 
     // Form id's can vary depending on how many other forms are displayed, so we
@@ -178,11 +301,14 @@ class FileAddForm extends FormBase {
     }
 
     if ($save) {
-      $file = file_load($form_state['storage']['upload']);
+      $file = File::load($form_state['storage']['upload'][0]);
       if ($file) {
-        if (file_uri_scheme($file->uri) != $form_state['storage']['scheme']) {
-          if ($moved_file = file_move($file, $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri), FILE_EXISTS_RENAME)) {
+        if (file_uri_scheme($file->getFileUri()) != $form_state['storage']['scheme']) {
+          // @TODO: Users should not be allowed to create private files without permission ('view private files')
+          if ($moved_file = file_move($file, $form_state['storage']['scheme'] . '://' . file_uri_target($file->getFileUri()), FILE_EXISTS_RENAME)) {
             // Only re-assign the file object if file_move() did not fail.
+            $moved_file->setFilename($file->getFilename());
+
             $file = $moved_file;
           }
         }
@@ -196,11 +322,15 @@ class FileAddForm extends FormBase {
         // Keep in mind that the values for the Field API fields must be in
         // $form_state['values'] and not in ['storage']. This is true as long as
         // the fields are on the last page of the multi step form.
-        entity_form_submit_build_entity('file', $file, $form, $form_state);
+        // @TODO: TODO
+        //entity_form_submit_build_entity('file', $file, $form, $form_state);
 
-        file_save($file);
+        // Save entity
+        $file->save();
+
         $form_state['file'] = $file;
-        drupal_set_message(t('@type %name was uploaded.', array('@type' => file_entity_type_get_name($file), '%name' => $file->filename)));
+
+        drupal_set_message(t('@type %name was uploaded.', array('@type' => $file->type->entity->label(), '%name' => $file->getFilename())));
       }
       else {
         drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
@@ -208,17 +338,12 @@ class FileAddForm extends FormBase {
       }
 
       // Figure out destination.
-      if (isset($_GET['destination'])) {
-        $destination = drupal_get_destination();
-        unset($_GET['destination']);
-      }
-      elseif (user_access('administer files')) {
-        $destination = array('destination' => 'admin/content/file');
+      if (\Drupal::currentUser()->hasPermission('administer files')) {
+        $form_state['redirect_route'] = new Url('view.files.page_1');
       }
       else {
-        $destination = array('destination' => 'file/' . $file->fid);
+        $form_state['redirect_route'] = $file->urlInfo();
       }
-      $form_state['redirect'] = $destination['destination'];
     }
     else {
       $form_state['rebuild'] = TRUE;
@@ -305,5 +430,32 @@ class FileAddForm extends FormBase {
     }
 
     return $validators;
+  }
+
+  /**
+   * Get the candidate filetypes for a given file.
+   *
+   * Only filetypes for which the user has access to create entities are returned.
+   *
+   * @param \Drupal\file\FileInterface $file
+   *   An upload file from form_state.
+   *
+   * @return array
+   *   An array of file type bundles that support the file's mime type.
+   */
+  function getCandidateFileTypes(FileInterface $file) {
+    $types = \Drupal::moduleHandler()->invokeAll('file_type', array($file));
+    \Drupal::moduleHandler()->alter('file_type', $types, $file);
+    $candidates = array();
+    foreach ($types as $type) {
+
+      //@TODO: Write permissions for every file type seperatly.
+      if ($has_access = \Drupal::entityManager()->getAccessController('file')->createAccess($type)) {
+        //$candidates[$type] = FileType::load($type)->label();
+        $candidates[$type] = $type;
+      }
+    }
+
+    return $candidates;
   }
 }

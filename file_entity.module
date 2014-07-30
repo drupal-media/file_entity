@@ -474,7 +474,6 @@ function file_entity_queue_info() {
  *   A file ID.
  */
 function file_entity_type_determine($fid) {
-  debug($fid);
   if ($file = File::load($fid)) {
     // The file type will be automatically determined when saving the file.
     $file->save();
@@ -913,6 +912,7 @@ function file_entity_entity_type_alter(&$entity_types) {
 
   $entity_types['file']->setClass('Drupal\file_entity\Entity\FileEntity');
   $entity_types['file']->setFormClass('default', 'Drupal\file_entity\Form\FileForm');
+  $entity_types['file']->set('admin_permission', 'administer files');
   //$entity_types['file']['uri callback'] = 'file_entity_uri';
   /*$entity_types['file']['view modes']['teaser'] = array(
     'label' => t('Teaser'),
@@ -1422,7 +1422,7 @@ function template_preprocess_file_entity(&$variables) {
  * @return
  *   The file type name or FALSE if the file type is not found.
  */
-function file_entity_type_get_name($file) {
+function file_entity_type_get_name(FileInterface $file) {
   $type = is_object($file) ? $file->type : $file;
   $info = entity_get_info('file');
   return isset($info['bundles'][$type]['label']) ? $info['bundles'][$type]['label'] : FALSE;
@@ -2022,15 +2022,15 @@ function file_entity_file_is_local($file) {
 /**
  * Check if a file entity is considered writeable or not.
  *
- * @param object $file
+ * @param \Drupal\file\FileInterface $file
  *   A file entity object from file_load().
  *
  * @return
  *   TRUE if the file is using a visible, readable and writeable stream wrapper,
  *   or FALSE otherwise.
  */
-function file_entity_file_is_writeable($file) {
-  $scheme = file_uri_scheme($file->uri);
+function file_entity_file_is_writeable(FileInterface $file) {
+  $scheme = file_uri_scheme($file->getFileUri());
   $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
   return !empty($wrappers[$scheme]);
 }
@@ -2267,7 +2267,7 @@ function path_file_update($file) {
  */
 function path_file_delete($file) {
   // Delete all aliases associated with this file.
-  path_delete(array('source' => 'file/' . $file->fid));
+  //path_delete(array('source' => 'file/' . $file->fid));
 }
 
 /**

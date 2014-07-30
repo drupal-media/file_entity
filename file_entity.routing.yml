@@ -76,7 +76,7 @@ file_entity.file_add:
     _form: '\Drupal\file_entity\Form\FileAddForm'
     _title: 'Add file'
   requirements:
-    _permission: 'create'
+    _permission: 'administer files'
 
 file_entity.file_add_upload:
   path: 'file/add/upload'

@@ -139,12 +139,16 @@ abstract class FileEntityTestBase extends WebTestBase {
    *   A file object matching $filename.
    */
   function getFileByFilename($filename, $reset = FALSE) {
-    $files = file_load_multiple(array(), array('filename' => $filename), $reset);
+    $files = entity_load_multiple_by_properties('file', array('filename' => $filename), $reset);
     // Load the first file returned from the database.
     $returned_file = reset($files);
     return $returned_file;
   }
 
+  /**
+   * @param array $settings
+   * @return \stdClass
+   */
   protected function createFileEntity($settings = array()) {
     $file = new \stdClass();
 
