@@ -28,7 +28,7 @@ use string;
  *   config_prefix = "type",
  *   bundle_of = "file",
  *   entity_keys = {
- *     "id" = "id",
+ *     "id" = "type",
  *     "label" = "label",
  *     "status" = "status",
  *   },
@@ -45,7 +45,7 @@ class FileType extends ConfigEntityBundleBase implements FileTypeInterface {
    *
    * @var string
    */
-  protected $id;
+  protected $type;
 
   /**
    * The human-readable name of the file type.
