@@ -42,7 +42,7 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     $type_machine_label = 'foobar';
     $type = $this->createFileType(array('id' => $type_machine_type, 'label' => $type_machine_label));
     $loaded_type = FileType::load($type_machine_type);
-    $this->assertEqual($loaded_type->label, $type_machine_label, "Was able to create a type and retreive it.");
+    $this->assertEqual($loaded_type->label(), $type_machine_label, "Was able to create a type and retreive it.");
   }
 
 
@@ -74,11 +74,12 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     // Create multiple file types with the same mime types.
     $types = array(
       'image1' => $this->createFileType(array('type' => 'image1', 'label' => 'Image 1')),
-      'image2' => $this->createFileType(array('type' => 'image2', 'label' => 'Image 2'))
+      'image2' => $this->createFileType(array('type' => 'image2', 'label' => 'Image 2')),
     );
     $field_name = drupal_strtolower($this->randomName());
 
     // Attach a text field to one of the file types.
+    // @todo @see node_add_body_field() in node.module
     $field_storage = FieldStorageConfig::create(array(
       'name' => $field_name,
       'type' => 'text',
@@ -205,7 +206,7 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     // Create new file type.
     $edit = array(
       'label' => t('Test type'),
-      'type' => 'test_type',
+      'id' => 'test_type',
       'description' => t('This is dummy file type used just for testing.'),
       'mimetypes' => 'image/png',
     );
@@ -217,11 +218,11 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     $this->assertFieldByXPath("//table//tr[1]//td[7]", t('Normal'), 'Newly created file type is stored in DB.');
     $this->assertLink(t('disable'), 0, 'Able to disable newly created file type.');
     $this->assertLink(t('delete'), 0, 'Able to delete newly created file type.');
-    $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['type'] . '/disable', 0, 'Disable link points to disable confirmation page.');
-    $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['type'] . '/delete', 0, 'Delete link points to delete confirmation page.');
+    $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['id'] . '/disable', 0, 'Disable link points to disable confirmation page.');
+    $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['id'] . '/delete', 0, 'Delete link points to delete confirmation page.');
 
     // Edit file type.
-    $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/edit');
+    $this->drupalGet('admin/structure/file-types/manage/' . $edit['id'] . '/edit');
     $this->assertRaw(t('Save'), 'Save button found on edit page.');
     $this->assertRaw(t('Delete'), 'Delete button found on edit page.');
     $this->assertRaw($edit['label'], 'Label found on file type edit page');
@@ -236,21 +237,21 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     $this->assertText($edit['label'], 'Modified label found on file types list.');
 
     // Disable and re-enable file type.
-    $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/disable');
+    $this->drupalGet('admin/structure/file-types/manage/' . $edit['id'] . '/disable');
     $this->assertText(t('Are you sure you want to disable the file type @type?', array('@type' => $edit['label'])), 'Disable confirmation page found.');
     $this->drupalPostForm(NULL, array(), t('Disable'));
     $this->assertText(t('The file type @type has been disabled.', array('@type' => $edit['label'])), 'Disable confirmation message found.');
     $this->assertFieldByXPath("//table//tr[5]//td[1]", $edit['label'], 'Disabled type moved to the tail of the list.');
     $this->assertLink(t('enable'), 0, 'Able to re-enable newly created file type.');
     $this->assertLinkByHref('admin/structure/file-types/manage/' . $edit['type'] . '/enable', 0, 'Enable link points to enable confirmation page.');
-    $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/enable');
+    $this->drupalGet('admin/structure/file-types/manage/' . $edit['id'] . '/enable');
     $this->assertText(t('Are you sure you want to enable the file type @type?', array('@type' => $edit['label'])), 'Enable confirmation page found.');
     $this->drupalPostForm(NULL, array(), t('Enable'));
     $this->assertText(t('The file type @type has been enabled.', array('@type' => $edit['label'])), 'Enable confirmation message found.');
     $this->assertFieldByXPath("//table//tr[1]//td[1]", $edit['label'], 'Enabled type moved to the top of the list.');
 
     // Delete newly created type.
-    $this->drupalGet('admin/structure/file-types/manage/' . $edit['type'] . '/delete');
+    $this->drupalGet('admin/structure/file-types/manage/' . $edit['id'] . '/delete');
     $this->assertText(t('Are you sure you want to delete the file type @type?', array('@type' => $edit['label'])), 'Delete confirmation page found.');
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->assertText(t('The file type @type has been deleted.', array('@type' => $edit['label'])), 'Delete confirmation message found.');
