@@ -50,7 +50,7 @@ class FileTypeForm extends EntityForm {
     $form['description'] = array(
       '#title' => t('Description'),
       '#type' => 'textarea',
-      '#default_value' => $type->description,
+      '#default_value' => $type->getDescription(),
       '#description' => t('A brief description of this file type.'),
     );
 
@@ -58,7 +58,7 @@ class FileTypeForm extends EntityForm {
       '#type' => 'textarea',
       '#title' => t('Mimetypes'),
       '#description' => t('Enter one mimetype per line.'),
-      '#default_value' => implode("\n", $type->mimetypes),
+      '#default_value' => implode("\n", $type->getMimeTypes()),
     );
 
     $mimetypes = new Mimetypes(\Drupal::moduleHandler());
@@ -80,7 +80,9 @@ class FileTypeForm extends EntityForm {
       '#type' => 'submit',
       '#value' => t('Save'),
     );
-    if (!empty($type->type)) {
+    // Arbitrary expressions in empty() allowed in PHP 5.5 only.
+    $id = $type->id();
+    if (!empty($id)) {
       $form['actions']['delete'] = array(
         '#type' => 'submit',
         '#value' => t('Delete'),
@@ -119,9 +121,6 @@ class FileTypeForm extends EntityForm {
    */
   public function save(array $form, array &$form_state) {
     $type = $this->entity;
-    $type->type = trim($type->type());
-    $type->label = trim($type->label());
-
     $status = $type->save();
 
     $t_args = array('%name' => $type->label());

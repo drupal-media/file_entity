@@ -33,7 +33,7 @@ class FileTypeListBuilder extends ConfigEntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     /** @var FileType $entity */
     $row['label'] = $this->getLabel($entity);
-    $row['description'] = $entity->description;
+    $row['description'] = $entity->getDescription();
     return $row + parent::buildRow($entity);
   }
 }
