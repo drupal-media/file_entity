@@ -7,8 +7,8 @@
 
 namespace Drupal\file_entity\Form;
 
-use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\file_entity\Entity\FileType;
 use Drupal\file_entity\Mimetypes;
@@ -56,20 +56,19 @@ class FileTypeForm extends EntityForm {
 
     $form['mimetypes'] = array(
       '#type' => 'textarea',
-      '#title' => t('Mimetypes'),
-      '#description' => t('Enter one mimetype per line.'),
+      '#title' => t('MIME types'),
+      '#description' => t('Enter one MIME type per line.'),
       '#default_value' => implode("\n", $type->getMimeTypes()),
     );
 
     $mimetypes = new Mimetypes(\Drupal::moduleHandler());
 
-    $form['mimetype_mapping'] = array(
+    $form['mimetype_list'] = array(
       '#type' => 'details',
-      '#title' => t('Mimetype List'),
-      '#collapsible' => TRUE,
+      '#title' => t('Known MIME types'),
       '#collapsed' => TRUE,
     );
-    $form['mimetype_mapping']['mapping'] = array(
+    $form['mimetype_list']['list'] = array(
       '#theme' => 'item_list',
       '#items' => $mimetypes->get(),
     );
@@ -124,4 +123,12 @@ class FileTypeForm extends EntityForm {
     $form_state['redirect_route']['route_name'] = 'file_entity.file_types_overview';
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, array &$form_state) {
+    // Convert multi-line string to array before copying.
+    $form_state['values']['mimetypes'] = explode("\n", $form_state['values']['mimetypes']);
+    parent::copyFormValuesToEntity($entity, $form, $form_state);
+  }
 }

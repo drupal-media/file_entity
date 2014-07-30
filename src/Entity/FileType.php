@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\file\FileInterface;
 use Drupal\file_entity\FileTypeInterface;
 use string;
@@ -120,5 +121,16 @@ class FileType extends ConfigEntityBundleBase implements FileTypeInterface {
       }
     }
     return $types;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function sort(ConfigEntityInterface $a, ConfigEntityInterface $b) {
+    // Sort primarily by status, secondarily by label.
+    if ($a->status() == $b->status()) {
+      return strnatcasecmp($a->label(), $b->label());
+    }
+    return ($b->status() - $a->status());
   }
 }

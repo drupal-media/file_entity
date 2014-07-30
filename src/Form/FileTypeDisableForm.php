@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
+use Drupal\Core\Url;
 use Drupal\file_entity\Entity\FileType;
 
 /**
@@ -38,18 +39,18 @@ class FileTypeDisableForm extends EntityConfirmFormBase {
   public function submit(array $form, array &$form_state) {
     /** @var FileType $type */
     $type = $this->entity;
-    $type->enable();
+    $type->disable()->save();
     drupal_set_message(t(
       'The file type %label has been disabled.',
       array('%label' => $type->label())
     ));
-    $form_state['redirect_route'] = $this->getCancelUrl();
+    $form_state['redirect_route'] = new Url('file_entity.file_types_overview');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return $this->entity->urlInfo();
+    return new Url('file_entity.file_types_overview');
   }
 }
