@@ -10,6 +10,7 @@ namespace Drupal\file_entity\Form;
 use Drupal\Component\Utility\Bytes;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
@@ -32,7 +33,7 @@ class FileAddForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, array $options = array()) {
+  public function buildForm(array $form, FormStateInterface $form_state, array $options = array()) {
     $step = (isset($form_state['step']) && in_array($form_state['step'], array(1, 2, 3, 4))) ? $form_state['step'] : 1;
     $form['#step'] = $step;
     $form['#options'] = $options;
@@ -64,7 +65,7 @@ class FileAddForm extends FormBase {
    * @param $form_state
    *   Form State
    */
-  function stepUpload($form, $form_state) {
+  function stepUpload(array $form, FormStateInterface $form_state) {
     $form['upload'] = array(
       '#type' => 'managed_file',
       '#title' => t('Upload a new file'),
@@ -95,7 +96,7 @@ class FileAddForm extends FormBase {
    * @param $form
    * @param $form_state
    */
-  function stepFileType($form, $form_state) {
+  function stepFileType(array $form, FormStateInterface $form_state) {
     /** @var $file File */
     $file = File::load($form_state['storage']['upload'][0]);
 
@@ -132,7 +133,7 @@ class FileAddForm extends FormBase {
    * @param $form_state
    * @return mixed
    */
-  function stepScheme($form, $form_state) {
+  function stepScheme(array $form, FormStateInterface $form_state) {
     $options = array();
     foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
       $options[$scheme] = String::checkPlain($info['description']);
@@ -166,7 +167,7 @@ class FileAddForm extends FormBase {
    * @param $form
    * @param $form_state
    */
-  function stepFields($form, $form_state) {
+  function stepFields(array $form, FormStateInterface $form_state) {
     // Load the file and overwrite the filetype set on the previous screen.
     /** @var $file File */
     $file = File::load($form_state['storage']['upload'][0]);
@@ -202,14 +203,14 @@ class FileAddForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, array &$form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $form_state['storage'] = isset($form_state['storage']) ? $form_state['storage'] : array();
     $form_state['storage'] = array_merge($form_state['storage'], $form_state['values']);
 

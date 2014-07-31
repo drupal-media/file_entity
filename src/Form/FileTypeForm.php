@@ -10,6 +10,7 @@ namespace Drupal\file_entity\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\file_entity\Entity\FileType;
 use Drupal\file_entity\Mimetypes;
 
@@ -21,7 +22,7 @@ class FileTypeForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
     /* @var FileType $type */
@@ -94,7 +95,7 @@ class FileTypeForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, array &$form_state) {
+  public function validate(array $form, FormStateInterface $form_state) {
     parent::validate($form, $form_state);
 
     $id = trim($form_state['values']['id']);
@@ -107,7 +108,7 @@ class FileTypeForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $status = $this->entity->save();
 
     $t_args = array('%name' => $this->entity->label());
@@ -126,7 +127,7 @@ class FileTypeForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, array &$form_state) {
+  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
     // Convert multi-line string to array before copying.
     $form_state['values']['mimetypes'] = explode("\n", $form_state['values']['mimetypes']);
     parent::copyFormValuesToEntity($entity, $form, $form_state);

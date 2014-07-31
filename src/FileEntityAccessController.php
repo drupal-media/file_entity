@@ -18,17 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Defines the access controller for the file entity type.
  */
-class FileEntityAccessController extends FileAccessController implements EntityControllerInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
-    return new static(
-      $entity_type,
-      $container->get('file.grant_storage')
-    );
-  }
+class FileEntityAccessController extends FileAccessController {
 
   /**
    * {@inheritdoc}

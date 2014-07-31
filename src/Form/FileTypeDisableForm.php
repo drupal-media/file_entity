@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\file_entity\Entity\FileType;
 
@@ -36,7 +37,7 @@ class FileTypeDisableForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function submit(array $form, FormStateInterface $form_state) {
     /** @var FileType $type */
     $type = $this->entity;
     $type->disable()->save();
