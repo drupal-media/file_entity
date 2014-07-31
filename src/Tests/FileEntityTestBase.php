@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Tests;
 
 use Drupal\file\Entity\File;
+use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileType;
 use Drupal\file_entity\FileEntity;
 use Drupal\simpletest\WebTestBase;
@@ -23,7 +24,7 @@ abstract class FileEntityTestBase extends WebTestBase {
   public static $modules = array('file_entity');
 
   /**
-   * @var FileEntity[]
+   * @var FileInterface[]
    */
   protected $files = array();
 

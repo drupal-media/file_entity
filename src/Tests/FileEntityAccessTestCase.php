@@ -7,6 +7,7 @@
 
 namespace Drupal\file_entity\Tests;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileEntity;
 use Drupal\file_entity\FileEntityAccessController;
 
@@ -42,10 +43,9 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
    * Asserts FileEntityAccessController correctly grants or denies access.
    */
   function assertFileEntityAccess($ops, $file, $account) {
-    drupal_static_reset('file_entity_access');
-    foreach ($ops as $op => $result) {
+    foreach ($ops as $op => $expected) {
       $this->assertEqual(
-        $result,
+        $expected,
         $op === 'create' ?
           $this->accessController->createAccess($file, $account) :
           $this->accessController->access($file, $op, LanguageInterface::LANGCODE_DEFAULT, $account)
@@ -57,6 +57,7 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
    * Runs basic tests for file_entity_access function.
    */
   function testFileEntityAccess() {
+    /** @var FileInterface $file */
     $file = reset($this->files['image']);
 
     // Ensures user with 'bypass file access' permission can do everything.
@@ -77,25 +78,27 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
     // User can view own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files'));
     $this->assertFileEntityAccess(array('view' => FALSE), $file, $web_user);
-    $file->uid = $web_user->uid;
+    $file->setOwner($web_user)->save();
+    debug($file->getOwnerId(), '$file->getOwnerId()');
+    debug($web_user->id(), '$web_user->id()');
     $this->assertFileEntityAccess(array('view' => TRUE), $file, $web_user);
 
     // User can download own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'download own image files'));
     $this->assertFileEntityAccess(array('download' => FALSE), $file, $web_user);
-    $file->uid = $web_user->uid;
+    $file->setOwner($web_user);
     $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
 
     // User can update own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files'));
     $this->assertFileEntityAccess(array('update' => FALSE), $file, $web_user);
-    $file->uid = $web_user->uid;
+    $file->setOwner($web_user);
     $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
 
     // User can delete own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files', 'delete own image files'));
     $this->assertFileEntityAccess(array('delete' => FALSE), $file, $web_user);
-    $file->uid = $web_user->uid;
+    $file->setOwner($web_user);
     $this->assertFileEntityAccess(array('delete' => TRUE), $file, $web_user);
 
     // User can view any file.
