@@ -86,6 +86,6 @@ class FileEntityCreationTestCase extends FileEntityTestBase {
     $this->assertTrue($file, t('File found in database.'));
 
     // Check if the file is stored in the private folder.
-    $this->assertTrue(substr($file->toArray()['uri'][0]['value'], 0, 10) === 'private://', 'File uploaded in private folder.');
+    $this->assertTrue(substr($file->getFileUri(), 0, 10) === 'private://', 'File uploaded in private folder.');
   }
 }

@@ -66,6 +66,7 @@ function file_entity_field_formatter_info() {
  * Implements hook_field_formatter_info_alter().
  */
 function file_entity_field_formatter_info_alter(&$info) {
+  return;
   // Add descriptions to core formatters.
   $descriptions = array(
     'file_default' => t('Create a simple link to the file. The link is prefixed by a file type icon and the name of the file is used as the link text'),

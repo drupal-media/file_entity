@@ -1,6 +1,0 @@
-id: duplicate
-label: Duplicate Image
-description: 'An <em>Image</em> file is a still visual.'
-status: true
-mimetypes:
-  - 'image/*'

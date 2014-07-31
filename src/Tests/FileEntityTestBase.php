@@ -136,7 +136,7 @@ abstract class FileEntityTestBase extends WebTestBase {
    * @param $reset
    *   (optional) Whether to reset the internal file_load() cache.
    *
-   * @return
+   * @return \Drupal\file\FileInterface
    *   A file object matching $filename.
    */
   function getFileByFilename($filename, $reset = FALSE) {

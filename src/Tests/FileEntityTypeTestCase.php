@@ -73,9 +73,12 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
       'bundle' => 'image2',
     ));
     $field_instance->save();
-    entity_get_form_display('file', 'image2', 'default')->setComponent($field_name, array(
-      'type' => 'text_textfield',
-    ));
+    entity_get_form_display('file', 'image2', 'default')
+      ->setComponent($field_name, array(
+        'type' => 'text_textfield',
+      ))
+      ->save();
+
 
     // Create a user with file creation access.
     $user = $this->drupalCreateUser(array('create files'));
@@ -104,9 +107,16 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     // Step 4: Complete field widgets.
     $edit = array();
     $edit["{$field_name}[0][value]"] = $this->randomName();
+    $edit['filename[0][value]'] = $this->randomName();
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $file->getFilename())));
-    $this->assertText($field_name);
+    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $edit['filename[0][value]'])));
+
+    // Check that the file exists in the database.
+    $file = $this->getFileByFilename($edit['filename[0][value]']);
+    $this->assertTrue($file, t('File found in database.'));
+
+    // Checks if configurable field exists in the database.
+    $this->assertTrue($file->hasField($field_name), 'Found configurable field in database');
   }
 
   /**
@@ -127,9 +137,11 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
       'bundle' => 'image',
     ));
     $field_instance->save();
-    entity_get_form_display('file', 'image', 'default')->setComponent($field_name, array(
+    entity_get_form_display('file', 'image', 'default')
+      ->setComponent($field_name, array(
       'type' => 'text_textfield',
-    ));
+      ))
+      ->save();
 
     // Create a user with file creation access.
     $user = $this->drupalCreateUser(array('create files'));
@@ -149,9 +161,16 @@ class FileEntityTypeTestCase extends FileEntityTestBase {
     // Step 3: Complete field widgets.
     $edit = array();
     $edit["{$field_name}[0][value]"] = $this->randomName();
+    $edit['filename[0][value]'] = $this->randomName();
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $file->getFilename())));
-    $this->assertText($field_name);
+    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $edit['filename[0][value]'])));
+
+    // Check that the file exists in the database.
+    $file = $this->getFileByFilename($edit['filename[0][value]']);
+    $this->assertTrue($file, t('File found in database.'));
+
+    // Checks if configurable field exists in the database.
+    $this->assertTrue($file->hasField($field_name), 'Found configurable field in database');
   }
 
   /**

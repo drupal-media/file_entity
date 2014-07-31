@@ -72,15 +72,22 @@ class FileEntity extends File {
   /**
    * Updates the file bundle.
    */
-  protected function updateBundle() {
-    if ($type = file_get_type($this)) {
-      // Update the type field.
-      $this->get('type')->target_id = $type;
-      // Clear the field definitions, so that they will be fetched for the new bundle.
-      $this->fieldDefinitions = NULL;
-      // Update the entity keys cache.
-      $this->entityKeys['bundle'] = $type;
+  public function updateBundle($type = NULL) {
+    if (!$type) {
+      $type = file_get_type($this);
+
+      if (!$type) {
+        return;
+      }
     }
+
+    // Update the type field.
+    $this->get('type')->target_id = $type;
+    // Clear the field definitions, so that they will be fetched for the new bundle.
+    $this->fieldDefinitions = NULL;
+    $this->dataDefinition = NULL;
+    // Update the entity keys cache.
+    $this->entityKeys['bundle'] = $type;
   }
 
   /**
@@ -92,6 +99,13 @@ class FileEntity extends File {
       ->setLabel(t('File type'))
       ->setDescription(t('The type of the file.'))
       ->setSetting('target_type', 'file_type');
+
+    $fields['filename']
+      ->setDisplayOptions('form', array(
+        'type' => 'string',
+        'weight' => -5,
+      ))
+      ->setDisplayConfigurable('form', TRUE);
 
     return $fields;
   }
