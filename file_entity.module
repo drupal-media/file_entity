@@ -1761,12 +1761,12 @@ function file_entity_file_download($uri) {
 
   // An existing file wasn't found, so we don't control access.
   // E.g. image derivatives will fall here.
-  if (empty($file->fid)) {
+  if (empty($file)) {
     return NULL;
   }
 
   // Allow the user to download the file if they have appropriate permissions.
-  if (file_entity_access('view', $file)) {
+  if ($file->access('view')) {
     return file_get_content_headers($file);
   }
 
@@ -2217,9 +2217,12 @@ function file_entity_admin_menu_map() {
  *   An eight-character token which can be used to protect file downloads
  *   against denial-of-service attacks.
  */
-function file_entity_get_download_token($file) {
+function file_entity_get_download_token(File $file) {
   // Return the first eight characters.
-  return substr(\Drupal\Component\Utility\Crypt::hmacBase64("file/$file->fid/download:" . $file->getFileUri(), \Drupal::service('private_key')->get() . \Drupal\Core\Site\Settings::getHashSalt()), 0, 8);
+  return substr(\Drupal\Component\Utility\Crypt::hmacBase64(
+    "file/{$file->id()}/download:" . $file->getFileUri(),
+    \Drupal::service('private_key')->get() . \Drupal\Core\Site\Settings::getHashSalt()
+  ), 0, 8);
 }
 
 /**

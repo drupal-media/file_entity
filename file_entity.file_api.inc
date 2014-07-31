@@ -7,6 +7,7 @@
 use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileType;
 use Drupal\file_entity\FileTypeInterface;
+use Drupal\file\Entity\File;
 
 /**
  * The {file_managed}.type value when the file type has not yet been determined.
@@ -460,7 +461,7 @@ function _file_entity_sort_weight_label($a, $b) {
  *   table with the passed in URI, then that file object is returned.
  *   Otherwise, a new file object is returned. Default is TRUE.
  *
- * @return object|bool
+ * @return FileInterface|bool
  *   A file object, or FALSE on error.
  *
  * @todo This should probably be named
@@ -473,20 +474,20 @@ function file_uri_to_object($uri, $use_existing = TRUE) {
 
   if ($use_existing) {
     // We should always attempt to re-use a file if possible.
-    $files = entity_load('file', FALSE, array('uri' => $uri));
+    $files = entity_load_multiple_by_properties('file', array('uri' => $uri));
     $file = !empty($files) ? reset($files) : FALSE;
   }
 
   if (empty($file)) {
-    $file = new stdClass();
-    $file->uid = $GLOBALS['user']->uid;
-    $file->filename = drupal_basename($uri);
-    $file->uri = $uri;
-    $file->filemime = file_get_mimetype($uri);
-    // This is gagged because some uris will not support it.
-    $file->filesize = @filesize($uri);
-    $file->timestamp = REQUEST_TIME;
-    $file->status = FILE_STATUS_PERMANENT;
+    $file = File::create(array(
+      'uid' => \Drupal::currentUser(),
+      'filename' => drupal_basename($uri),
+      'uri' => $uri,
+      'filemime' => \Drupal::service('file.mime_type.guesser')->guess($uri),
+      'filesize' => @filesize($uri),
+      'created' => REQUEST_TIME,
+      'status' => FILE_STATUS_PERMANENT,
+    ));
   }
 
   return $file;

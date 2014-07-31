@@ -22,6 +22,9 @@ abstract class FileEntityTestBase extends WebTestBase {
    */
   public static $modules = array('file_entity');
 
+  /**
+   * @var FileEntity[]
+   */
   protected $files = array();
 
   protected function setUpFiles($defaults = array()) {

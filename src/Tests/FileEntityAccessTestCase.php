@@ -6,6 +6,9 @@
  */
 
 namespace Drupal\file_entity\Tests;
+use Drupal\Core\Language\LanguageInterface;
+use Drupal\file_entity\Entity\FileEntity;
+use Drupal\file_entity\FileEntityAccessController;
 
 /**
  * Tests the access aspects of file entity.
@@ -14,9 +17,17 @@ namespace Drupal\file_entity\Tests;
  */
 class FileEntityAccessTestCase extends FileEntityTestBase {
 
+  /**
+   * The File Entity access controller.
+   *
+   * @var FileEntityAccessController
+   */
+  protected $accessController;
+
   function setUp() {
     parent::setUp();
     $this->setUpFiles(array('uid' => 0));
+    $this->accessController = \Drupal::entityManager()->getAccessController('file');
 
     // Unset the fact that file_entity_install() adds the 'view files'
     // permission to all user roles. This messes with being able to fully unit
@@ -28,13 +39,17 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
   }
 
   /**
-   * Asserts file_entity_access correctly grants or denies access.
+   * Asserts FileEntityAccessController correctly grants or denies access.
    */
   function assertFileEntityAccess($ops, $file, $account) {
     drupal_static_reset('file_entity_access');
     foreach ($ops as $op => $result) {
-      $msg = t("file_entity_access returns @result with operation '@op'.", array('@result' => $result ? 'true' : 'false', '@op' => $op));
-      $this->assertEqual($result, file_entity_access($op, $file, $account), $msg);
+      $this->assertEqual(
+        $result,
+        $op === 'create' ?
+          $this->accessController->createAccess($file, $account) :
+          $this->accessController->access($file, $op, LanguageInterface::LANGCODE_DEFAULT, $account)
+      );
     }
   }
 
@@ -124,14 +139,14 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
     // This fails.. No clue why but, tested manually and works as should.
     //$web_user = $this->drupalCreateUser(array('view own files'));
     //$this->drupalLogin($web_user);
-    //$this->drupalGet("file/{$file->fid}/view");
+    //$this->drupalGet("file/{$file->id()}/view");
     //$this->assertResponse(403, 'Users without access can not access the file view page');
     $web_user = $this->drupalCreateUser(array('view files'));
     $this->drupalLogin($web_user);
-    $this->drupalGet("file/{$file->fid}/view");
+    $this->drupalGet("file/{$file->id()}/view");
     $this->assertResponse(200, 'Users with access can access the file view page');
 
-    $url = "file/{$file->fid}/download";
+    $url = "file/{$file->id()}/download";
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
     $this->drupalGet($url, array('query' => array('token' => file_entity_get_download_token($file))));
@@ -148,22 +163,23 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
     $this->drupalGet($url);
     $this->assertResponse(200, 'Users with access can download the file without a token when file_entity_allow_insecure_download is set.');
 
+    /** @var FileEntity $file */
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
-    $this->drupalGet("file/{$file->fid}/edit");
+    $this->drupalGet("file/{$file->id()}/edit");
     $this->assertResponse(403, 'Users without access can not access the file edit page');
     $web_user = $this->drupalCreateUser(array('edit any document files'));
     $this->drupalLogin($web_user);
-    $this->drupalGet("file/{$file->fid}/edit");
+    $this->drupalGet("file/{$file->id()}/edit");
     $this->assertResponse(200, 'Users with access can access the file add page');
 
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
-    $this->drupalGet("file/{$file->fid}/delete");
+    $this->drupalGet("file/{$file->id()}/delete");
     $this->assertResponse(403, 'Users without access can not access the file view page');
     $web_user = $this->drupalCreateUser(array('delete any document files'));
     $this->drupalLogin($web_user);
-    $this->drupalGet("file/{$file->fid}/delete");
+    $this->drupalGet("file/{$file->id()}/delete");
     $this->assertResponse(200, 'Users with access can access the file add page');
   }
 
@@ -182,15 +198,15 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
       // Create private, permanent files owned by this user only he's an owner.
       if (!empty($case['owner'])) {
         $file = next($this->files['text']);
-        $file->uid = $account->uid;
+        $file->uid = $account->id();
         $file->save();
         $file = file_move($file, 'private://');
 
         // Check if the physical file is there.
-        $arguments = array('%name' => $file->filename, '%username' => $account->name, '%uri' => $file->uri);
-        $this->assertTrue(is_file($file->uri), format_string('File %name owned by %username successfully created at %uri.', $arguments));
-        $url = file_create_url($file->uri);
-        $message_file_info = ' ' . format_string('File %uri was checked.', array('%uri' => $file->uri));
+        $arguments = array('%name' => $file->getFilename(), '%username' => $account->getName(), '%uri' => $file->getFileUri());
+        $this->assertTrue(is_file($file->getFileUri()), format_string('File %name owned by %username successfully created at %uri.', $arguments));
+        $url = file_create_url($file->getFileUri());
+        $message_file_info = ' ' . format_string('File %uri was checked.', array('%uri' => $file->getFileUri()));
       }
 
       // Try to download the file.
