@@ -43,6 +43,7 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
    * Asserts FileEntityAccessController correctly grants or denies access.
    */
   function assertFileEntityAccess($ops, $file, $account) {
+    $this->accessController->resetCache();
     foreach ($ops as $op => $expected) {
       $this->assertEqual(
         $expected,
@@ -79,26 +80,24 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
     $web_user = $this->drupalCreateUser(array('create files', 'view own files'));
     $this->assertFileEntityAccess(array('view' => FALSE), $file, $web_user);
     $file->setOwner($web_user)->save();
-    debug($file->getOwnerId(), '$file->getOwnerId()');
-    debug($web_user->id(), '$web_user->id()');
     $this->assertFileEntityAccess(array('view' => TRUE), $file, $web_user);
 
     // User can download own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'download own image files'));
     $this->assertFileEntityAccess(array('download' => FALSE), $file, $web_user);
-    $file->setOwner($web_user);
+    $file->setOwner($web_user)->save();
     $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
 
     // User can update own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files'));
     $this->assertFileEntityAccess(array('update' => FALSE), $file, $web_user);
-    $file->setOwner($web_user);
+    $file->setOwner($web_user)->save();
     $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
 
     // User can delete own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files', 'delete own image files'));
     $this->assertFileEntityAccess(array('delete' => FALSE), $file, $web_user);
-    $file->setOwner($web_user);
+    $file->setOwner($web_user)->save();
     $this->assertFileEntityAccess(array('delete' => TRUE), $file, $web_user);
 
     // User can view any file.
