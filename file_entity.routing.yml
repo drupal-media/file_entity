@@ -116,7 +116,7 @@ file_entity.file_view:
     _content: '\Drupal\file_entity\Controller\FileController::FileView'
     _title: 'View'
   requirements:
-      _permission: 'access content'
+    _entity_access: 'file.view'
 
 file_entity.file_usage:
   path: 'file/{file}/usage'
@@ -132,7 +132,7 @@ file_entity.file_download:
     _content: '\Drupal\file_entity\Controller\FileController::FileDownload'
     _title: 'Download'
   requirements:
-      _permission: 'access content'
+    _entity_access: 'file.download'
 
 file_entity.file_edit:
   path: 'file/{file}/edit'
@@ -140,7 +140,7 @@ file_entity.file_edit:
     _content: '\Drupal\file_entity\Controller\FileController::FileEdit'
     _title: 'Edit'
   requirements:
-      _permission: 'access content'
+    _entity_access: 'file.update'
 
 file_entity.file_delete:
   path: 'file/{file}/delete'
@@ -148,4 +148,4 @@ file_entity.file_delete:
     _content: '\Drupal\file_entity\Controller\FileController::FileDelete'
     _title: 'Delete'
   requirements:
-      _permission: 'access content'
+    _entity_access: 'file.delete'

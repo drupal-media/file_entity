@@ -57,7 +57,7 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
   /**
    * Runs basic tests for file_entity_access function.
    */
-  function testFileEntityAccess() {
+  function dtestFileEntityAccess() {
     /** @var FileInterface $file */
     $file = reset($this->files['image']);
 
@@ -165,7 +165,6 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
     $this->drupalGet($url);
     $this->assertResponse(200, 'Users with access can download the file without a token when file_entity_allow_insecure_download is set.');
 
-    /** @var FileEntity $file */
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/edit");
@@ -188,7 +187,7 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
   /**
    * Test to see if we have access to download private files when granted the permissions.
    */
-  function testFileEntityPrivateDownloadAccess() {
+  function dtestFileEntityPrivateDownloadAccess() {
     foreach ($this->getPrivateDownloadAccessCases() as $case) {
       // Create users and login only if non-anonymous.
       $authenticated_user = !is_null($case['permissions']);

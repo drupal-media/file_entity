@@ -50,6 +50,11 @@ class FileEntityAccessController extends FileAccessController {
     /** @var FileEntity $entity */
 
     $is_owner = $entity->getOwnerId() === $account->id();
+    debug($entity->getOwnerId());
+    debug($account->id());
+    debug($account->hasPermission('view files'), 'view files');
+    debug($is_owner, 'owner');
+    debug($operation);
 
     if ($operation == 'view') {
       $wrapper = file_entity_get_stream_wrapper(file_uri_scheme($entity->getFileUri()));
