@@ -1,3 +1,4 @@
+# @todo Move this back to admin/config/media/file-types in Drupal 8 if MenuTreeStorage::MAX_DEPTH is increased to a value higher than 9.
 file_entity.file_types_overview:
   path: 'admin/structure/file-types'
   defaults:
@@ -35,14 +36,6 @@ file_entity.file_types_manage_disable:
   defaults:
     _entity_form: 'file_type.disable'
     _title: 'Disable file type'
-  requirements:
-    _permission: 'administer file types'
-
-file_entity.file_types_manage_revert:
-  path: 'admin/structure/file-types/manage/{file_type}/revert'
-  defaults:
-    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManageRevert'
-    _title: 'Revert'
   requirements:
     _permission: 'administer file types'
 

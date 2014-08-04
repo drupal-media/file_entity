@@ -111,85 +111,10 @@ function file_entity_menu() {
 //   File Configuration
 //   @todo Move this back to admin/config/media/file-types in Drupal 8 if
 //   MENU_MAX_DEPTH is increased to a value higher than 9.
-  $items['admin/structure/file-types'] = array(
-    'title' => 'File types',
-    'description' => 'Manage settings for the type of files used on your site.',
-    'page callback' => 'file_entity_list_types_page',
-    'access arguments' => array('administer file types'),
-    'file' => 'file_entity.admin.inc',
-  );
-  $items['admin/structure/file-types/add'] = array(
-    'title' => 'Add file type',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_file_type_form'),
-    'access arguments' => array('administer file types'),
-    'type' => MENU_LOCAL_ACTION,
-    'file' => 'file_entity.admin.inc',
-  );
   $items['admin/structure/file-types/manage/%file_type'] = array(
     'title' => 'Manage file types',
     'description' => 'Manage settings for the type of files used on your site.',
   );
-  $items['admin/structure/file-types/manage/%file_type/enable'] = array(
-    'title' => 'Enable',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_type_enable_confirm', 4),
-    'access arguments' => array('administer file types'),
-    'file' => 'file_entity.admin.inc',
-    'type' => MENU_CALLBACK,
-  );
-  $items['admin/structure/file-types/manage/%file_type/disable'] = array(
-    'title' => 'Disable',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_type_disable_confirm', 4),
-    'access arguments' => array('administer file types'),
-    'file' => 'file_entity.admin.inc',
-    'type' => MENU_CALLBACK,
-  );
-  $items['admin/structure/file-types/manage/%file_type/revert'] = array(
-    'title' => 'Revert',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_type_revert_confirm', 4),
-    'access arguments' => array('administer file types'),
-    'file' => 'file_entity.admin.inc',
-    'type' => MENU_CALLBACK,
-  );
-  $items['admin/structure/file-types/manage/%file_type/delete'] = array(
-    'title' => 'Delete',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_type_delete_confirm', 4),
-    'access arguments' => array('administer file types'),
-    'file' => 'file_entity.admin.inc',
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['admin/content/file'] = array(
-    'title' => 'Files',
-    'description' => 'Manage files used on your site.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_admin_file'),
-    'access arguments' => array('administer files'),
-    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-    'file' => 'file_entity.admin.inc',
-  );
-  $items['admin/content/file/list'] = array(
-    'title' => 'List',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-
-  // general view, edit, delete for files
-  $items['file/add'] = array(
-    'title' => 'Add file',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_add_upload', array()),
-    'access callback' => 'file_entity_access',
-    'access arguments' => array('create'),
-    'file' => 'file_entity.pages.inc',
-  );
-//   @TODO: Check how to translate this into D8
-  if (\Drupal::moduleHandler()->moduleExists('plupload') && \Drupal::moduleHandler()->moduleExists('multiform')) {
-    $items['file/add']['page arguments'] = array('file_entity_add_upload_multiple');
-  }
   $items['file/add/upload'] = array(
     'title' => 'Upload',
     'type' => MENU_DEFAULT_LOCAL_TASK,
