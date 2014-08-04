@@ -21,41 +21,6 @@ function file_entity_view_page($file) {
 }
 
 /**
- * Menu callback; download a single file entity.
- */
-function file_entity_download_page($file) {
-  // Ensure there is a valid token to download this file.
-  if (!\Drupal::config('file_entity')->get('allow_insecure_download', FALSE)) {
-    if (!isset($_GET['token']) || $_GET['token'] !== file_entity_get_download_token($file)) {
-      return MENU_ACCESS_DENIED;
-    }
-  }
-
-  // If the file does not exist it can cause problems with file_transfer().
-  if (!is_file($file->uri)) {
-    return MENU_NOT_FOUND;
-  }
-
-  $headers = array(
-    'Content-Type' => mime_header_encode($file->filemime),
-    'Content-Disposition' => 'attachment; filename="' . mime_header_encode(drupal_basename($file->uri)) . '"',
-    'Content-Length' => $file->filesize,
-    'Content-Transfer-Encoding' => 'binary',
-    'Pragma' => 'no-cache',
-    'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-    'Expires' => '0',
-  );
-
-  // Let other modules alter the download headers.
-  drupal_alter('file_download_headers', $headers, $file);
-
-  // Let other modules know the file is being downloaded.
-  module_invoke_all('file_transfer', $file->uri, $headers);
-
-  file_transfer($file->uri, $headers);
-}
-
-/**
  * Form callback for adding a file via an upload form.
  *
  * This is a multi step form which has 1-3 pages:

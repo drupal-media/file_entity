@@ -114,8 +114,8 @@ file_entity.file_usage:
 file_entity.file_download:
   path: 'file/{file}/download'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileDownload'
-    _title: 'Download'
+    _controller: '\Drupal\file_entity\Controller\FileController::download'
+    _title: 'Download file'
   requirements:
     _entity_access: 'file.download'
 

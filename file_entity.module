@@ -2128,7 +2128,7 @@ function file_entity_admin_menu_map() {
   return $map;
 }
 
-/*
+/**
  * Generates a token to protect a file download URL.
  *
  * This prevents unauthorized crawling of all file download URLs since the
