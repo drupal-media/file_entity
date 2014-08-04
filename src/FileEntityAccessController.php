@@ -53,18 +53,16 @@ class FileEntityAccessController extends FileAccessController {
 
     if ($operation == 'view') {
       $wrapper = file_entity_get_stream_wrapper(file_uri_scheme($entity->getFileUri()));
-      return
-        // For private files, users can view private files if the
-        // user has the 'view private files' permission.
-        !empty($wrapper['private']) && $account->hasPermission('view private files') ||
-        // For private files, users can view their own private files if the user
-        // is not anonymous, and has the 'view own private files' permission.
-        !empty($wrapper['private']) && !$account->isAnonymous() && $is_owner && $account->hasPermission('view own private files') ||
-        // For non-private files, allow to see if user owns the file.
-        $entity->isPermanent() && $is_owner && $account->hasPermission('view own files') ||
-        // For non-private files, users can view if they have the 'view files'
-        // permission.
-        $entity->isPermanent() && $account->hasPermission('view files');
+      if (!empty($wrapper['private'])) {
+        return
+          $account->hasPermission('view private files') ||
+          ($account->isAuthenticated() && $is_owner && $account->hasPermission('view own private files'));
+      }
+      elseif ($entity->isPermanent()) {
+        return
+          $account->hasPermission('view files') ||
+          ($is_owner && $account->hasPermission('view own files'));
+      }
     }
 
     // User can perform these operations if they have the "any" permission or if

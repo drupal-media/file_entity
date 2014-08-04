@@ -480,7 +480,7 @@ function file_uri_to_object($uri, $use_existing = TRUE) {
 
   if (empty($file)) {
     $file = File::create(array(
-      'uid' => \Drupal::currentUser(),
+      'uid' => \Drupal::currentUser()->id(),
       'filename' => drupal_basename($uri),
       'uri' => $uri,
       'filemime' => \Drupal::service('file.mime_type.guesser')->guess($uri),
