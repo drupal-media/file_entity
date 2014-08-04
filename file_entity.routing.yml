@@ -122,10 +122,10 @@ file_entity.file_download:
 file_entity.file_edit:
   path: 'file/{file}/edit'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileEdit'
+    _entity_form: 'file.edit'
     _title: 'Edit'
   requirements:
-    _entity_access: 'file.update'
+    _entity_access: 'file.edit'
 
 file_entity.file_delete:
   path: 'file/{file}/delete'

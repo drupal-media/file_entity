@@ -13,6 +13,24 @@ function file_entity_views_data() {
   // will go into this field by default.
   $data['file_managed']['table']['group'] = t('Media');
 
+  // File Name.
+  $data['file_managed']['filename'] = array(
+    'title' => t('Filename'),
+    'help' => t('File name with optional link to view.'),
+    'field' => array(
+      'id' => 'file_name',
+    ),
+    'sort' => array(
+      'id' => 'standard',
+    ),
+    'filter' => array(
+      'id' => 'string',
+    ),
+    'argument' => array(
+      'id' => 'string',
+    ),
+  );
+
   // File type.
   $data['file_managed']['type'] = array(
     'title' => t('Type'),
@@ -66,11 +84,10 @@ function file_entity_views_data() {
 
   // View link.
   $data['file_managed']['view'] = array(
-    'title' => t('View link'),
-    'help' => t('Provide a simple link to view the file entity.'),
     'field' => array(
+      'title' => t('Link to file'),
+      'help' => t('Provide a simple link to the file.'),
       'id' => 'file_entity_link',
-      'real field' => 'fid',
     ),
   );
 
@@ -99,11 +116,8 @@ function file_entity_views_data() {
     'title' => t('Download link'),
     'help' => t('Provide a simple link to download the file entity.'),
     'field' => array(
-      'handler' => 'views_handler_field_file_link_download',
+      'id' => 'file_entity_link_download',
       'real field' => 'fid',
-      'additional fields' => array(
-        'fid',
-      ),
     ),
   );
 

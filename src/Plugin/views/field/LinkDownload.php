@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\file_entity\Plugin\views\field\LinkDelete.
+ * Contains Drupal\file_entity\Plugin\views\field\LinkDownload.
  */
 
 namespace Drupal\file_entity\Plugin\views\field;
@@ -14,12 +14,12 @@ use Drupal\views\ResultRow;
  *
  * @ingroup views_field_handlers
  *
- * @ViewsField("file_entity_link_delete")
+ * @ViewsField("file_entity_link_download")
  */
-class LinkDelete extends Link {
+class LinkDownload extends Link {
 
   /**
-   * Prepares the link to delete the media item.
+   * Prepares the link to download the file.
    *
    * @param \Drupal\Core\Entity\EntityInterface $file
    *   The file entity this field belongs to.
@@ -33,12 +33,12 @@ class LinkDelete extends Link {
     $text = NULL;
 
     // Ensure user has access to delete this media item.
-    if ($file->access('delete')) {
+    if ($file->access('download')) {
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = 'file/' . $file->id() . '/delete';
+      $this->options['alter']['path'] = 'file/' . $file->id() . '/download';
       $this->options['alter']['query'] = drupal_get_destination();
 
-      $text = !empty($this->options['text']) ? $this->options['text'] : t('Delete');
+      $text = !empty($this->options['text']) ? $this->options['text'] : t('Download');
     }
 
     return $text;

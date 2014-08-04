@@ -7,6 +7,7 @@
 
 namespace Drupal\file_entity\Plugin\views\filter;
 
+use Drupal\file_entity\Entity\FileType;
 use Drupal\views\Plugin\views\filter\InOperator;
 
 /**
@@ -27,11 +28,11 @@ class Type extends InOperator {
   public function getValueOptions() {
     if (!isset($this->value_options)) {
       // Load entity File.
-      $result = entity_load_multiple('file_type');
+      $types = FileType::loadMultiple();
 
       // Creates associative array of candidates.
       $candidates = array();
-      foreach ($result as $type) {
+      foreach ($types as $type) {
         $candidates[$type->id()] = $type->label();
       }
 
