@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityCreationTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityCreationTest.
  */
 
 namespace Drupal\file_entity\Tests;
@@ -12,7 +12,7 @@ namespace Drupal\file_entity\Tests;
  *
  * @group file_entity
  */
-class FileEntityCreationTestCase extends FileEntityTestBase {
+class FileEntityCreationTest extends FileEntityTestBase {
 
   public static $modules = array('views');
 

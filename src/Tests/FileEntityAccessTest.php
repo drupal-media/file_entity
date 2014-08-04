@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityAccessTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityAccessTest.
  */
 
 namespace Drupal\file_entity\Tests;
@@ -15,7 +15,7 @@ use Drupal\file_entity\FileEntityAccessController;
  *
  * @group file_entity
  */
-class FileEntityAccessTestCase extends FileEntityTestBase {
+class FileEntityAccessTest extends FileEntityTestBase {
 
   /**
    * The File Entity access controller.

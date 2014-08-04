@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityTypeTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityTypeTest.
  */
 
 namespace Drupal\file_entity\Tests;
@@ -16,7 +16,7 @@ use Drupal\file_entity\Entity\FileType;
  *
  * @group file_entity
  */
-class FileEntityTypeTestCase extends FileEntityTestBase {
+class FileEntityTypeTest extends FileEntityTestBase {
 
   /**
    * {@inheritdoc}

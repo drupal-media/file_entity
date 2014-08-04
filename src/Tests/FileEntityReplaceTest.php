@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityReplaceTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityReplaceTest.
  */
 
 namespace Drupal\file_entity\Tests;
@@ -12,7 +12,7 @@ namespace Drupal\file_entity\Tests;
  *
  * @group file_entity
  */
-class FileEntityReplaceTestCase extends FileEntityTestBase {
+class FileEntityReplaceTest extends FileEntityTestBase {
 
   function setUp() {
     parent::setUp();

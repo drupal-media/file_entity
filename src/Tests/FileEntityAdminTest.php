@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityAdminTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityAdminTest.
  */
 
 namespace Drupal\file_entity\Tests;
@@ -12,7 +12,7 @@ namespace Drupal\file_entity\Tests;
  *
  * @group file_entity
  */
-class FileEntityAdminTestCase extends FileEntityTestBase {
+class FileEntityAdminTest extends FileEntityTestBase {
 
   function setUp() {
     parent::setUp();
