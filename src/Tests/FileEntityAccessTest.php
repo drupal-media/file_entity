@@ -89,9 +89,9 @@ class FileEntityAccessTest extends FileEntityTestBase {
 
     // User can update own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files'));
-    $this->assertFileEntityAccess(array('update' => FALSE), $file, $web_user);
+    $this->assertFileEntityAccess(array('edit' => FALSE), $file, $web_user);
     $file->setOwner($web_user)->save();
-    $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(array('edit' => TRUE), $file, $web_user);
 
     // User can delete own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files', 'delete own image files'));
@@ -109,7 +109,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
 
     // User can edit any file.
     $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any image files'));
-    $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(array('edit' => TRUE), $file, $web_user);
 
     // User can delete any file.
     $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any image files', 'delete any image files'));
