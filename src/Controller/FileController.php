@@ -72,7 +72,7 @@ class FileController extends ControllerBase {
    */
   public function download(FileInterface $file) {
     // Ensure there is a valid token to download this file.
-    if (!($this->config('file_entity.settings')->get('allow_insecure_download'))) {
+    if (!$this->config('file_entity.settings')->get('allow_insecure_download')) {
       if (!isset($_GET['token']) || $_GET['token'] !== file_entity_get_download_token($file)) {
         return new Response(t('Access to file @url denied', array('@url' => $file->getFileUri())), 403);
       }

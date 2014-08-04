@@ -7,6 +7,7 @@
 
 namespace Drupal\file_entity\Tests;
 
+use Drupal\Core\Config\Config;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileType;
@@ -24,9 +25,24 @@ abstract class FileEntityTestBase extends WebTestBase {
   public static $modules = array('file_entity', 'text');
 
   /**
+   * File entity config.
+   *
+   * @var Config
+   */
+  protected $config;
+
+  /**
    * @var FileInterface[]
    */
   protected $files = array();
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+    $this->config = $this->container->get('config.factory')->get('file_entity.settings');
+  }
 
   protected function setUpFiles($defaults = array()) {
     // Populate defaults array.

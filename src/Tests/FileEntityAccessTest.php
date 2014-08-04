@@ -27,7 +27,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
   function setUp() {
     parent::setUp();
     $this->setUpFiles(array('uid' => 0));
-    $this->accessController = \Drupal::entityManager()->getAccessController('file');
+    $this->accessController = $this->container->get('entity.manager')->getAccessController('file');
 
     // Unset the fact that file_entity_install() adds the 'view files'
     // permission to all user roles. This messes with being able to fully unit
@@ -160,9 +160,9 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $this->assertResponse(403, 'Cannot download file with in invalid token.');
     $this->drupalGet($url);
     $this->assertResponse(403, 'Cannot download file without a token.');
-    \Drupal::config('file_entity')->set('allow_insecure_download', TRUE);
+    $this->config->set('allow_insecure_download', TRUE)->save();
     $this->drupalGet($url);
-    $this->assertResponse(200, 'Users with access can download the file without a token when file_entity_allow_insecure_download is set.');
+    $this->assertResponse(200, 'Users with access can download the file without a token when allow_insecure_download is set.');
 
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
