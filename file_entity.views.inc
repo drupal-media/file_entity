@@ -9,22 +9,22 @@
  * Implements hook_views_data().
  */
 function file_entity_views_data() {
+  // Define the base group of this table. Fields that don't have a group defined
+  // will go into this field by default.
+  $data['file_managed']['table']['group'] = t('Media');
+
   // File type.
   $data['file_managed']['type'] = array(
     'title' => t('Type'),
     'help' => t('The type of the file (for example, "audio", "image", "video", etc).'),
     'field' => array(
-      'handler' => 'views_handler_field_file_type',
-      'click sortable' => TRUE,
+      'id' => 'file_entity_type',
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+      'id' => 'standard',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_file_type',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_file_type',
+      'id' => 'file_entity_type',
     ),
   );
 
@@ -64,16 +64,23 @@ function file_entity_views_data() {
     ),
   );
 
+  // View link.
+  $data['file_managed']['view'] = array(
+    'title' => t('View link'),
+    'help' => t('Provide a simple link to view the file entity.'),
+    'field' => array(
+      'id' => 'file_entity_link',
+      'real field' => 'fid',
+    ),
+  );
+
   // Edit link.
   $data['file_managed']['edit'] = array(
     'title' => t('Edit link'),
     'help' => t('Provide a simple link to edit the file entity.'),
     'field' => array(
-      'handler' => 'views_handler_field_file_link_edit',
+      'id' => 'file_entity_link_edit',
       'real field' => 'fid',
-      'additional fields' => array(
-        'fid',
-      ),
     ),
   );
 
@@ -82,11 +89,8 @@ function file_entity_views_data() {
     'title' => t('Delete link'),
     'help' => t('Provide a simple link to delete the file entity.'),
     'field' => array(
-      'handler' => 'views_handler_field_file_link_delete',
+      'id' => 'file_entity_link_delete',
       'real field' => 'fid',
-      'additional fields' => array(
-        'fid',
-      ),
     ),
   );
 
@@ -138,13 +142,15 @@ function file_entity_views_data_alter(&$data) {
  */
 function file_entity_views_plugins() {
   return array(
-    'module' => 'views', // This just tells our themes are elsewhere.
+    // This just tells our themes are elsewhere.
+    'module' => 'views',
     'row' => array(
       'file' => array(
         'title' => t('File'),
         'help' => t('Display the file with standard file view.'),
         'handler' => 'views_plugin_row_file_view',
-        'base' => array('file_managed'), // only works with 'file' as base.
+        // Only works with 'file' as base.
+        'base' => array('file_managed'),
         'uses options' => TRUE,
         'type' => 'normal',
         'help topic' => 'style-file',
@@ -154,7 +160,8 @@ function file_entity_views_plugins() {
         'help' => t('Display the file with standard file view.'),
         'handler' => 'views_plugin_row_file_rss',
         'theme' => 'views_view_row_rss',
-        'base' => array('file_managed'), // only works with 'file' as base.
+        // Only works with 'file' as base.
+        'base' => array('file_managed'),
         'uses options' => TRUE,
         'type' => 'feed',
         'help topic' => 'style-file-rss',
