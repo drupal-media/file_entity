@@ -98,16 +98,8 @@ file_entity.file_add_upload_archive:
 file_entity.file:
   path: 'file/{file}'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::File'
-    _title: 'File Name'
-  requirements:
-      _permission: 'access content'
-
-file_entity.file_view:
-  path: 'file/{file}/view'
-  defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileView'
-    _title: 'View'
+    _entity_view: 'file.full'
+    _title: 'File'
   requirements:
     _entity_access: 'file.view'
 

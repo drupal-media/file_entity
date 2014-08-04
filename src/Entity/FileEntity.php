@@ -10,6 +10,7 @@ namespace Drupal\file_entity\Entity;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\file\Entity\File;
 
 /**
@@ -101,11 +102,30 @@ class FileEntity extends File {
       ->setSetting('target_type', 'file_type');
 
     $fields['filename']
+      ->setDisplayOptions('view', array(
+        'type' => 'string',
+        'label' => 'hidden',
+        'weight' => -5,
+      ))
+      ->setDisplayConfigurable('view', TRUE)
       ->setDisplayOptions('form', array(
         'type' => 'string',
         'weight' => -5,
       ))
       ->setDisplayConfigurable('form', TRUE);
+
+    $fields['uid']->setDisplayOptions('view', array(
+      'type' => 'link',
+      'weight' => 1,
+    ));
+    $fields['filemime']->setDisplayOptions('view', array(
+      'type' => 'string',
+      'weight' => 2,
+    ));
+    $fields['filesize']->setDisplayOptions('view', array(
+      'type' => 'string',
+      'weight' => 3,
+    ));
 
     return $fields;
   }

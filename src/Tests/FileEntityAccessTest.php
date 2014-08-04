@@ -120,7 +120,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
    * Test to see if we have access to view files when granted the permissions.
    * In this test we aim to prove the permissions work in the following pages:
    *  file/add
-   *  file/%/view
+   *  file/%
    *  file/%/download
    *  file/%/edit
    *  file/%/delete
@@ -140,11 +140,11 @@ class FileEntityAccessTest extends FileEntityTestBase {
     // This fails.. No clue why but, tested manually and works as should.
     //$web_user = $this->drupalCreateUser(array('view own files'));
     //$this->drupalLogin($web_user);
-    //$this->drupalGet("file/{$file->id()}/view");
+    //$this->drupalGet("file/{$file->id()}");
     //$this->assertResponse(403, 'Users without access can not access the file view page');
     $web_user = $this->drupalCreateUser(array('view files'));
     $this->drupalLogin($web_user);
-    $this->drupalGet("file/{$file->id()}/view");
+    $this->drupalGet("file/{$file->id()}");
     $this->assertResponse(200, 'Users with access can access the file view page');
 
     $url = "file/{$file->id()}/download";

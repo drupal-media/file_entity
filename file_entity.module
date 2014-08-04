@@ -841,6 +841,7 @@ function file_entity_entity_type_alter(&$entity_types) {
   $entity_types['file']->setAccessClass('Drupal\file_entity\FileEntityAccessController');
   $entity_types['file']->setLinkTemplate('admin-form', 'file_entity.file_types_manage');
   $entity_types['file']->setLinkTemplate('canonical', 'file_entity.file_add');
+  $entity_types['file']->setViewBuilderClass('Drupal\file_entity\Entity\FileEntityViewBuilder');
 
   //$entity_types['file']['uri callback'] = 'file_entity_uri';
   /*$entity_types['file']['view modes']['teaser'] = array(
