@@ -115,11 +115,7 @@ function file_entity_menu() {
     'title' => 'Manage file types',
     'description' => 'Manage settings for the type of files used on your site.',
   );
-  $items['file/add/upload'] = array(
-    'title' => 'Upload',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
+
   $items['file/add/upload/file'] = array(
     'title' => 'File',
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -145,11 +141,7 @@ function file_entity_menu() {
     'access arguments' => array('view', 1),
     'file' => 'file_entity.pages.inc',
   );
-  $items['file/%file/view'] = array(
-    'title' => 'View',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
+
   $items['file/%file/usage'] = array(
     'title' => 'Usage',
     'page callback' => 'file_entity_usage_page',
@@ -169,17 +161,7 @@ function file_entity_menu() {
     'file' => 'file_entity.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['file/%file/edit'] = array(
-    'title' => 'Edit',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_edit', 1),
-    'access callback' => 'file_entity_access',
-    'access arguments' => array('update', 1),
-    'weight' => 0,
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'file_entity.pages.inc',
-  );
+
   $items['file/%file/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
