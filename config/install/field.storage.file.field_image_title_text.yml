@@ -1,0 +1,18 @@
+uuid: ef5f71b9-d524-4e04-8d00-b27cd5803272
+langcode: en
+status: true
+dependencies:
+  module:
+    - file
+    - text
+id: file.field_image_title_text
+name: field_image_title_text
+entity_type: file
+type: text
+settings:
+  max_length: 255
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }

@@ -1,0 +1,20 @@
+uuid: fe3742b7-0cd3-459b-9502-2f4c83555d12
+langcode: en
+status: true
+dependencies:
+  entity:
+    - field.storage.file.field_image_title_text
+    - file_entity.type.image
+id: file.image.field_image_title_text
+label: 'Title Text'
+field_name: field_image_title_text
+entity_type: file
+bundle: image
+description: 'Title text is used in the tool tip when a user hovers their mouse over the image. Adding title text makes it easier to understand the context of an image and improves usability.'
+required: false
+translatable: false
+default_value: {  }
+default_value_function: ''
+settings:
+  text_processing: 0
+field_type: text
