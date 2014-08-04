@@ -69,15 +69,10 @@ class FileEntityAccessController extends FileAccessController {
 
     // User can perform these operations if they have the "any" permission or if
     // they own it and have the "own" permission.
-    $operation_permission_map = array(
-      'download' => 'download',
-      'update' => 'edit',
-      'delete' => 'delete',
-    );
-    if ($permission = @$operation_permission_map[$operation]) {
+    if (in_array($operation, array('download', 'edit', 'delete'))) {
       $type = $entity->get('type')->target_id;
-      return $account->hasPermission("$permission any $type files") ||
-        ($is_owner && $account->hasPermission("$permission own $type files"));
+      return $account->hasPermission("$operation any $type files") ||
+        ($is_owner && $account->hasPermission("$operation own $type files"));
     }
   }
 }

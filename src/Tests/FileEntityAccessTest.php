@@ -171,7 +171,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $web_user = $this->drupalCreateUser(array('edit any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/edit");
-    $this->assertResponse(200, 'Users with access can access the file add page');
+    $this->assertResponse(200, 'Users with access can access the file edit page');
 
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
