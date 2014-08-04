@@ -3,3 +3,9 @@ file_entity.file_type_add:
   title: 'Add file type'
   appears_on:
     - file_entity.file_types_overview
+
+file_entity.file_add:
+  route_name: file_entity.file_add
+  title: 'Add file'
+  appears_on:
+    - view.files.page_1
