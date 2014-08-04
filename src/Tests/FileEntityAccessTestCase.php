@@ -8,7 +8,6 @@
 namespace Drupal\file_entity\Tests;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\file\FileInterface;
-use Drupal\file_entity\Entity\FileEntity;
 use Drupal\file_entity\FileEntityAccessController;
 
 /**
@@ -57,7 +56,7 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
   /**
    * Runs basic tests for file_entity_access function.
    */
-  function dtestFileEntityAccess() {
+  function testFileEntityAccess() {
     /** @var FileInterface $file */
     $file = reset($this->files['image']);
 
@@ -187,7 +186,7 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
   /**
    * Test to see if we have access to download private files when granted the permissions.
    */
-  function dtestFileEntityPrivateDownloadAccess() {
+  function testFileEntityPrivateDownloadAccess() {
     foreach ($this->getPrivateDownloadAccessCases() as $case) {
       // Create users and login only if non-anonymous.
       $authenticated_user = !is_null($case['permissions']);
