@@ -176,11 +176,11 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/delete");
-    $this->assertResponse(403, 'Users without access can not access the file view page');
+    $this->assertResponse(403, 'Users without access can not access the file delete page');
     $web_user = $this->drupalCreateUser(array('delete any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/delete");
-    $this->assertResponse(200, 'Users with access can access the file add page');
+    $this->assertResponse(200, 'Users with access can access the file delete page');
   }
 
   /**

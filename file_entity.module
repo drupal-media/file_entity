@@ -180,17 +180,6 @@ function file_entity_menu() {
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'file_entity.pages.inc',
   );
-  $items['file/%file/delete'] = array(
-    'title' => 'Delete',
-    'page callback' => 'drupal_get_form',
-    'page arguments'  => array('file_entity_delete_form', 1),
-    'access callback' => 'file_entity_access',
-    'access arguments' => array('delete', 1),
-    'weight' => 1,
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'file_entity.pages.inc',
-  );
 
   // Attach a "Manage file display" tab to each file type in the same way that
   // Field UI attaches "Manage fields" and "Manage display" tabs. Note that
@@ -837,6 +826,7 @@ function file_entity_entity_type_alter(&$entity_types) {
 
   $entity_types['file']->setClass('Drupal\file_entity\Entity\FileEntity');
   $entity_types['file']->setFormClass('edit', 'Drupal\file_entity\Form\FileEditForm');
+  $entity_types['file']->setFormClass('delete', 'Drupal\file_entity\Form\FileDeleteForm');
   $entity_types['file']->set('admin_permission', 'administer files');
   $entity_types['file']->setAccessClass('Drupal\file_entity\FileEntityAccessController');
   $entity_types['file']->setLinkTemplate('admin-form', 'file_entity.file_types_manage');
