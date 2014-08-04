@@ -1,3 +1,4 @@
+# @todo Move this back to admin/config/media/file-types in Drupal 8 if MenuTreeStorage::MAX_DEPTH is increased to a value higher than 9.
 file_entity.file_types_overview:
   path: 'admin/structure/file-types'
   defaults:
@@ -35,14 +36,6 @@ file_entity.file_types_manage_disable:
   defaults:
     _entity_form: 'file_type.disable'
     _title: 'Disable file type'
-  requirements:
-    _permission: 'administer file types'
-
-file_entity.file_types_manage_revert:
-  path: 'admin/structure/file-types/manage/{file_type}/revert'
-  defaults:
-    _content: '\Drupal\file_entity\Controller\FileTypeController::FileTypesManageRevert'
-    _title: 'Revert'
   requirements:
     _permission: 'administer file types'
 
@@ -116,7 +109,7 @@ file_entity.file_view:
     _content: '\Drupal\file_entity\Controller\FileController::FileView'
     _title: 'View'
   requirements:
-      _permission: 'access content'
+    _entity_access: 'file.view'
 
 file_entity.file_usage:
   path: 'file/{file}/usage'
@@ -132,7 +125,7 @@ file_entity.file_download:
     _content: '\Drupal\file_entity\Controller\FileController::FileDownload'
     _title: 'Download'
   requirements:
-      _permission: 'access content'
+    _entity_access: 'file.download'
 
 file_entity.file_edit:
   path: 'file/{file}/edit'
@@ -140,7 +133,7 @@ file_entity.file_edit:
     _content: '\Drupal\file_entity\Controller\FileController::FileEdit'
     _title: 'Edit'
   requirements:
-      _permission: 'access content'
+    _entity_access: 'file.update'
 
 file_entity.file_delete:
   path: 'file/{file}/delete'
@@ -148,4 +141,4 @@ file_entity.file_delete:
     _content: '\Drupal\file_entity\Controller\FileController::FileDelete'
     _title: 'Delete'
   requirements:
-      _permission: 'access content'
+    _entity_access: 'file.delete'

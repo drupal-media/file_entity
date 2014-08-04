@@ -2,12 +2,12 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityAccessTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityAccessTest.
  */
 
 namespace Drupal\file_entity\Tests;
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\file_entity\Entity\FileEntity;
+use Drupal\file\FileInterface;
 use Drupal\file_entity\FileEntityAccessController;
 
 /**
@@ -15,7 +15,7 @@ use Drupal\file_entity\FileEntityAccessController;
  *
  * @group file_entity
  */
-class FileEntityAccessTestCase extends FileEntityTestBase {
+class FileEntityAccessTest extends FileEntityTestBase {
 
   /**
    * The File Entity access controller.
@@ -42,10 +42,10 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
    * Asserts FileEntityAccessController correctly grants or denies access.
    */
   function assertFileEntityAccess($ops, $file, $account) {
-    drupal_static_reset('file_entity_access');
-    foreach ($ops as $op => $result) {
+    $this->accessController->resetCache();
+    foreach ($ops as $op => $expected) {
       $this->assertEqual(
-        $result,
+        $expected,
         $op === 'create' ?
           $this->accessController->createAccess($file, $account) :
           $this->accessController->access($file, $op, LanguageInterface::LANGCODE_DEFAULT, $account)
@@ -57,6 +57,7 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
    * Runs basic tests for file_entity_access function.
    */
   function testFileEntityAccess() {
+    /** @var FileInterface $file */
     $file = reset($this->files['image']);
 
     // Ensures user with 'bypass file access' permission can do everything.
@@ -77,25 +78,25 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
     // User can view own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files'));
     $this->assertFileEntityAccess(array('view' => FALSE), $file, $web_user);
-    $file->uid = $web_user->uid;
+    $file->setOwner($web_user)->save();
     $this->assertFileEntityAccess(array('view' => TRUE), $file, $web_user);
 
     // User can download own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'download own image files'));
     $this->assertFileEntityAccess(array('download' => FALSE), $file, $web_user);
-    $file->uid = $web_user->uid;
+    $file->setOwner($web_user)->save();
     $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
 
     // User can update own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files'));
     $this->assertFileEntityAccess(array('update' => FALSE), $file, $web_user);
-    $file->uid = $web_user->uid;
+    $file->setOwner($web_user)->save();
     $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
 
     // User can delete own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files', 'delete own image files'));
     $this->assertFileEntityAccess(array('delete' => FALSE), $file, $web_user);
-    $file->uid = $web_user->uid;
+    $file->setOwner($web_user)->save();
     $this->assertFileEntityAccess(array('delete' => TRUE), $file, $web_user);
 
     // User can view any file.
@@ -163,7 +164,6 @@ class FileEntityAccessTestCase extends FileEntityTestBase {
     $this->drupalGet($url);
     $this->assertResponse(200, 'Users with access can download the file without a token when file_entity_allow_insecure_download is set.');
 
-    /** @var FileEntity $file */
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/edit");

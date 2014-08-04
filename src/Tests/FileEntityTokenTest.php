@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityTokenTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityTokenTest.
  */
 
 namespace Drupal\file_entity\Tests;
@@ -12,7 +12,7 @@ namespace Drupal\file_entity\Tests;
  *
  * @group file_entity
  */
-class FileEntityTokenTestCase extends FileEntityTestBase {
+class FileEntityTokenTest extends FileEntityTestBase {
 
   function setUp() {
     parent::setUp();

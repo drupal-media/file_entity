@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityFileTypeClassificationTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityFileTypeClassificationTest.
  */
 
 namespace Drupal\file_entity\Tests;
@@ -15,7 +15,7 @@ use Drupal\simpletest\WebTestBase;
  *
  * @group file_entity
  */
-class FileEntityFileTypeClassificationTestCase extends WebTestBase {
+class FileEntityFileTypeClassificationTest extends WebTestBase {
 
   /**
    * Modules to enable.

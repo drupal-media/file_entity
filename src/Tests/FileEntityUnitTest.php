@@ -2,19 +2,20 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityUnitTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityUnitTest.
  */
 
 namespace Drupal\file_entity\Tests;
 
 use Drupal\file\Entity\File;
+use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeExtensionGuesser;
 
 /**
  * Test basic file entity functionality.
  *
  * @group file_entity
  */
-class FileEntityUnitTestCase extends FileEntityTestBase {
+class FileEntityUnitTest extends FileEntityTestBase {
 
   function setUp() {
     parent::setUp();
@@ -27,13 +28,15 @@ class FileEntityUnitTestCase extends FileEntityTestBase {
   function testMimeTypeMappings() {
     $tests = array(
       'public://test.ogg' => 'audio/ogg',
-      'public://test.mkv' => 'video/x-m4v',
+      'public://test.m4v' => 'video/x-m4v',
       'public://test.mka' => 'audio/x-matroska',
       'public://test.mkv' => 'video/x-matroska',
       'public://test.webp' => 'image/webp',
     );
+    /** @var MimeTypeExtensionGuesser $guesser */
+    $guesser = $this->container->get('file.mime_type.guesser.extension');
     foreach ($tests as $input => $expected) {
-      $this->assertEqual(file_get_mimetype($input), $expected);
+      $this->assertEqual($expected, $guesser->guess($input));
     }
   }
 

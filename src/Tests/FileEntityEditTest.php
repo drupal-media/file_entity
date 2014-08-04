@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityEditTestCase.
+ * Contains \Drupal\file_entity\Tests\FileEntityEditTest.
  */
 
 namespace Drupal\file_entity\Tests;
@@ -12,7 +12,7 @@ namespace Drupal\file_entity\Tests;
  *
  * @group file_entity
  */
-class FileEntityEditTestCase extends FileEntityTestBase {
+class FileEntityEditTest extends FileEntityTestBase {
   protected $web_user;
   protected $admin_user;
 

@@ -49,32 +49,35 @@ class FileEntityAccessController extends FileAccessController {
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
     /** @var FileEntity $entity */
 
-    // Fall back to default behaviors on view.
+    $is_owner = $entity->getOwnerId() === $account->id();
+
     if ($operation == 'view') {
       $wrapper = file_entity_get_stream_wrapper(file_uri_scheme($entity->getFileUri()));
-
-      if (!empty($wrapper['private'])) {
+      return
         // For private files, users can view private files if the
         // user has the 'view private files' permission.
-        if ($account->hasPermission('view private files')) {
-          return TRUE;
-        }
-
+        !empty($wrapper['private']) && $account->hasPermission('view private files') ||
         // For private files, users can view their own private files if the user
         // is not anonymous, and has the 'view own private files' permission.
-        if (!$account->isAnonymous() && $entity->getOwnerId() == $account->id() && $account->hasPermission('view own private files')) {
-          return TRUE;
-        }
-      }
-      elseif ($entity->isPermanent() && $entity->getOwnerId() == $account->id() && $account->hasPermission('view own files')) {
+        !empty($wrapper['private']) && !$account->isAnonymous() && $is_owner && $account->hasPermission('view own private files') ||
         // For non-private files, allow to see if user owns the file.
-        return TRUE;
-      }
-      elseif ($entity->isPermanent() && $account->hasPermission('view files')) {
+        $entity->isPermanent() && $is_owner && $account->hasPermission('view own files') ||
         // For non-private files, users can view if they have the 'view files'
         // permission.
-        return TRUE;
-      }
+        $entity->isPermanent() && $account->hasPermission('view files');
+    }
+
+    // User can perform these operations if they have the "any" permission or if
+    // they own it and have the "own" permission.
+    $operation_permission_map = array(
+      'download' => 'download',
+      'update' => 'edit',
+      'delete' => 'delete',
+    );
+    if ($permission = @$operation_permission_map[$operation]) {
+      $type = $entity->get('type')->target_id;
+      return $account->hasPermission("$permission any $type files") ||
+        ($is_owner && $account->hasPermission("$permission own $type files"));
     }
   }
 }
