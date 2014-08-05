@@ -1,0 +1,4 @@
+file_entity.file_types_manage:
+  route_name: file_entity.file_types_manage
+  title: 'Edit'
+  base_route: file_entity.file_types_manage

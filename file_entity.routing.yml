@@ -122,7 +122,7 @@ file_entity.file_delete:
 file_entity.settings:
   path: 'admin/config/media/file-settings'
   defaults:
-    _form: '\Drupal\file_entity\Form\FileEntitySettingsForm'
+    _form: '\Drupal\file_entity\Form\FileSettingsForm'
     _title: 'File settings'
   requirements:
     _permission: 'administer'

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\file_entity\Form\FileEntitySettingsForm.
+ * Contains \Drupal\file_entity\Form\FileSettingsForm.
  */
 
 namespace Drupal\file_entity\Form;
@@ -9,10 +9,10 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class FileEntitySettingsForm
+ * Class FileSettingsForm
  * @package Drupal\file_entity\Form
  */
-class FileEntitySettingsForm extends FormBase {
+class FileSettingsForm extends FormBase {
 
   /**
    * Returns a unique string identifying the form.
@@ -33,6 +33,7 @@ class FileEntitySettingsForm extends FormBase {
       '#title' => t('Maximum upload size'),
       '#default_value' => \Drupal::config('file_entity.settings')->get('max_filesize'),
       '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes) in order to restrict the allowed file size. If left empty the file sizes will be limited only by PHP\'s maximum post and file upload sizes (current max limit <strong>%limit</strong>).', array('%limit' => format_size(file_upload_max_size()))),
+      '#element_validate' => '\Drupal\file\Plugin\Field\FieldType\FileItem::validateMaxFilesize',
       '#size' => 10,
     );
 
@@ -41,6 +42,7 @@ class FileEntitySettingsForm extends FormBase {
       '#title' => t('Default allowed file extensions'),
       '#default_value' => \Drupal::config('file_entity.settings')->get('default_allowed_extensions'),
       '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
+      '#element_validate' => '\Drupal\file\Plugin\Field\FieldType\FileItem::validateExtensions',
       '#maxlength' => NULL,
     );
 
