@@ -89,9 +89,9 @@ class FileEntityAccessTest extends FileEntityTestBase {
 
     // User can update own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files'));
-    $this->assertFileEntityAccess(array('update' => FALSE), $file, $web_user);
+    $this->assertFileEntityAccess(array('edit' => FALSE), $file, $web_user);
     $file->setOwner($web_user)->save();
-    $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(array('edit' => TRUE), $file, $web_user);
 
     // User can delete own files but no other files.
     $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files', 'delete own image files'));
@@ -109,7 +109,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
 
     // User can edit any file.
     $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any image files'));
-    $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(array('edit' => TRUE), $file, $web_user);
 
     // User can delete any file.
     $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any image files', 'delete any image files'));
@@ -171,43 +171,49 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $web_user = $this->drupalCreateUser(array('edit any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/edit");
-    $this->assertResponse(200, 'Users with access can access the file add page');
+    $this->assertResponse(200, 'Users with access can access the file edit page');
 
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/delete");
-    $this->assertResponse(403, 'Users without access can not access the file view page');
+    $this->assertResponse(403, 'Users without access can not access the file delete page');
     $web_user = $this->drupalCreateUser(array('delete any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/delete");
-    $this->assertResponse(200, 'Users with access can access the file add page');
+    $this->assertResponse(200, 'Users with access can access the file delete page');
   }
 
   /**
    * Test to see if we have access to download private files when granted the permissions.
    */
   function testFileEntityPrivateDownloadAccess() {
+    $original_file = next($this->files['text']);
+
     foreach ($this->getPrivateDownloadAccessCases() as $case) {
+      /** @var FileInterface $file */
+      $file = file_copy($original_file, 'private://');
+      $user_name = 'anonymous';
+
       // Create users and login only if non-anonymous.
       $authenticated_user = !is_null($case['permissions']);
       if ($authenticated_user) {
         $account = $this->drupalCreateUser($case['permissions']);
         $this->drupalLogin($account);
+        $user_name = $account->getName();
+        if (!empty($case['owner'])) {
+          $file->setOwner($account)->save();
+        }
       }
 
-      // Create private, permanent files owned by this user only he's an owner.
-      if (!empty($case['owner'])) {
-        $file = next($this->files['text']);
-        $file->uid = $account->id();
-        $file->save();
-        $file = file_move($file, 'private://');
-
-        // Check if the physical file is there.
-        $arguments = array('%name' => $file->getFilename(), '%username' => $account->getName(), '%uri' => $file->getFileUri());
-        $this->assertTrue(is_file($file->getFileUri()), format_string('File %name owned by %username successfully created at %uri.', $arguments));
-        $url = file_create_url($file->getFileUri());
-        $message_file_info = ' ' . format_string('File %uri was checked.', array('%uri' => $file->getFileUri()));
-      }
+      // Check if the physical file is there.
+      $arguments = array(
+        '%name' => $file->getFilename(),
+        '%username' => $user_name,
+        '%uri' => $file->getFileUri(),
+      );
+      $this->assertTrue(is_file($file->getFileUri()), format_string('File %name owned by %username successfully created at %uri.', $arguments));
+      $url = file_create_url($file->getFileUri());
+      $message_file_info = ' ' . format_string('File %uri was checked.', array('%uri' => $file->getFileUri()));
 
       // Try to download the file.
       $this->drupalGet($url);

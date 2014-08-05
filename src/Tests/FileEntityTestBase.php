@@ -32,7 +32,7 @@ abstract class FileEntityTestBase extends WebTestBase {
   protected $config;
 
   /**
-   * @var FileInterface[]
+   * @var FileInterface[][]
    */
   protected $files = array();
 

@@ -47,22 +47,6 @@ file_entity.file_types_manage_delete:
   requirements:
     _permission: 'administer file types'
 
-file_entity.file_content:
-  path: 'admin/content/file'
-  defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileContent'
-    _title: 'Files'
-  requirements:
-    _permission: 'administer files'
-
-file_entity.file_content_list:
-  path: 'admin/content/file/list'
-  defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileContentList'
-    _title: 'List'
-  requirements:
-      _permission: 'access content'
-
 file_entity.file_add:
   path: 'file/add'
   defaults:
@@ -130,8 +114,8 @@ file_entity.file_edit:
 file_entity.file_delete:
   path: 'file/{file}/delete'
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileDelete'
-    _title: 'Delete'
+    _entity_form: 'file.delete'
+    _title: 'Delete file'
   requirements:
     _entity_access: 'file.delete'
 
