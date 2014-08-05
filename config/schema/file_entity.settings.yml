@@ -1,0 +1,25 @@
+file_entity.settings.*:
+  type: config_entity
+  label: 'File settings'
+  mapping:
+    max_filesize:
+      type: string
+      label: 'Maximum upload size'
+    default_allowed_extensions:
+      type: string
+      label: 'Default allowed file extensions'
+    alt:
+      type: string
+      label: 'Alt attribute'
+    title:
+      type: string
+      label: 'Title attribute'
+    file_upload_wizard_skip_file_type:
+      type: boolean
+      label: 'Skip filetype selection'
+    file_upload_wizard_skip_scheme:
+      type: boolean
+      label: 'Skip scheme selection'
+    file_upload_wizard_skip_fields:
+      type: boolean
+      label: 'Skip available fields'
