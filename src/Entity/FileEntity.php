@@ -117,7 +117,18 @@ class FileEntity extends File {
     $fields['uid']->setDisplayOptions('view', array(
       'type' => 'link',
       'weight' => 1,
-    ));
+    ))
+      ->setDisplayOptions('form', array(
+        'type' => 'entity_reference_autocomplete',
+        'weight' => -1,
+        'settings' => array(
+          'match_operator' => 'CONTAINS',
+          'size' => '60',
+          'autocomplete_type' => 'tags',
+          'placeholder' => '',
+        )
+      ));
+
     $fields['filemime']->setDisplayOptions('view', array(
       'type' => 'string',
       'weight' => 2,

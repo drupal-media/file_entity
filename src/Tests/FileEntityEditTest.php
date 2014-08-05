@@ -73,44 +73,48 @@ class FileEntityEditTest extends FileEntityTestBase {
   /**
    * Check changing file associated user fields.
    */
-  function atestFileEntityAssociatedUser() {
+  function testFileEntityAssociatedUser() {
     $this->drupalLogin($this->admin_user);
 
     // Create file to edit.
     $test_file = $this->getTestFile('text');
-    $name_key = "filename";
+    $name_key = "filename[0][value]";
     $edit = array();
     $edit['files[upload]'] = drupal_realpath($test_file->uri);
     $this->drupalPostForm('file/add', $edit, t('Next'));
 
     // Check that the file was associated with the currently logged in user.
     $file = $this->getFileByFilename($test_file->filename);
-    $this->assertIdentical($file->uid, $this->admin_user->uid, 'File associated with admin user.');
+    $this->assertIdentical($file->getOwnerId(), $this->admin_user->id(), 'File associated with admin user.');
 
     // Try to change the 'associated user' field to an invalid user name.
     $edit = array(
-      'name' => 'invalid-name',
+      'uid[0][target_id]' => 'invalid-name',
     );
-    $this->drupalPostForm('file/' . $file->fid . '/edit', $edit, t('Save'));
-    $this->assertText('The username invalid-name does not exist.');
+    $this->drupalPostForm('file/' . $file->id() . '/edit', $edit, t('Save'));
+    $this->assertText('There are no entities matching "invalid-name".');
 
     // Change the associated user field to an empty string, which should assign
     // association to the anonymous user (uid 0).
-    $edit['name'] = '';
-    $this->drupalPostForm('file/' . $file->fid . '/edit', $edit, t('Save'));
-    $file = File::load($file->fid);
-    $this->assertIdentical($file->uid, '0', 'File associated with anonymous user.');
+    $edit = array();
+    $edit['uid[0][target_id]'] = '';
+    $this->drupalPostForm('file/' . $file->id() . '/edit', $edit, t('Save'));
+    \Drupal::entityManager()->getStorage('file')->resetCache();
+    $file = File::load($file->id());
+    $this->assertIdentical($file->getOwnerId(), '0', 'File associated with anonymous user.');
 
     // Change the associated user field to another user's name (that is not
     // logged in).
-    $edit['name'] = $this->web_user->name;
-    $this->drupalPostForm('file/' . $file->fid . '/edit', $edit, t('Save'));
-    $file = File::load($file->fid);
-    $this->assertIdentical($file->uid, $this->web_user->uid, 'File associated with normal user.');
+    $edit = array();
+    $edit['uid[0][target_id]'] = $this->web_user->label();
+    $this->drupalPostForm('file/' . $file->id() . '/edit', $edit, t('Save'));
+    \Drupal::entityManager()->getStorage('file')->resetCache();
+    $file = File::load($file->id());
+    $this->assertIdentical($file->getOwnerId(), $this->web_user->id(), 'File associated with normal user.');
 
     // Check that normal users cannot change the associated user information.
     $this->drupalLogin($this->web_user);
-    $this->drupalGet('file/' . $file->fid . '/edit');
-    $this->assertNoFieldByName('name');
+    $this->drupalGet('file/' . $file->id() . '/edit');
+    $this->assertNoFieldByName('uid[0][target_id]');
   }
 }

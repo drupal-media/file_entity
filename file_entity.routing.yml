@@ -91,7 +91,7 @@ file_entity.file_usage:
   path: 'file/{file}/usage'
   defaults:
     _content: '\Drupal\file_entity\Controller\FileController::FileUsage'
-    _title: 'Usage'
+    _title: 'File Usage'
   requirements:
       _permission: 'access content'
 
