@@ -158,36 +158,3 @@ function file_entity_views_data_alter(&$data) {
   // Override the filename field handler.
   $data['file_managed']['filename']['field']['handler'] = 'views_handler_field_file_filename';
 }
-
-/**
- * Implements hook_views_plugins().
- */
-function file_entity_views_plugins() {
-  return array(
-    // This just tells our themes are elsewhere.
-    'module' => 'views',
-    'row' => array(
-      'file' => array(
-        'title' => t('File'),
-        'help' => t('Display the file with standard file view.'),
-        'handler' => 'views_plugin_row_file_view',
-        // Only works with 'file' as base.
-        'base' => array('file_managed'),
-        'uses options' => TRUE,
-        'type' => 'normal',
-        'help topic' => 'style-file',
-      ),
-      'file_rss' => array(
-        'title' => t('File'),
-        'help' => t('Display the file with standard file view.'),
-        'handler' => 'views_plugin_row_file_rss',
-        'theme' => 'views_view_row_rss',
-        // Only works with 'file' as base.
-        'base' => array('file_managed'),
-        'uses options' => TRUE,
-        'type' => 'feed',
-        'help topic' => 'style-file-rss',
-      ),
-    ),
-  );
-}

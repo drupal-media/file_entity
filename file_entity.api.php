@@ -6,57 +6,6 @@
  */
 
 /**
- * Declare that your module provides default file types.
- *
- * Your module may already implement this hook for other CTools plugin types.
- * If so, copy the body of this function into the existing hook.
- */
-function hook_ctools_plugin_api($owner, $api) {
-  if ($owner == 'file_entity' && $api == 'file_type') {
-    return array('version' => 1);
-  }
-}
-
-/**
- * Define default file types.
- *
- * File types are implemented as CTools exportables, so modules can alter the
- * defaults via hook_file_default_types_alter(), and the administrator can
- * save overridden and custom types to the {file_type} database table.
- *
- * @return array
- *   An array whose keys are file type names and whose values are objects
- *   representing the file type, with the following key/value pairs:
- *   - api_version: The version of this data.
- *   - type: The file type name.
- *   - label: The human-readable name of the file type.
- *   - description: The description of this file type.
- *   - mimetypes: An array of mimetypes that this file type will map to.
- */
-function hook_file_default_types() {
-  return array(
-    'image' => (object) array(
-      'api_version' => 1,
-      'type' => 'image',
-      'label' => t('Image'),
-      'description' => t("An <em>Image</em> is a two-dimensional picture that has a similar appearance to some subject, usually a physical object or a person."),
-      'mimetypes' => array(
-        'image/*',
-      ),
-    ),
-  );
-}
-
-/**
- * Alter default file types.
- *
- * @see hook_file_default_types()
- */
-function hook_file_default_types_alter(&$types) {
-  $types['image']->mimetypes[] = 'image/svg+xml';
-}
-
-/**
  * Define file formatters.
  *
  * @return array
@@ -118,34 +67,6 @@ function hook_file_view($file, $view_mode, $langcode) {
  * @todo Add documentation.
  */
 function hook_file_view_alter($build, $type) {
-}
-
-/**
- * Add mass file operations.
- *
- * This hook enables modules to inject custom operations into the mass
- * operations dropdown found at admin/content/file, by associating a callback
- * function with the operation, which is called when the form is submitted. The
- * callback function receives one initial argument, which is an array of the
- * checked files.
- *
- * @return array
- *   An array of operations. Each operation is an associative array that may
- *   contain the following key-value pairs:
- *   - 'label': Required. The label for the operation, displayed in the dropdown
- *     menu.
- *   - 'callback': Required. The function to call for the operation.
- *   - 'callback arguments': Optional. An array of additional arguments to pass
- *     to the callback function.
- */
-function hook_file_operations() {
-  $operations = array(
-    'delete' => array(
-      'label' => t('Delete selected files'),
-      'callback' => NULL,
-    ),
-  );
-  return $operations;
 }
 
 /**

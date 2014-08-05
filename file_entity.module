@@ -744,10 +744,7 @@ function file_entity_theme() {
  * Implements hook_entity_info_alter().
  *
  * Extends the core file entity to be fieldable. The file type is used as the
- * bundle key. File types are implemented as CTools exportables, so modules can
- * define default file types via hook_file_default_types(), and the
- * administrator can override the default types or add custom ones via
- * admin/structure/file-types.
+ * bundle key.
  */
 function file_entity_entity_type_alter(&$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
