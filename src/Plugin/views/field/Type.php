@@ -31,7 +31,13 @@ class Type extends FieldPluginBase {
    */
   public function render(ResultRow $values) {
     $value = $this->getValue($values);
-    return FileType::load($value)->label();
+
+    if ($file_entity = FileType::load($value)) {
+      return $file_entity->label();
+    }
+    else {
+      return t('Undefined');
+    }
   }
 
 }

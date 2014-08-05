@@ -25,7 +25,7 @@ function file_entity_view_page($file) {
  */
 function file_entity_download_page($file) {
   // Ensure there is a valid token to download this file.
-  if (!\Drupal::config('file_entity')->get('allow_insecure_download', FALSE)) {
+  if (!\Drupal::config('file_entity.settings')->get('allow_insecure_download', FALSE)) {
     if (!isset($_GET['token']) || $_GET['token'] !== file_entity_get_download_token($file)) {
       return MENU_ACCESS_DENIED;
     }

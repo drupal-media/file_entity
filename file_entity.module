@@ -397,7 +397,7 @@ function _file_entity_rankings(SelectQueryExtender $query) {
   if ($ranking = \Drupal::moduleHandler()->invokeAll('file_ranking')) {
     $tables = &$query->getTables();
     foreach ($ranking as $rank => $values) {
-      if ($file_rank = \Drupal::config('file_entity')->get('rank_' . $rank, 0)) {
+      if ($file_rank = \Drupal::config('file_entity.settings')->get('rank_' . $rank, 0)) {
         // If the table defined in the ranking isn't already joined, then add it.
         if (isset($values['join']) && !isset($tables[$values['join']['alias']])) {
           $query->addJoin($values['join']['type'], $values['join']['table'], $values['join']['alias'], $values['join']['on']);
@@ -466,7 +466,7 @@ function file_entity_search_admin() {
       '#title' => $values['title'],
       '#type' => 'select',
       '#options' => $options,
-      '#default_value' => \Drupal::config('file_entity')->get('rank_' . $var, 0),
+      '#default_value' => \Drupal::config('file_entity.settings')->get('rank_' . $var, 0),
     );
   }
   return $form;
@@ -544,7 +544,7 @@ function file_entity_file_ranking() {
   );
 
   // Add relevance based on creation date.
-  if ($file_cron_last = \Drupal::config('file_entity')->get('cron_last', 0)) {
+  if ($file_cron_last = \Drupal::config('file_entity.settings')->get('cron_last', 0)) {
     $ranking['timestamp'] = array(
       'title' => t('Recently posted'),
       // Exponential decay with half-life of 6 months, starting at last indexed file
@@ -607,7 +607,7 @@ function _file_entity_index_file($file) {
 
   // Save the creation time of the most recent indexed file, for the search
   // results half-life calculation.
-  \Drupal::config('file_entity')->set('cron_last', $file->timestamp);
+  \Drupal::config('file_entity.settings')->set('cron_last', $file->timestamp);
 
   // Render the file.
   $build = file_view($file, 'search_index');
@@ -2083,7 +2083,7 @@ function file_entity_fnmatch($pattern, $string) {
  */
 function file_entity_download_uri($file) {
   $uri = array('path' => "file/{$file->fid}/download", 'options' => array());
-  if (!\Drupal::config('file_entity')->get('allow_insecure_download', FALSE)) {
+  if (!\Drupal::config('file_entit.settings')->get('allow_insecure_download', FALSE)) {
     $uri['options']['query']['token'] = file_entity_get_download_token($file);
   }
   return $uri;

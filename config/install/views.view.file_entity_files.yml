@@ -1,14 +1,12 @@
-uuid: 6866bbb5-888f-4548-ac25-373635317d1d
 langcode: en
-status: true
+status: false
 dependencies:
   module:
-    - null
     - file
     - file_entity
-id: files
-label: Files
-module: file
+id: file_entity_files
+label: File Entity Files
+module: file_entity
 description: 'Find and manage files.'
 tag: default
 base_table: file_managed
