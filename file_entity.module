@@ -662,9 +662,9 @@ function file_entity_action_info_alter(&$actions) {
  */
 function file_entity_theme() {
   return array(
-    'file_entity' => array(
+    'file' => array(
       'render element' => 'elements',
-      'template' => 'file_entity',
+      'template' => 'file',
     ),
     'file_entity_search_admin' => array(
       'render element' => 'form',
@@ -1097,7 +1097,7 @@ function file_entity_modules_disabled($modules) {
  *   A file object.
  */
 function file_entity_is_page($file) {
-  $page_file = menu_get_object('file', 1);
+  $page_file = \Drupal::routeMatch()->getParameter('node');
   return (!empty($page_file) ? $page_file->fid == $file->fid : FALSE);
 }
 
@@ -1110,20 +1110,19 @@ function file_entity_is_page($file) {
  *
  * @see file_entity.tpl.php
  */
-function template_preprocess_file_entity(&$variables) {
+function template_preprocess_file(&$variables) {
   $view_mode = $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['file'] = $variables['elements']['#file'];
   $file = $variables['file'];
 
-  $variables['id'] = drupal_html_id('file-'. $file->fid);
-  $variables['date']      = format_date($file->timestamp);
-  $account = user_load($file->uid);
+  $variables['id']        = $file->id();
+  $variables['date']      = format_date($file->timestamp); // @TODO: Check this out
+  $account                = $file->getOwner();
   $variables['name']      = theme('username', array('account' => $account));
 
-  $uri = entity_uri('file', $file);
-  $variables['file_url']  = url($uri['path'], $uri['options']);
-  $label = entity_label('file', $file);
-  $variables['label']     = check_plain($label);
+  $variables['file_url']  = $file->url('canonical');
+  $label                  = $file->label();
+  $variables['label']     = \Drupal\Component\Utility\String::checkPlain($label);
   $variables['page']      = $view_mode == 'full' && file_entity_is_page($file);
 
   // Hide the file name from being displayed until we can figure out a better
@@ -1139,7 +1138,7 @@ function template_preprocess_file_entity(&$variables) {
 
   // Helpful $content variable for templates.
   $variables += array('content' => array());
-  foreach (element_children($variables['elements']) as $key) {
+  foreach (\Drupal\Core\Render\Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
 
