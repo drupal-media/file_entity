@@ -1120,9 +1120,9 @@ display:
       show_admin_links: true
       field_langcode: '***CURRENT_LANGUAGE***'
       field_langcode_add_to_query: null
-  page_1:
+  overview:
     display_plugin: page
-    id: page_1
+    id: overview
     display_title: 'Files overview'
     position: 1
     display_options:
@@ -1150,9 +1150,9 @@ display:
           required: false
       field_langcode: '***CURRENT_LANGUAGE***'
       field_langcode_add_to_query: null
-  page_2:
+  usage:
     display_plugin: page
-    id: page_2
+    id: usage
     display_title: 'File usage'
     position: 2
     display_options:
