@@ -5,4 +5,5 @@ package: Media
 core: 8.x
 dependencies:
   - file
+  - text
 #configure = admin/config/media/file-settings

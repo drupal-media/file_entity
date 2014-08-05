@@ -99,9 +99,10 @@ function file_entity_schema() {
 }
 
 /**
- * Implements hook_schema_alter().
+ * Implements hook_install().
  */
-function file_entity_schema_alter(&$schema) {
+function file_entity_install() {
+  $schema = array();
   $schema['file_managed']['fields']['type'] = array(
     'description' => 'The type of this file.',
     'type' => 'varchar',
@@ -114,15 +115,6 @@ function file_entity_schema_alter(&$schema) {
     'default' => 'undefined',
   );
   $schema['file_managed']['indexes']['file_type'] = array('type');
-}
-
-
-/**
- * Implements hook_install().
- */
-function file_entity_install() {
-  $schema = array();
-  file_entity_schema_alter($schema);
   $spec = $schema['file_managed']['fields']['type'];
   $indexes_new = array('indexes' => $schema['file_managed']['indexes']);
 

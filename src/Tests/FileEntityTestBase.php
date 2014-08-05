@@ -22,7 +22,7 @@ abstract class FileEntityTestBase extends WebTestBase {
   /**
    * @var array
    */
-  public static $modules = array('file_entity', 'text');
+  public static $modules = array('file_entity');
 
   /**
    * File entity config.
