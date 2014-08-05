@@ -218,15 +218,6 @@ function file_entity_menu() {
     }
   }
 
-  $items['admin/config/media/file-settings'] = array(
-    'title' => 'File settings',
-    'description' => 'Configure allowed file extensions, default alt and title sources, and the file upload wizard.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_settings_form'),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'file_entity.admin.inc',
-  );
-
   // Optional devel module integration
   if (\Drupal::moduleHandler()->moduleExists('devel')) {
     $items['file/%file/devel'] = array(
