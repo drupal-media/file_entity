@@ -760,15 +760,6 @@ function file_entity_file_display_form_submit($form, &$form_state) {
 }
 
 /**
- * Returns HTML for the file type overview page.
- *
- * Specifically, this returns HTML for a file type label and description.
- */
-function theme_file_entity_file_type_overview($variables) {
-  return check_plain($variables['label']) . '<div class="description">' . $variables['description'] . '</div>';
-}
-
-/**
  * Returns HTML for a file display's display order table.
  */
 function theme_file_entity_file_display_order($variables) {

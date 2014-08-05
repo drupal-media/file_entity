@@ -12,24 +12,6 @@ use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileType;
 
 /**
- * Modules should return this value from hook_file_entity_access() to allow
- * access to a file.
- */
-define('FILE_ENTITY_ACCESS_ALLOW', 'allow');
-
-/**
- * Modules should return this value from hook_file_entity_access() to deny
- * access to a file.
- */
-define('FILE_ENTITY_ACCESS_DENY', 'deny');
-
-/**
- * Modules should return this value from hook_file_entity_access() to not affect
- * file access.
- */
-define('FILE_ENTITY_ACCESS_IGNORE', NULL);
-
-/**
  * As part of extending Drupal core's file entity API, this module adds some
  * functions to the 'file' namespace. For organization, those are kept in the
  * 'file_entity.file_api.inc' file.
@@ -55,7 +37,6 @@ function file_entity_hook_info() {
     'file_type',
     'file_type_alter',
     'file_download_headers_alter',
-    'file_entity_access',
   );
 
   return array_fill_keys($hooks, array('group' => 'file'));
@@ -129,17 +110,6 @@ function file_entity_menu() {
     'file' => 'file_entity.pages.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => -5,
-  );
-  $items['file/%file'] = array(
-    'title callback' => 'entity_label',
-    'title arguments' => array('file', 1),
-    // The page callback also invokes drupal_set_title() in case
-    // the menu router's title is overridden by a menu link.
-    'page callback' => 'file_entity_view_page',
-    'page arguments' => array(1),
-    'access callback' => 'file_entity_access',
-    'access arguments' => array('view', 1),
-    'file' => 'file_entity.pages.inc',
   );
 
   $items['file/%file/usage'] = array(
@@ -825,15 +795,14 @@ function file_entity_entity_type_alter(&$entity_types) {
   $keys['bundle'] = 'type';
   $entity_types['file']->set('entity_keys', $keys);
   $entity_types['file']->set('bundle_entity_type', 'file_type');
-
+  $entity_types['file']->set('admin_permission', 'administer files');
   $entity_types['file']->setClass('Drupal\file_entity\Entity\FileEntity');
   $entity_types['file']->setFormClass('edit', 'Drupal\file_entity\Form\FileEditForm');
   $entity_types['file']->setFormClass('delete', 'Drupal\file_entity\Form\FileDeleteForm');
-  $entity_types['file']->set('admin_permission', 'administer files');
   $entity_types['file']->setAccessClass('Drupal\file_entity\FileEntityAccessController');
   $entity_types['file']->setLinkTemplate('admin-form', 'file_entity.file_types_manage');
+  $entity_types['file']->setLinkTemplate('canonical', 'file_entity.file');
   $entity_types['file']->setViewBuilderClass('Drupal\file_entity\Entity\FileEntityViewBuilder');
-  $entity_types['file']->setLinkTemplate('canonical', 'file_entity.file_view');
 
   //$entity_types['file']['uri callback'] = 'file_entity_uri';
   /*$entity_types['file']['view modes']['teaser'] = array(
