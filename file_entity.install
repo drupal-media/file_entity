@@ -162,3 +162,11 @@ function file_entity_install() {
     drupal_set_message(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
   }
 }
+
+/**
+ * Implements hook_uninstall().
+ */
+function file_entity_uninstall() {
+  // Remove the added column to the core {file_managed} table.
+  db_drop_field('file_managed', 'type');
+}

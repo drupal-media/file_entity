@@ -138,6 +138,14 @@ function file_entity_views_data() {
     ),
   );
 
+  $data['file_managed']['bulk_form'] = array(
+    'title' => 'File operations bulk form',
+    'help' => 'Form elements to perform operations on multiple files at once.',
+    'field' => array(
+      'id' => 'bulk_form',
+    ),
+  );
+
   return $data;
 }
 
