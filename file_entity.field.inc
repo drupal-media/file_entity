@@ -102,7 +102,7 @@ function file_entity_field_formatter_settings_form($field, $instance, $view_mode
     $element['file_view_mode'] = array(
       '#title'   => t('View mode'),
       '#type'    => 'select',
-      '#options' => file_entity_view_mode_labels(),
+      '#options' => \Drupal::entityManager()->getViewModeOptions('file'),
       '#default_value' => $settings['file_view_mode'],
       // Never empty, so no #empty_option
     );

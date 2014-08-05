@@ -232,23 +232,6 @@ function file_entity_menu() {
 }
 
 /**
- * Implements hook_menu_local_tasks_alter().
- */
-function file_entity_menu_local_tasks_alter(&$data, $router_item, $root_path) {
-  // Add action link to 'file/add' on 'admin/content/file' page.
-  if ($root_path == 'admin/content/file') {
-    $item = menu_get_item('file/add');
-    if (!empty($item['access'])) {
-      $data['actions']['output'][] = array(
-        '#theme' => 'menu_local_action',
-        '#link' => $item,
-        '#weight' => $item['weight'],
-      );
-    }
-  }
-}
-
-/**
  * Implement hook_permission().
  */
 function file_entity_permission() {
@@ -662,20 +645,6 @@ function file_entity_search_validate($form, &$form_state) {
 }
 
 /**
- * Implements hook_admin_paths().
- */
-function file_entity_admin_paths() {
-  $paths = array(
-    'file/add' => TRUE,
-    'file/add/*' => TRUE,
-    'file/*/edit' => TRUE,
-    'file/*/usage' => TRUE,
-    'file/*/delete' => TRUE,
-  );
-  return $paths;
-}
-
-/**
  * Implements hook_action_info_alter().
  */
 function file_entity_action_info_alter(&$actions) {
@@ -819,14 +788,6 @@ function file_entity_field_display_file_alter(&$display, $context) {
 }
 
 /**
- * URI callback for file entities.
- */
-function file_entity_uri($file) {
-  $uri['path'] = 'file/' . $file->fid;
-  return $uri;
-}
-
-/**
  * Entity API callback to get the form of a file entity.
  */
 function file_entity_metadata_form_file($file) {
@@ -844,38 +805,6 @@ function file_entity_ctools_plugin_directory($module, $type) {
   if ($module == 'ctools' && $type == 'content_types') {
     return 'plugins/' . $type;
   }
-}
-
-/**
- * Implements hook_field_extra_fields().
- *
- * Adds 'file' as an extra field, so that its display and form component can be
- * weighted relative to the fields that are added to file entity bundles.
- */
-function file_entity_field_extra_fields() {
-  $info = array();
-
-  if ($file_type_names = file_entity_type_get_names()) {
-    foreach ($file_type_names as $type => $name) {
-      $info['file'][$type]['form']['filename'] = array(
-        'label' => t('File name'),
-        'description' => t('File name'),
-        'weight' => -10,
-      );
-      $info['file'][$type]['form']['preview'] = array(
-        'label' => t('File'),
-        'description' => t('File preview'),
-        'weight' => -5,
-      );
-      $info['file'][$type]['display']['file'] = array(
-        'label' => t('File'),
-        'description' => t('File display'),
-        'weight' => 0,
-      );
-    }
-  }
-
-  return $info;
 }
 
 /**
@@ -1162,15 +1091,6 @@ function file_entity_modules_disabled($modules) {
 }
 
 /**
- * Implements hook_views_api().
- */
-function file_entity_views_api() {
-  return array(
-    'api' => 3,
-  );
-}
-
-/**
  * Returns whether the current page is the full page view of the passed-in file.
  *
  * @param $file
@@ -1285,39 +1205,19 @@ function file_entity_type_get_name(FileInterface $file) {
  */
 function file_entity_type_get_names() {
   $names = &drupal_static(__FUNCTION__);
-
   if (!isset($names)) {
-    $info = entity_get_info('file');
-    foreach ($info['bundles'] as $bundle => $bundle_info) {
-      $names[$bundle] = $bundle_info['label'];
+    foreach (FileType::loadMultiple() as $id => $type) {
+      $names[$id] = $type->label();
     }
   }
-
   return $names;
-}
-
-/**
- * Return an array of available view modes for file entities.
- */
-function file_entity_view_mode_labels() {
-  $labels = &drupal_static(__FUNCTION__);
-
-  if (!isset($options)) {
-    $entity_info = entity_get_info('file');
-    $labels = array('default' => t('Default'));
-    foreach ($entity_info['view modes'] as $machine_name => $mode) {
-      $labels[$machine_name] = $mode['label'];
-    }
-  }
-
-  return $labels;
 }
 
 /**
  * Return the label for a specific file entity view mode.
  */
 function file_entity_view_mode_label($view_mode, $default = FALSE) {
-  $labels = file_entity_view_mode_labels();
+  $labels = \Drupal::entityManager()->getViewModeOptions('file');
   return isset($labels[$view_mode]) ? $labels[$view_mode] : $default;
 }
 
@@ -1993,26 +1893,13 @@ function file_entity_match_mimetypes($needle, $haystack) {
 
   foreach ($haystack as $mimetype) {
     foreach ($needle as $search) {
-      if (file_entity_fnmatch($search, $mimetype) || file_entity_fnmatch($mimetype, $search)) {
+      if (fnmatch($search, $mimetype) || fnmatch($mimetype, $search)) {
         return TRUE;
       }
     }
   }
 
   return FALSE;
-}
-
-/**
- * A wrapper function for the PHP function fnmatch().
- *
- * We include this, because Windows servers do not implement fnmatch() until
- * PHP Version 5.3. See: http://php.net/manual/en/function.fnmatch.php
- */
-function file_entity_fnmatch($pattern, $string) {
-  if (!function_exists('fnmatch')) {
-    return preg_match("#^" . strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']')) . "$#", $string);
-  }
-  return fnmatch($pattern, $string);
 }
 
 /**

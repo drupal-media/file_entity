@@ -31,7 +31,7 @@ class views_plugin_row_file_view extends views_plugin_row {
 
     $form['view_mode'] = array(
       '#type' => 'select',
-      '#options' => file_entity_view_mode_labels(),
+      '#options' => \Drupal::entityManager()->getViewModeOptions('file'),
       '#title' => t('View mode'),
       '#default_value' => $this->options['view_mode'],
     );

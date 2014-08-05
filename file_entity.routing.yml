@@ -54,6 +54,8 @@ file_entity.file_add:
     _title: 'Add file'
   requirements:
     _entity_create_access: 'file'
+  options:
+    _admin_route: TRUE
 
 file_entity.file_add_upload:
   path: 'file/add/upload'
@@ -61,7 +63,9 @@ file_entity.file_add_upload:
     _content: '\Drupal\file_entity\Controller\FileController::FileAddUpload'
     _title: 'Upload'
   requirements:
-      _permission: 'access content'
+    _permission: 'access content'
+  options:
+    _admin_route: TRUE
 
 file_entity.file_add_upload_file:
   path: 'file/add/upload/file'
@@ -69,7 +73,9 @@ file_entity.file_add_upload_file:
     _content: '\Drupal\file_entity\Controller\FileController::FileAddUploadFile'
     _title: 'File'
   requirements:
-      _permission: 'access content'
+    _permission: 'access content'
+  options:
+    _admin_route: TRUE
 
 file_entity.file_add_upload_archive:
   path: 'file/add/upload/archive'
@@ -78,6 +84,8 @@ file_entity.file_add_upload_archive:
     _title: 'Archive'
   requirements:
     _permission: 'administer files'
+  options:
+    _admin_route: TRUE
 
 file_entity.file:
   path: 'file/{file}'
@@ -93,7 +101,9 @@ file_entity.file_usage:
     _content: '\Drupal\file_entity\Controller\FileController::FileUsage'
     _title: 'File Usage'
   requirements:
-      _permission: 'access content'
+    _permission: 'access content'
+  options:
+    _admin_route: TRUE
 
 file_entity.file_download:
   path: 'file/{file}/download'
@@ -110,6 +120,8 @@ file_entity.file_edit:
     _title: 'Edit'
   requirements:
     _entity_access: 'file.edit'
+  options:
+    _admin_route: TRUE
 
 file_entity.file_delete:
   path: 'file/{file}/delete'
@@ -118,6 +130,8 @@ file_entity.file_delete:
     _title: 'Delete file'
   requirements:
     _entity_access: 'file.delete'
+  options:
+    _admin_route: TRUE
 
 file_entity.settings:
   path: 'admin/config/media/file-settings'
