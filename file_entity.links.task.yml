@@ -2,3 +2,21 @@ file_entity.file_types_manage:
   route_name: file_entity.file_types_manage
   title: 'Edit'
   base_route: file_entity.file_types_manage
+
+file_entity.file:
+  route_name: file_entity.file
+  title: 'View'
+  base_route: file_entity.file
+  weight: -5
+
+file_entity.file_edit:
+  route_name: file_entity.file_edit
+  title: 'Edit'
+  base_route: file_entity.file
+  weight: 0
+
+file_entity.file_usage:
+  route_name: file_entity.file_usage
+  title: 'Usage'
+  base_route: file_entity.file
+  weight: 5
