@@ -6,6 +6,8 @@
  */
 
 namespace Drupal\file_entity\Tests;
+use Drupal\Core\Language\LanguageInterface;
+use Drupal\file_entity\Entity\FileEntity;
 
 /**
  * Tests creating and saving a file.
@@ -87,5 +89,42 @@ class FileEntityCreationTest extends FileEntityTestBase {
 
     // Check if the file is stored in the private folder.
     $this->assertTrue(substr($file->getFileUri(), 0, 10) === 'private://', 'File uploaded in private folder.');
+  }
+
+  /**
+   * Test the Title Text and Alt Text fields of to the predefined Image type.
+   */
+  public function testImageAltTitleFields() {
+    // Disable private path to avoid irrelevant second form step.
+    $this->container->get('config.factory')->get('system.file')
+      ->set('path.private', NULL)->save();
+
+    // Create an image.
+    $test_file = $this->getTestFile('image');
+    $edit = array('files[upload]' => drupal_realpath($test_file->uri));
+    $this->drupalPostForm('file/add', $edit, t('Next'));
+
+    $data = array(
+      'field_image_title_text' => 'My image',
+      'field_image_alt_text' => 'A test image',
+    );
+
+    // Find the alt and title fields on the next step.
+    foreach ($data as $field => $value) {
+      $this->assertFieldByXPath('//input[@name="'. $field . '[0][value]"]');
+    }
+
+    // Set fields.
+    $edit = array();
+    foreach ($data as $field => $value) {
+      $edit[$field . '[0][value]'] = $value;
+    }
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // Make sure the field values are saved.
+    $created_file = FileEntity::load(1)->getTranslation(LanguageInterface::LANGCODE_DEFAULT);
+    foreach ($data as $field => $value) {
+      $this->assertEqual($value, $created_file->get($field)->value);
+    }
   }
 }
