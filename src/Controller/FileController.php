@@ -18,20 +18,6 @@ use Symfony\Component\HttpFoundation\Response;
 class FileController extends ControllerBase {
 
   /**
-   * Manage files used on your site.
-   */
-  public function FileContent() {
-
-  }
-
-  /**
-   * List
-   */
-  public function FileContentList() {
-
-  }
-
-  /**
    * Upload
    */
   public function FileAddUpload() {
@@ -100,23 +86,5 @@ class FileController extends ControllerBase {
     catch (FileNotFoundException $e) {
       return new Response(t('File @uri not found', array('@uri' =>$file->getFileUri())), 404);
     }
-  }
-
-  /**
-   * Edit
-   *
-   * @param $file
-   */
-  public function FileEdit($file) {
-
-  }
-
-  /**
-   * Delete
-   *
-   * @param $file
-   */
-  public function FileDelete($file) {
-
   }
 }

@@ -149,55 +149,6 @@ function hook_file_operations() {
 }
 
 /**
- * Control access to a file.
- *
- * Modules may implement this hook if they want to have a say in whether or not
- * a given user has access to perform a given operation on a file.
- *
- * The administrative account (user ID #1) always passes any access check,
- * so this hook is not called in that case. Users with the "bypass file access"
- * permission may always view and edit files through the administrative
- * interface.
- *
- * Note that not all modules will want to influence access on all
- * file types. If your module does not want to actively grant or
- * block access, return FILE_ENTITY_ACCESS_IGNORE or simply return nothing.
- * Blindly returning FALSE will break other file access modules.
- *
- * @param string $op
- *   The operation to be performed. Possible values:
- *   - "create"
- *   - "delete"
- *   - "update"
- *   - "view"
- *   - "download"
- * @param object $file
- *   The file on which the operation is to be performed, or, if it does
- *   not yet exist, the type of file to be created.
- * @param object $account
- *   A user object representing the user for whom the operation is to be
- *   performed.
- *
- * @return string|NULL
- *   FILE_ENTITY_ACCESS_ALLOW if the operation is to be allowed;
- *   FILE_ENTITY_ACCESS_DENY if the operation is to be denied;
- *   FILE_ENTITY_ACCESS_IGNORE to not affect this operation at all.
- *
- * @ingroup file_entity_access
- */
-function hook_file_entity_access($op, $file, $account) {
-  $type = is_string($file) ? $file : $file->type;
-
-  if ($op !== 'create' && (REQUEST_TIME - $file->timestamp) < 3600) {
-    // If the file was uploaded in the last hour, deny access to it.
-    return FILE_ENTITY_ACCESS_DENY;
-  }
-
-  // Returning nothing from this function would have the same effect.
-  return FILE_ENTITY_ACCESS_IGNORE;
-}
-
-/**
  * Control access to listings of files.
  *
  * @param object $query
