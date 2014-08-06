@@ -202,4 +202,75 @@ class FileEntityAdminTest extends FileEntityTestBase {
       $this->assertLinkByHref('file/' . $file->id() . '/delete');
     }
   }
+
+  /**
+   * Tests single and bulk operations on the file overview.
+   */
+  public function testFileOverviewOperations() {
+    $this->setUpFiles();
+    $this->drupalLogin($this->userEditDelete);
+
+    // Test single operations.
+    $this->drupalGet('admin/content/files');
+    $this->assertLinkByHref('file/1/delete');
+    $this->assertLinkByHref('file/2/delete');
+    $this->drupalGet('file/1/delete');
+    $this->assertTitle(t('Are you sure you want to delete the file @filename? | Drupal', array('@filename' => FileEntity::load(1)->label())));
+    $this->drupalPostForm(NULL, array(), t('Confirm'));
+    $this->assertNoLinkByHref('file/1/delete');
+    $this->assertLinkByHref('file/2/delete');
+
+    // Test bulk status change.
+    // The "first" file now has id 2, but bulk form fields start counting at 0.
+    $this->assertTrue(FileEntity::load(2)->isPermanent());
+    $this->assertTrue(FileEntity::load(3)->isPermanent());
+    $this->assertTrue(FileEntity::load(4)->isPermanent());
+    $this->assertTrue(FileEntity::load(5)->isPermanent());
+
+    $this->drupalGet('admin/content/files', array('query' => array('order' => 'fid')));
+    $edit = array(
+      'action' => 'file_temporary_action',
+      'bulk_form[0]' => 1,
+      'bulk_form[1]' => 1,
+      'bulk_form[2]' => 1,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+
+    \Drupal::entityManager()->getStorage('file')->resetCache();
+    $this->assertFalse(FileEntity::load(2)->isPermanent());
+    $this->assertFalse(FileEntity::load(3)->isPermanent());
+    $this->assertFalse(FileEntity::load(4)->isPermanent());
+    $this->assertTrue(FileEntity::load(5)->isPermanent());
+
+    $this->drupalGet('admin/content/files', array('query' => array('order' => 'fid')));
+    $edit = array(
+      'action' => 'file_permanent_action',
+      'bulk_form[0]' => 1,
+      'bulk_form[1]' => 1,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+
+    \Drupal::entityManager()->getStorage('file')->resetCache();
+    $this->assertTrue(FileEntity::load(2)->isPermanent());
+    $this->assertTrue(FileEntity::load(3)->isPermanent());
+    $this->assertFalse(FileEntity::load(4)->isPermanent());
+    $this->assertTrue(FileEntity::load(5)->isPermanent());
+
+    // Test bulk delete.
+    $this->drupalGet('admin/content/files', array('query' => array('order' => 'fid')));
+    $edit = array(
+      'action' => 'file_delete_action',
+      'bulk_form[0]' => 1,
+      'bulk_form[1]' => 1,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+    $this->assertTitle(t('Are you sure you want to delete these files? | Drupal'));
+    $this->assertLink('Cancel');
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+
+    \Drupal::entityManager()->getStorage('file')->resetCache();
+    $this->assertNull(FileEntity::load(2), 'File 2 is deleted.');
+    $this->assertNull(FileEntity::load(3), 'File 3 is deleted.');
+    $this->assertNotNull(FileEntity::load(4), 'File 4 is not deleted.');
+  }
 }
