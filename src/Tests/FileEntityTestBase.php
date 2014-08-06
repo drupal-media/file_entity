@@ -44,6 +44,9 @@ abstract class FileEntityTestBase extends WebTestBase {
     $this->config = $this->container->get('config.factory')->get('file_entity.settings');
   }
 
+  /**
+   * Set up some sample text and image files.
+   */
   protected function setUpFiles($defaults = array()) {
     // Populate defaults array.
     $defaults += array(
