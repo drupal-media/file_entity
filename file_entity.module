@@ -1962,11 +1962,6 @@ function file_entity_file_load($files) {
     if (!empty($title)) {
       $file->title = $token_service->replace($title, array('file' => $file), $replace_options);
     }
-
-    debug($file->id(), 'file id');
-    debug($file->alt, 'file alt');
-    debug($file->title, 'file title');
-    debug($file->toArray(), 'file to array');
   }
 
   // Load and unserialize metadata.

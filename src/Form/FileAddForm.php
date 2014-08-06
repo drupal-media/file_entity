@@ -68,10 +68,12 @@ class FileAddForm extends FormBase {
    * Step 1
    * Generate form fields for the first step in the add file wizard.
    *
-   * @param $form
-   *   Form
-   * @param $form_state
-   *   Form State
+   * @param array $form
+   *   Holds form data
+   * @param FormStateInterface $form_state
+   *   Holds form state data
+   * @return array
+   *   Returns form data
    */
   function stepUpload(array $form, FormStateInterface $form_state) {
     $form['upload'] = array(
@@ -92,6 +94,7 @@ class FileAddForm extends FormBase {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['next'] = array(
       '#type' => 'submit',
+      '#button_type' => 'primary',
       '#value' => t('Next'),
     );
 
@@ -214,8 +217,11 @@ class FileAddForm extends FormBase {
 
     $form['actions']['next'] = array(
       '#type' => 'submit',
+      '#button_type' => 'primary',
       '#value' => t('Next'),
     );
+
+
 
     return $form;
   }
@@ -276,6 +282,7 @@ class FileAddForm extends FormBase {
     );
     $form['actions']['next'] = array(
       '#type' => 'submit',
+      '#button_type' => 'primary',
       '#value' => t('Next'),
     );
 
@@ -297,9 +304,6 @@ class FileAddForm extends FormBase {
     $form_state['form_display'] = EntityFormDisplay::collectRenderDisplay($file, 'default');
     $form_state['form_display']->buildForm($file, $form, $form_state);
 
-    // Add fields.
-    // @TODO: Add configurable fields
-    //field_attach_form('file', $file, $form, $form_state);
 
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['previous'] = array(
@@ -309,6 +313,7 @@ class FileAddForm extends FormBase {
     );
     $form['actions']['submit'] = array(
       '#type' => 'submit',
+      '#button_type' => 'primary',
       '#value' => t('Save'),
     );
 
