@@ -18,23 +18,32 @@ class FileEntityCreationTest extends FileEntityTestBase {
 
   public static $modules = array('views');
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp();
 
-    $web_user = $this->drupalCreateUser(array('create files', 'edit own document files', 'administer files', 'administer site configuration', 'view private files'));
+    $web_user = $this->drupalCreateUser(array('create files',
+      'edit own document files',
+      'administer files',
+      'administer site configuration',
+      'view private files',
+    ));
     $this->drupalLogin($web_user);
   }
 
   /**
    * Create a "document" file and verify its consistency in the database.
+   *
    * Unset the private folder so it skips the scheme selecting page.
    */
-  function testSingleFileEntityCreation() {
-    // Configure private file system path
+  public function testSingleFileEntityCreation() {
+    // Configure private file system path.
     $config = \Drupal::config('system.file');
 
-    // Unset private file system path so it skips the scheme selecting
-    // cause there is only one file system path available (public://) by default.
+    // Unset private file system path so it skips the scheme selecting, because
+    // there is only one file system path available (public://) by default.
     $private_file_system_path = NULL;
     $config->set('path.private', $private_file_system_path);
     $this->assertIdentical($config->get('path.private'), $private_file_system_path, 'Private Path is succesfully disabled.');
@@ -57,11 +66,12 @@ class FileEntityCreationTest extends FileEntityTestBase {
 
   /**
    * Upload a file with both private and public folder set.
+   *
    * Should have one extra step selecting a scheme.
    * Selects private scheme and checks if the file is succesfully uploaded to
    * the private folder.
    */
-  function testFileEntityCreationMultipleSteps() {
+  public function testFileEntityCreationMultipleSteps() {
     $test_file = $this->getTestFile('text');
     // Create a file.
     $edit = array();
@@ -75,7 +85,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     // Test if the public radio button is selected by default.
     $this->assertFieldChecked('edit-scheme-public', 'Public Scheme is checked');
 
-    // Submit form and set scheme to private
+    // Submit form and set scheme to private.
     $edit = array();
     $edit['scheme'] = 'private';
     $this->drupalPostForm(NULL, $edit, t('Next'));
@@ -111,7 +121,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
 
     // Find the alt and title fields on the next step.
     foreach ($data as $field => $value) {
-      $this->assertFieldByXPath('//input[@name="'. $field . '[0][value]"]');
+      $this->assertFieldByXPath('//input[@name="' . $field . '[0][value]"]');
     }
 
     // Set fields.
@@ -126,5 +136,19 @@ class FileEntityCreationTest extends FileEntityTestBase {
     foreach ($data as $field => $value) {
       $this->assertEqual($value, $created_file->get($field)->value);
     }
+  }
+
+  /**
+   * Tests Pathauto support.
+   */
+  public function testPathauto() {
+    $this->container->get('module_handler')
+      ->install(array('token', 'path', 'pathauto'), FALSE);
+    $file = $this->createFileEntity();
+    $alias = \Drupal::service('pathauto.manager')->createAlias(
+      'file', 'insert', $file->getSystemPath(), array('file' => $file),
+      $file->bundle(), $file->language()->getId());
+    $this->drupalGet($alias);
+    $this->assertResponse(200);
   }
 }
