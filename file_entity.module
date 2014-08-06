@@ -1683,27 +1683,6 @@ function file_entity_upload_validators_pre_render($element) {
  */
 
 /**
- * Implements hook_file_insert() on behalf of pathauto.module.
- */
-function pathauto_file_insert($file) {
-  pathauto_file_update_alias($file, 'insert');
-}
-
-/**
- * Implements hook_file_update() on behalf of pathauto.module.
- */
-function pathauto_file_update($file) {
-  pathauto_file_update_alias($file, 'update');
-}
-
-/**
- * Implements hook_file_delete() on behalf of pathauto.module.
- */
-function pathauto_file_delete($file) {
-  pathauto_entity_path_delete_all('file', $file, "file/{$file->fid}");
-}
-
-/**
  * Implements hook_form_FORM_ID_alter() on behalf of pathauto.module.
  *
  * Add the Pathauto settings to the file form.
@@ -1724,58 +1703,6 @@ function pathauto_file_operations() {
     'callback arguments' => array('bulkupdate', array('message' => TRUE)),
   );
   return $operations;
-}
-
-/**
- * Update the URL aliases for an individual file.
- *
- * @param $file
- *   A file object.
- * @param $op
- *   Operation being performed on the file ('insert', 'update' or 'bulkupdate').
- * @param $options
- *   An optional array of additional options.
- */
-function pathauto_file_update_alias(stdClass $file, $op, array $options = array()) {
-  // Skip processing if the user has disabled pathauto for the file.
-  if (isset($file->path['pathauto']) && empty($file->path['pathauto']) && empty($options['force'])) {
-    return;
-  }
-
-  $options += array('language' => pathauto_entity_language('file', $file));
-
-  // Skip processing if the file has no pattern.
-  if (!pathauto_pattern_load_by_entity('file', $file->type, $options['language'])) {
-    return;
-  }
-
-  module_load_include('inc', 'pathauto');
-  $uri = entity_uri('file', $file);
-  pathauto_create_alias('file', $op, $uri['path'], array('file' => $file), $file->type, $options['language']);
-}
-
-/**
- * Update the URL aliases for multiple files.
- *
- * @param $fids
- *   An array of file IDs.
- * @param $op
- *   Operation being performed on the files ('insert', 'update' or
- *   'bulkupdate').
- * @param $options
- *   An optional array of additional options.
- */
-function pathauto_file_update_alias_multiple(array $fids, $op, array $options = array()) {
-  $options += array('message' => FALSE);
-
-  $files = file_load_multiple($fids);
-  foreach ($files as $file) {
-    pathauto_file_update_alias($file, $op, $options);
-  }
-
-  if (!empty($options['message'])) {
-    drupal_set_message(format_plural(count($fids), 'Updated URL alias for 1 file.', 'Updated URL aliases for @count files.'));
-  }
 }
 
 /**
@@ -1839,56 +1766,23 @@ function path_form_file_entity_edit_alter(&$form, $form_state) {
   }
 }
 
-/**
- * Implements hook_file_insert() on behalf of path.module.
- */
-function path_file_insert($file) {
-  if (isset($file->path)) {
-    $path = $file->path;
-    $path['alias'] = trim($path['alias']);
-    // Only save a non-empty alias.
-    if (!empty($path['alias'])) {
-      // Ensure fields for programmatic executions.
-      $path['source'] = 'file/' . $file->fid;
-      // Core does not provide a way to store the file language but contrib
-      // modules can do it so we need to take this into account.
-      $langcode = entity_language('file', $file);
-      $path['language'] = !empty($langcode) ? $langcode : LANGUAGE_NONE;
-      path_save($path);
-    }
+// @todo move
+function file_entity_entity_base_field_info(EntityTypeInterface $entity_type) {
+  // @todo: Make this configurable and/or remove if
+  //   https://drupal.org/node/476294 is resolved.
+  if (\Drupal::moduleHandler()->moduleExists('pathauto') && $entity_type->id() == 'file') {
+    $fields = array();
+    $fields['path'] = FieldDefinition::create('path')
+      ->setCustomStorage(TRUE)
+      ->setLabel(t('URL alias'))
+      ->setTranslatable(TRUE)
+      ->setDisplayOptions('form', array(
+        'type' => 'pathauto',
+        'weight' => 30,
+      ))
+      ->setDisplayConfigurable('form', TRUE);
+    return $fields;
   }
-}
-
-/**
- * Implements hook_file_update() on behalf of path.module.
- */
-function path_file_update($file) {
-  if (isset($file->path)) {
-    $path = $file->path;
-    $path['alias'] = trim($path['alias']);
-    // Delete old alias if user erased it.
-    if (!empty($path['fid']) && empty($path['alias'])) {
-      path_delete($path['fid']);
-    }
-    // Only save a non-empty alias.
-    if (!empty($path['alias'])) {
-      // Ensure fields for programmatic executions.
-      $path['source'] = 'file/' . $file->fid;
-      // Core does not provide a way to store the file language but contrib
-      // modules can do it so we need to take this into account.
-      $langcode = entity_language('file', $file);
-      $path['language'] = !empty($langcode) ? $langcode : LANGUAGE_NONE;
-      path_save($path);
-    }
-  }
-}
-
-/**
- * Implements hook_file_delete() on behalf of path.module.
- */
-function path_file_delete($file) {
-  // Delete all aliases associated with this file.
-  //path_delete(array('source' => 'file/' . $file->fid));
 }
 
 /**

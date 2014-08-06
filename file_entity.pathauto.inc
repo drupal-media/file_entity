@@ -34,7 +34,7 @@ function file_entity_pathauto($op) {
       $settings['batch_file'] = drupal_get_path('module', 'file_entity') . '/file_entity.pathauto.inc';
 
       foreach (FileType::loadEnabled() as $file_type => $type) {
-        $settings['patternitems'][$file_type] = t('Pattern for all @file_type paths.', array('@file_type' => $type->label));
+        $settings['patternitems'][$file_type] = t('Pattern for all @file_type paths.', array('@file_type' => $type->label()));
       }
       return (object) $settings;
 

@@ -9,6 +9,7 @@ namespace Drupal\file_entity\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file_entity\Entity\FileType;
 
 /**
  * Form controller for file type forms.
@@ -24,7 +25,7 @@ class FileEditForm extends ContentEntityForm {
 
     if ($this->operation == 'edit') {
       $form['#title'] = $this->t('<em>Edit @type</em> "@title"', array(
-        '@type' => $file->type->entity->label(),
+        '@type' => FileType::load($file->bundle())->label(),
         '@title' => $file->label(),
       ));
     }

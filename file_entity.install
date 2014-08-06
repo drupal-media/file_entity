@@ -144,7 +144,7 @@ function file_entity_install() {
 
   // Configure default pathauto variables if it is currently installed.
   if (\Drupal::moduleHandler()->moduleExists('pathauto')) {
-    \Drupal::config('pathauto.pattern')->set('file._default', 'file/[file:name]');
+    \Drupal::config('pathauto.pattern')->set('file._default', 'files/[file:name]')->save();
   }
 
   // Classify existing files according to the currently defined file types.
