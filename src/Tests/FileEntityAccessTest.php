@@ -63,11 +63,11 @@ class FileEntityAccessTest extends FileEntityTestBase {
     // Ensures user with 'bypass file access' permission can do everything.
     $web_user = $this->drupalCreateUser(array('bypass file access'));
     $this->assertFileEntityAccess(array('create' => TRUE), NULL, $web_user);
-    $this->assertFileEntityAccess(array('view' => TRUE, 'download' => TRUE, 'update' => TRUE, 'delete' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(array('view' => TRUE, 'download' => TRUE, 'edit' => TRUE, 'delete' => TRUE), $file, $web_user);
 
     // A user with 'administer files' should not access CRUD operations.
     $web_user = $this->drupalCreateUser(array('administer files'));
-    $this->assertFileEntityAccess(array('view' => FALSE, 'download' => FALSE, 'update' => FALSE, 'delete' => FALSE), $file, $web_user);
+    $this->assertFileEntityAccess(array('view' => FALSE, 'download' => FALSE, 'edit' => FALSE, 'delete' => FALSE), $file, $web_user);
 
     // User cannot 'view files'.
     $web_user = $this->drupalCreateUser(array('create files'));

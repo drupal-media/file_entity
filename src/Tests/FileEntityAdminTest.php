@@ -8,8 +8,8 @@
 namespace Drupal\file_entity\Tests;
 
 use Drupal\file_entity\Entity\FileEntity;
+use Drupal\user\Entity\User;
 use Drupal\views\Entity\View;
-use Symfony\Component\DependencyInjection\SimpleXMLElement;
 
 /**
  * Test file administration page functionality.
@@ -18,10 +18,19 @@ use Symfony\Component\DependencyInjection\SimpleXMLElement;
  */
 class FileEntityAdminTest extends FileEntityTestBase {
 
+  /** @var User */
   protected $userAdmin;
+
+  /** @var User */
   protected $userBasic;
+
+  /** @var User */
   protected $userViewOwn;
+
+  /** @var User */
   protected $userViewPrivate;
+
+  /** @var User */
   protected $userEditDelete;
 
   /**
@@ -67,22 +76,20 @@ class FileEntityAdminTest extends FileEntityTestBase {
     }
 
     // Test that the default sort by file_managed.created DESC fires properly.
-    $files_query = db_select('file_managed', 'fm')
-      ->fields('fm', array('filename'))
-      ->orderBy('created', 'DESC')
-      ->execute()
-      ->fetchCol();
+    $files_query = array();
+    foreach (\Drupal::entityQuery('file')->sort('created', 'DESC')->execute() as $fid) {
+      $files_query[] = FileEntity::load($fid)->label();
+    }
 
     $this->drupalGet('admin/content/files');
     $this->assertEqual($files_query, $this->xpath('//table/tbody/tr/td[2]/a'), 'Files are sorted in the view according to the default query.');
 
     // Compare the rendered HTML node list to a query for the files ordered by
     // filename to account for possible database-dependent sort order.
-    $files_query = db_select('file_managed', 'fm')
-      ->fields('fm', array('filename'))
-      ->orderBy('filename')
-      ->execute()
-      ->fetchCol();
+    $files_query = array();
+    foreach (\Drupal::entityQuery('file')->sort('filename')->execute() as $fid) {
+      $files_query[] = FileEntity::load($fid)->label();
+    }
 
     $this->drupalGet('admin/content/files', array('query' => array('sort' => 'asc', 'order' => 'filename')));
     $this->assertEqual($files_query, $this->xpath('//table/tbody/tr/td[2]/a'), 'Files are sorted in the view the same as they are in the query.');
@@ -91,40 +98,41 @@ class FileEntityAdminTest extends FileEntityTestBase {
   /**
    * Tests files overview with different user permissions.
    */
-  public function dtestFilesAdminPages() {
+  public function testFilesAdminPages() {
     $this->drupalLogin($this->userAdmin);
 
     /** @var FileEntity[] $files */
     $files['public_image'] = $this->createFileEntity(array(
       'scheme' => 'public',
-      'uid' => $this->userBasic->uid,
+      'uid' => $this->userBasic->id(),
       'type' => 'image',
     ));
     $files['public_document'] = $this->createFileEntity(array(
       'scheme' => 'public',
-      'uid' => $this->userViewOwn->uid,
+      'uid' => $this->userViewOwn->id(),
       'type' => 'document',
     ));
     $files['private_image'] = $this->createFileEntity(array(
       'scheme' => 'private',
-      'uid' => $this->userBasic->uid,
+      'uid' => $this->userBasic->id(),
       'type' => 'image',
     ));
     $files['private_document'] = $this->createFileEntity(array(
       'scheme' => 'private',
-      'uid' => $this->userViewOwn->uid,
+      'uid' => $this->userViewOwn->id(),
       'type' => 'document',
     ));
 
     // Verify view, edit, and delete links for any file.
     $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
+    $i = 0;
     foreach ($files as $file) {
       $this->assertLinkByHref('file/' . $file->id());
       $this->assertLinkByHref('file/' . $file->id() . '/edit');
       $this->assertLinkByHref('file/' . $file->id() . '/delete');
       // Verify tableselect.
-      $this->assertFieldByName('files[' . $file->id() . ']', '', t('Tableselect found.'));
+      $this->assertFieldByName("bulk_form[$i]", NULL, t('Bulk form checkbox found.'));
     }
 
     // Verify no operation links are displayed for regular users.
@@ -140,13 +148,14 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertNoLinkByHref('file/' . $files['public_document']->id() . '/delete');
 
     // Verify no tableselect.
-    $this->assertNoFieldByName('files[' . $files['public_image']->id() . ']', '', t('No tableselect found.'));
+    $this->assertNoFieldByName('bulk_form[' . $files['public_image']->id() . ']', '', t('No bulk form checkbox found.'));
 
     // Verify private file is displayed with permission.
     $this->drupalLogout();
     $this->drupalLogin($this->userViewOwn);
     $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
+    debug($files['private_document']->getOwnerId(), $this->userViewOwn->id());
     $this->assertLinkByHref('file/' . $files['private_document']->id());
     // Verify no operation links are displayed.
     $this->assertNoLinkByHref('file/' . $files['private_document']->id() . '/edit');
@@ -158,7 +167,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertNoLinkByHref('file/' . $files['private_image']->id() . '/delete');
 
     // Verify no tableselect.
-    $this->assertNoFieldByName('files[' . $files['private_document']->id() . ']', '', t('No tableselect found.'));
+    $this->assertNoFieldByName('bulk_form[' . $files['private_document']->id() . ']', '', t('No bulk form checkbox found.'));
 
     // Verify private file is displayed with permission.
     $this->drupalLogout();
