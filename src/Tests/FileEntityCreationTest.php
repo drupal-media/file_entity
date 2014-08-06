@@ -21,7 +21,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
   function setUp() {
     parent::setUp();
 
-    $web_user = $this->drupalCreateUser(array('create files', 'edit own document files', 'administer files', 'access files overview', 'administer site configuration', 'view private files'));
+    $web_user = $this->drupalCreateUser(array('create files', 'edit own document files', 'administer files', 'administer site configuration', 'view private files'));
     $this->drupalLogin($web_user);
   }
 

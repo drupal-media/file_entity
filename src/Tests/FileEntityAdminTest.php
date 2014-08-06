@@ -7,6 +7,10 @@
 
 namespace Drupal\file_entity\Tests;
 
+use Drupal\file_entity\Entity\FileEntity;
+use Drupal\views\Entity\View;
+use Symfony\Component\DependencyInjection\SimpleXMLElement;
+
 /**
  * Test file administration page functionality.
  *
@@ -14,7 +18,16 @@ namespace Drupal\file_entity\Tests;
  */
 class FileEntityAdminTest extends FileEntityTestBase {
 
-  function setUp() {
+  protected $userAdmin;
+  protected $userBasic;
+  protected $userViewOwn;
+  protected $userViewPrivate;
+  protected $userEditDelete;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp();
 
     // Remove the "view files" permission which is set
@@ -25,139 +38,159 @@ class FileEntityAdminTest extends FileEntityTestBase {
       user_role_revoke_permissions($rid, array('view files'));
     }
 
-    $this->admin_user = $this->drupalCreateUser(array('administer files', 'bypass file access'));
-    $this->base_user_1 = $this->drupalCreateUser(array('administer files'));
-    $this->base_user_2 = $this->drupalCreateUser(array('administer files', 'view own private files'));
-    $this->base_user_3 = $this->drupalCreateUser(array('administer files', 'view private files'));
-    $this->base_user_4 = $this->drupalCreateUser(array('administer files', 'edit any document files', 'delete any document files', 'edit any image files', 'delete any image files'));
+    $this->userAdmin = $this->drupalCreateUser(array('administer files', 'bypass file access'));
+    $this->userBasic = $this->drupalCreateUser(array('administer files'));
+    $this->userViewOwn = $this->drupalCreateUser(array('administer files', 'view own private files'));
+    $this->userViewPrivate = $this->drupalCreateUser(array('administer files', 'view private files'));
+    $this->userEditDelete = $this->drupalCreateUser(array(
+      'administer files',
+      'edit any document files',
+      'delete any document files',
+      'edit any image files',
+      'delete any image files',
+    ));
+
+    // Enable the enhanced Files view.
+    View::load('files')->disable()->save();
+    View::load('file_entity_files')->enable()->save();
   }
 
   /**
    * Tests that the table sorting works on the files admin pages.
    */
-  function testFilesAdminSort() {
-    $this->drupalLogin($this->admin_user);
+  public function testFilesAdminSort() {
+    $this->drupalLogin($this->userAdmin);
     $i = 0;
     foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $prefix) {
-      $this->createFileEntity(array('filepath' => $prefix . $this->randomName(6), 'timestamp' => $i));
+      $this->createFileEntity(array('filename' => $prefix . $this->randomName(6), 'created' => $i * 90000));
       $i++;
     }
 
-    // Test that the default sort by file_managed.timestamp DESC actually fires properly.
+    // Test that the default sort by file_managed.created DESC fires properly.
     $files_query = db_select('file_managed', 'fm')
-      ->fields('fm', array('fid'))
-      ->orderBy('timestamp', 'DESC')
+      ->fields('fm', array('filename'))
+      ->orderBy('created', 'DESC')
       ->execute()
       ->fetchCol();
 
-    $files_form = array();
-    $this->drupalGet('admin/content/file');
-    foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
-      $files_form[] = $input;
-    }
-    $this->assertEqual($files_query, $files_form, 'Files are sorted in the form according to the default query.');
+    $this->drupalGet('admin/content/files');
+    $this->assertEqual($files_query, $this->xpath('//table/tbody/tr/td[2]/a'), 'Files are sorted in the view according to the default query.');
 
     // Compare the rendered HTML node list to a query for the files ordered by
     // filename to account for possible database-dependent sort order.
     $files_query = db_select('file_managed', 'fm')
-      ->fields('fm', array('fid'))
+      ->fields('fm', array('filename'))
       ->orderBy('filename')
       ->execute()
       ->fetchCol();
 
-    $files_form = array();
-    $this->drupalGet('admin/content/file', array('query' => array('sort' => 'asc', 'order' => 'Title')));
-    foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
-      $files_form[] = $input;
-    }
-    $this->assertEqual($files_query, $files_form, 'Files are sorted in the form the same as they are in the query.');
+    $this->drupalGet('admin/content/files', array('query' => array('sort' => 'asc', 'order' => 'filename')));
+    $this->assertEqual($files_query, $this->xpath('//table/tbody/tr/td[2]/a'), 'Files are sorted in the view the same as they are in the query.');
   }
 
   /**
    * Tests files overview with different user permissions.
    */
-  function testFilesAdminPages() {
-    $this->drupalLogin($this->admin_user);
+  public function dtestFilesAdminPages() {
+    $this->drupalLogin($this->userAdmin);
 
-    $files['public_image'] = $this->createFileEntity(array('scheme' => 'public', 'uid' => $this->base_user_1->uid, 'type' => 'image'));
-    $files['public_document'] = $this->createFileEntity(array('scheme' => 'public', 'uid' => $this->base_user_2->uid, 'type' => 'document'));
-    $files['private_image'] = $this->createFileEntity(array('scheme' => 'private', 'uid' => $this->base_user_1->uid, 'type' => 'image'));
-    $files['private_document'] = $this->createFileEntity(array('scheme' => 'private', 'uid' => $this->base_user_2->uid, 'type' => 'document'));
+    /** @var FileEntity[] $files */
+    $files['public_image'] = $this->createFileEntity(array(
+      'scheme' => 'public',
+      'uid' => $this->userBasic->uid,
+      'type' => 'image',
+    ));
+    $files['public_document'] = $this->createFileEntity(array(
+      'scheme' => 'public',
+      'uid' => $this->userViewOwn->uid,
+      'type' => 'document',
+    ));
+    $files['private_image'] = $this->createFileEntity(array(
+      'scheme' => 'private',
+      'uid' => $this->userBasic->uid,
+      'type' => 'image',
+    ));
+    $files['private_document'] = $this->createFileEntity(array(
+      'scheme' => 'private',
+      'uid' => $this->userViewOwn->uid,
+      'type' => 'document',
+    ));
 
     // Verify view, edit, and delete links for any file.
-    $this->drupalGet('admin/content/file');
+    $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
     foreach ($files as $file) {
-      $this->assertLinkByHref('file/' . $file->fid);
-      $this->assertLinkByHref('file/' . $file->fid . '/edit');
-      $this->assertLinkByHref('file/' . $file->fid . '/delete');
+      $this->assertLinkByHref('file/' . $file->id());
+      $this->assertLinkByHref('file/' . $file->id() . '/edit');
+      $this->assertLinkByHref('file/' . $file->id() . '/delete');
       // Verify tableselect.
-      $this->assertFieldByName('files[' . $file->fid . ']', '', t('Tableselect found.'));
+      $this->assertFieldByName('files[' . $file->id() . ']', '', t('Tableselect found.'));
     }
 
     // Verify no operation links are displayed for regular users.
     $this->drupalLogout();
-    $this->drupalLogin($this->base_user_1);
-    $this->drupalGet('admin/content/file');
+    $this->drupalLogin($this->userBasic);
+    $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
-    $this->assertLinkByHref('file/' . $files['public_image']->fid);
-    $this->assertLinkByHref('file/' . $files['public_document']->fid);
-    $this->assertNoLinkByHref('file/' . $files['public_image']->fid . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['public_image']->fid . '/delete');
-    $this->assertNoLinkByHref('file/' . $files['public_document']->fid . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['public_document']->fid . '/delete');
+    $this->assertLinkByHref('file/' . $files['public_image']->id());
+    $this->assertLinkByHref('file/' . $files['public_document']->id());
+    $this->assertNoLinkByHref('file/' . $files['public_image']->id() . '/edit');
+    $this->assertNoLinkByHref('file/' . $files['public_image']->id() . '/delete');
+    $this->assertNoLinkByHref('file/' . $files['public_document']->id() . '/edit');
+    $this->assertNoLinkByHref('file/' . $files['public_document']->id() . '/delete');
 
     // Verify no tableselect.
-    $this->assertNoFieldByName('files[' . $files['public_image']->fid . ']', '', t('No tableselect found.'));
+    $this->assertNoFieldByName('files[' . $files['public_image']->id() . ']', '', t('No tableselect found.'));
 
     // Verify private file is displayed with permission.
     $this->drupalLogout();
-    $this->drupalLogin($this->base_user_2);
-    $this->drupalGet('admin/content/file');
+    $this->drupalLogin($this->userViewOwn);
+    $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
-    $this->assertLinkByHref('file/' . $files['private_document']->fid);
+    $this->assertLinkByHref('file/' . $files['private_document']->id());
     // Verify no operation links are displayed.
-    $this->assertNoLinkByHref('file/' . $files['private_document']->fid . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['private_document']->fid . '/delete');
+    $this->assertNoLinkByHref('file/' . $files['private_document']->id() . '/edit');
+    $this->assertNoLinkByHref('file/' . $files['private_document']->id() . '/delete');
 
     // Verify user cannot see private file of other users.
-    $this->assertNoLinkByHref('file/' . $files['private_image']->fid);
-    $this->assertNoLinkByHref('file/' . $files['private_image']->fid . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['private_image']->fid . '/delete');
+    $this->assertNoLinkByHref('file/' . $files['private_image']->id());
+    $this->assertNoLinkByHref('file/' . $files['private_image']->id() . '/edit');
+    $this->assertNoLinkByHref('file/' . $files['private_image']->id() . '/delete');
 
     // Verify no tableselect.
-    $this->assertNoFieldByName('files[' . $files['private_document']->fid . ']', '', t('No tableselect found.'));
+    $this->assertNoFieldByName('files[' . $files['private_document']->id() . ']', '', t('No tableselect found.'));
 
     // Verify private file is displayed with permission.
     $this->drupalLogout();
-    $this->drupalLogin($this->base_user_3);
-    $this->drupalGet('admin/content/file');
+    $this->drupalLogin($this->userViewPrivate);
+    $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
 
     // Verify user can see private file of other users.
-    $this->assertLinkByHref('file/' . $files['private_document']->fid);
-    $this->assertLinkByHref('file/' . $files['private_image']->fid);
+    $this->assertLinkByHref('file/' . $files['private_document']->id());
+    $this->assertLinkByHref('file/' . $files['private_image']->id());
 
-    // Verify operation links are displayed for users with appropriate permission.
+    // Verify operation links are displayed for users with appropriate
+    // permission.
     $this->drupalLogout();
-    $this->drupalLogin($this->base_user_4);
-    $this->drupalGet('admin/content/file');
+    $this->drupalLogin($this->userEditDelete);
+    $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
     foreach ($files as $file) {
-      $this->assertLinkByHref('file/' . $file->fid);
-      $this->assertLinkByHref('file/' . $file->fid . '/edit');
-      $this->assertLinkByHref('file/' . $file->fid . '/delete');
+      $this->assertLinkByHref('file/' . $file->id());
+      $this->assertLinkByHref('file/' . $file->id() . '/edit');
+      $this->assertLinkByHref('file/' . $file->id() . '/delete');
     }
 
     // Verify file access can be bypassed.
     $this->drupalLogout();
-    $this->drupalLogin($this->admin_user);
-    $this->drupalGet('admin/content/file');
+    $this->drupalLogin($this->userAdmin);
+    $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
     foreach ($files as $file) {
-      $this->assertLinkByHref('file/' . $file->fid);
-      $this->assertLinkByHref('file/' . $file->fid . '/edit');
-      $this->assertLinkByHref('file/' . $file->fid . '/delete');
+      $this->assertLinkByHref('file/' . $file->id());
+      $this->assertLinkByHref('file/' . $file->id() . '/edit');
+      $this->assertLinkByHref('file/' . $file->id() . '/delete');
     }
   }
 }

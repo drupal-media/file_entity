@@ -7,4 +7,5 @@ dependencies:
   - file
   - text
   - entity_reference
+  - views
 #configure = admin/config/media/file-settings

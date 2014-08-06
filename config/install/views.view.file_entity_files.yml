@@ -23,7 +23,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'access files overview'
+          perm: 'administer files'
         provider: views
       cache:
         type: none
@@ -80,6 +80,7 @@ display:
           summary: ''
           description: ''
           columns:
+            bulk_form: bulk_form
             fid: fid
             filename: filename
             type: type
@@ -94,6 +95,11 @@ display:
             view: view
             dropbutton: dropbutton
           info:
+            bulk_form:
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
             fid:
               sortable: false
               default_sort_order: asc
@@ -185,7 +191,7 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-          default: changed
+          default: created
           empty_table: true
         provider: views
       row:
@@ -598,6 +604,9 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          dependencies:
+            module:
+              - views
           label: 'Changed date'
           exclude: false
           alter:

@@ -33,6 +33,9 @@ class FileName extends FieldPluginBase {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['link_to_file'] = array('default' => FALSE, 'bool' => TRUE);
@@ -40,7 +43,7 @@ class FileName extends FieldPluginBase {
   }
 
   /**
-   * Provide link to file option
+   * Provide link to file option.
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['link_to_file'] = array(
@@ -67,7 +70,7 @@ class FileName extends FieldPluginBase {
     if (!empty($this->options['link_to_file']) && $data !== NULL && $data !== '') {
       $file = $entity = $this->getEntity($values);
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = 'file/' . $file->id() . '/view';
+      $this->options['alter']['path'] = $file->url();
     }
 
     return $data;

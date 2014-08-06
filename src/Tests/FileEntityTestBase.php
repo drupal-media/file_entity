@@ -164,52 +164,37 @@ abstract class FileEntityTestBase extends WebTestBase {
   }
 
   /**
-   * @param array $settings
-   * @return \stdClass
+   * Create a file in the database and on disk, asserting its success.
+   *
+   * @param array $values
+   *   (optional) Values of the new file. Default values are supplied.
+   *
+   * @return FileEntity
+   *   The newly created file.
    */
-  protected function createFileEntity($settings = array()) {
-    $file = new \stdClass();
-
+  protected function createFileEntity($values = array()) {
     // Populate defaults array.
-    $settings += array(
-      'filepath' => 'Файл для тестирования ' . $this->randomName(), // Prefix with non-latin characters to ensure that all file-related tests work with international filenames.
+    $values += array(
+      // Prefix filename with non-latin characters to ensure that all
+      // file-related tests work with international filenames.
+      'filename' => 'Файл для тестирования ' . $this->randomName(),
       'filemime' => 'text/plain',
       'uid' => 1,
-      'timestamp' => REQUEST_TIME,
+      'created' => REQUEST_TIME,
       'status' => FILE_STATUS_PERMANENT,
       'contents' => "file_put_contents() doesn't seem to appreciate empty strings so let's put in some data.",
       'scheme' => file_default_scheme(),
-      'type' => NULL,
     );
 
-    $filepath = $settings['scheme'] . '://' . $settings['filepath'];
+    $values['uri'] = $values['scheme'] . '://' . $values['filename'];
 
-    file_put_contents($filepath, $settings['contents']);
-    $this->assertTrue(is_file($filepath), t('The test file exists on the disk.'), 'Create test file');
+    file_put_contents($values['uri'], $values['contents']);
+    $this->assertTrue(is_file($values['uri']), t('The test file exists on the disk.'), 'Create test file');
 
-    $file = new \stdClass();
-    $file->uri = $filepath;
-    $file->filename = drupal_basename($file->uri);
-    $file->filemime = $settings['filemime'];
-    $file->uid = $settings['uid'];
-    $file->timestamp = $settings['timestamp'];
-    $file->filesize = filesize($file->uri);
-    $file->status = $settings['status'];
-    $file->type = $settings['type'];
-
-    // The file type is used as a bundle key, and therefore, must not be NULL.
-    if (!isset($file->type)) {
-      $file->type = FILE_TYPE_NONE;
-    }
-
-    // If the file isn't already assigned a real type, determine what type should
-    // be assigned to it.
-    if ($file->type === FILE_TYPE_NONE) {
-      $file->type = $file->filemime;
-    }
+    $file = FileEntity::create($values);
 
     // Save the file and assert success.
-    $result = FileEntity::create((array) $file)->save();
+    $result = $file->save();
     $this->assertIdentical(SAVED_NEW, $result, t('The file was added to the database.'), 'Create test file');
 
     return $file;
