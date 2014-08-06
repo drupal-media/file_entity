@@ -127,38 +127,6 @@ function file_entity_file_mimetype_mapping_alter(&$mapping) {
 }
 
 /**
- * Implements hook_file_load().
- */
-function file_entity_file_load($files) {
-  /*
-  $alt = variable_get('file_entity_alt', '[file:field_file_image_alt_text]');
-  $title = variable_get('file_entity_title', '[file:field_file_image_title_text]');
-
-  $replace_options = array(
-    'clear' => TRUE,
-    'sanitize' => FALSE,
-  );
-
-  foreach ($files as $file) {
-    $file->metadata = array();
-
-    // Load alt and title text from fields.
-    if (!empty($alt)) {
-      $file->alt = token_replace($alt, array('file' => $file), $replace_options);
-    }
-    if (!empty($title)) {
-      $file->title = token_replace($title, array('file' => $file), $replace_options);
-    }
-  }*/
-
-  // Load and unserialize metadata.
-  $results = db_query("SELECT * FROM {file_metadata} WHERE fid IN (:fids)", array(':fids' => array_keys($files)));
-  foreach ($results as $result) {
-    $files[$result->fid]->metadata[$result->name] = unserialize($result->value);
-  }
-}
-
-/**
  * Fetch the dimensions of an image and store them in the file metadata array.
  */
 function file_entity_metadata_fetch_image_dimensions(FileInterface $file) {
