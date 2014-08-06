@@ -4,6 +4,7 @@
  * @file
  * Extends Drupal file entities to be fieldable and viewable.
  */
+
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;

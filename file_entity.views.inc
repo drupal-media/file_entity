@@ -146,6 +146,14 @@ function file_entity_views_data() {
     ),
   );
 
+  // @todo This should really be added in file.views.inc
+  $data['file_usage']['table']['join'] = array(
+    'file_managed' => array(
+      'field' => 'fid',
+      'left_field' => 'fid',
+    ),
+  );
+
   return $data;
 }
 
