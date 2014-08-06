@@ -13,10 +13,7 @@
   {% endif %}
 
   <div class="content"{{ content_attributes }}>
-    <?php
-      // We hide the links now so that we can render them later.
       {{ content|without('links') }}
-    ?>
   </div>
 
   {{ content.links }}

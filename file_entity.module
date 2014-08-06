@@ -1102,23 +1102,30 @@ function file_entity_is_page($file) {
 }
 
 /**
- * Process variables for file_entity.tpl.php
+ * Prepares variables for file templates.
  *
- * The $variables array contains the following arguments:
- * - $file
- * - $view_mode
+ * Default template: file.html.twig.
  *
- * @see file_entity.tpl.php
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An array of elements to display in view mode.
+ *   - file: The file object.
  */
 function template_preprocess_file(&$variables) {
   $view_mode = $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['file'] = $variables['elements']['#file'];
+
+  /** @var FileInterface $file */
   $file = $variables['file'];
 
   $variables['id']        = $file->id();
-  $variables['date']      = format_date($file->timestamp); // @TODO: Check this out
-  $account                = $file->getOwner();
-  $variables['name']      = theme('username', array('account' => $account));
+  $variables['date']      = format_date($file->getCreatedTime()); // @TODO: Check this out
+  $username = array(
+    '#theme' => 'username',
+    '#account' => $file->getOwner(),
+    '#link_options' => array('attributes' => array('rel' => 'author')),
+  );
+  $variables['name']      = drupal_render($username);
 
   $variables['file_url']  = $file->url('canonical');
   $label                  = $file->label();
@@ -1143,13 +1150,14 @@ function template_preprocess_file(&$variables) {
   }
 
   // Make the field variables available with the appropriate language.
-  field_attach_preprocess('file', $file, $variables['content'], $variables);
+  //field_attach_preprocess('file', $file, $variables['content'], $variables);
 
   // Attach the file object to the content element.
   $variables['content']['file']['#file'] = $file;
 
   // Display post information only on certain file types.
-  if (variable_get('file_submitted_' . $file->type, FALSE)) {
+  //if (variable_get('file_submitted_' . $file->type, FALSE)) { @TODO: What todo with this?
+  if (FALSE) {
     $variables['display_submitted'] = TRUE;
     $variables['submitted'] = t('Uploaded by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
     $variables['user_picture'] = theme_get_setting('toggle_file_user_picture') ? theme('user_picture', array('account' => $account)) : '';
@@ -1161,9 +1169,9 @@ function template_preprocess_file(&$variables) {
   }
 
   // Gather file classes.
-  $variables['classes_array'][] = drupal_html_class('file-' . $file->type);
-  $variables['classes_array'][] = drupal_html_class('file-' . $file->filemime);
-  if ($file->status != FILE_STATUS_PERMANENT) {
+  $variables['classes_array'][] = drupal_html_class('file-' . $file->bundle());
+  $variables['classes_array'][] = drupal_html_class('file-' . $file->getMimeType());
+  if (!$file->isPermanent()) {
     $variables['classes_array'][] = 'file-temporary';
   }
 
@@ -1173,12 +1181,12 @@ function template_preprocess_file(&$variables) {
   }
 
   // Clean up name so there are no underscores.
-  $variables['theme_hook_suggestions'][] = 'file__' . $file->type;
-  $variables['theme_hook_suggestions'][] = 'file__' . $file->type . '__' . $view_mode;
-  $variables['theme_hook_suggestions'][] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->filemime);
-  $variables['theme_hook_suggestions'][] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->filemime) . '__' . $view_mode;
-  $variables['theme_hook_suggestions'][] = 'file__' . $file->fid;
-  $variables['theme_hook_suggestions'][] = 'file__' . $file->fid . '__' . $view_mode;
+  $variables['theme_hook_suggestions'][] = 'file__' . $file->bundle();
+  $variables['theme_hook_suggestions'][] = 'file__' . $file->bundle() . '__' . $view_mode;
+  $variables['theme_hook_suggestions'][] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->getMimeType());
+  $variables['theme_hook_suggestions'][] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->getMimeType()) . '__' . $view_mode;
+  $variables['theme_hook_suggestions'][] = 'file__' . $file->id();
+  $variables['theme_hook_suggestions'][] = 'file__' . $file->id() . '__' . $view_mode;
 }
 
 /**

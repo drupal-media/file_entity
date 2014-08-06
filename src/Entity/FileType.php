@@ -68,6 +68,8 @@ class FileType extends ConfigEntityBundleBase implements FileTypeInterface {
    */
   protected $description;
 
+  protected $type;
+
   /**
    * MIME types associated with this file type.
    *
