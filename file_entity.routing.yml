@@ -133,6 +133,13 @@ file_entity.file_delete:
   options:
     _admin_route: TRUE
 
+file_entity.multiple_delete_confirm:
+  path: 'admin/content/files/delete'
+  defaults:
+    _form: '\Drupal\file_entity\Form\FileDeleteMultipleForm'
+  requirements:
+    _permission: 'administer files'
+
 file_entity.settings:
   path: 'admin/config/media/file-settings'
   defaults:
