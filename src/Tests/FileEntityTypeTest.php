@@ -60,7 +60,7 @@ class FileEntityTypeTest extends FileEntityTestBase {
     );
 
     // Attach a text field to one of the file types.
-    $field_name = drupal_strtolower($this->randomName());
+    $field_name = drupal_strtolower($this->randomMachineName());
     $field_storage = FieldStorageConfig::create(array(
       'name' => $field_name,
       'entity_type' => 'file',
@@ -106,8 +106,8 @@ class FileEntityTypeTest extends FileEntityTestBase {
 
     // Step 4: Complete field widgets.
     $edit = array();
-    $edit["{$field_name}[0][value]"] = $this->randomName();
-    $edit['filename[0][value]'] = $this->randomName();
+    $edit["{$field_name}[0][value]"] = $this->randomMachineName();
+    $edit['filename[0][value]'] = $this->randomMachineName();
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $edit['filename[0][value]'])));
 
@@ -124,7 +124,7 @@ class FileEntityTypeTest extends FileEntityTestBase {
    */
   public function testTypeWithoutCandidates() {
     // Attach a text field to the default image file type.
-    $field_name = drupal_strtolower($this->randomName());
+    $field_name = drupal_strtolower($this->randomMachineName());
     $field_storage = FieldStorageConfig::create(array(
       'name' => $field_name,
       'entity_type' => 'file',
@@ -160,8 +160,8 @@ class FileEntityTypeTest extends FileEntityTestBase {
 
     // Step 3: Complete field widgets.
     $edit = array();
-    $edit["{$field_name}[0][value]"] = $this->randomName();
-    $edit['filename[0][value]'] = $this->randomName();
+    $edit["{$field_name}[0][value]"] = $this->randomMachineName();
+    $edit['filename[0][value]'] = $this->randomMachineName();
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $edit['filename[0][value]'])));
 

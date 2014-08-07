@@ -74,7 +74,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->drupalLogin($this->userAdmin);
     $i = 0;
     foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $prefix) {
-      $this->createFileEntity(array('filename' => $prefix . $this->randomName(6), 'created' => $i * 90000));
+      $this->createFileEntity(array('filename' => $prefix . $this->randomMachineName(6), 'created' => $i * 90000));
       $i++;
     }
 
@@ -313,7 +313,11 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $node = Node::create(array(
       'title' => 'An article that uses a file',
       'type' => $content_type->id(),
-      'used_file' => $file->id(),
+      'used_file' => array(
+        'target_id' => $file->id(),
+        'display' => 1,
+        'description' => '',
+      ),
     ));
     debug($node->toArray());
     $node->save();

@@ -69,7 +69,7 @@ class FileEntityReplaceTest extends FileEntityTestBase {
 
     // Create a non-local file record.
     $file2 = new \stdClass();
-    $file2->uri = 'oembed://' . $this->randomName();
+    $file2->uri = 'oembed://' . $this->randomMachineName();
     $file2->filename = drupal_basename($file2->uri);
     $file2->filemime = 'image/oembed';
     $file2->type = 'image';

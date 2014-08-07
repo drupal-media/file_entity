@@ -62,7 +62,7 @@ class FileEntityEditTest extends FileEntityTestBase {
 
     // Edit the content of the file.
     $edit = array();
-    $edit[$name_key] = $this->randomName(8);
+    $edit[$name_key] = $this->randomMachineName(8);
     // Stay on the current page, without reloading.
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
