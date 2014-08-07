@@ -659,13 +659,16 @@ display:
           relationship: fid
           group_type: sum
           admin_label: ''
+          dependencies:
+            module:
+              - views
           label: 'Used in'
           exclude: false
           alter:
             alter_text: false
             text: ''
             make_link: true
-            path: 'admin/content/files/usage/[fid]'
+            path: 'file/[fid]/usage'
             absolute: false
             external: false
             replace_spaces: false
@@ -1105,7 +1108,24 @@ display:
           provider: file_entity
       sorts: {  }
       title: Files
-      header: {  }
+      header:
+        area_text_custom:
+          id: area_text_custom
+          table: views
+          field: area_text_custom
+          relationship: none
+          group_type: group
+          admin_label: ''
+          dependencies:
+            module:
+              - views
+              - views
+              - views
+          empty: false
+          tokenize: true
+          content: 'This table lists all of the places where <em>%1</em> is used.'
+          plugin_id: text_custom
+          provider: views
       footer: {  }
       empty:
         area_text_custom:
@@ -1125,7 +1145,7 @@ display:
           admin_label: 'File usage'
           required: true
       arguments: {  }
-      group_by: true
+      group_by: false
       show_admin_links: true
       field_langcode: '***CURRENT_LANGUAGE***'
       field_langcode_add_to_query: null
@@ -1167,7 +1187,22 @@ display:
     display_options:
       display_description: ''
       path: file/%file/usage
-      empty: {  }
+      empty:
+        area_text_custom:
+          id: area_text_custom
+          table: views
+          field: area_text_custom
+          relationship: none
+          group_type: group
+          admin_label: ''
+          dependencies:
+            module:
+              - views
+          empty: true
+          tokenize: false
+          content: 'This file is not currently used.'
+          plugin_id: text_custom
+          provider: views
       defaults:
         empty: false
         pager: false
