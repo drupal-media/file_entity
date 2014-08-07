@@ -7,7 +7,10 @@
 
 namespace Drupal\file_entity\Tests;
 
+use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file_entity\Entity\FileEntity;
+use Drupal\node\Entity\Node;
 use Drupal\user\Entity\User;
 use Drupal\views\Entity\View;
 
@@ -272,5 +275,63 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertNull(FileEntity::load(2), 'File 2 is deleted.');
     $this->assertNull(FileEntity::load(3), 'File 3 is deleted.');
     $this->assertNotNull(FileEntity::load(4), 'File 4 is not deleted.');
+  }
+
+  /**
+   * Tests the file usage view.
+   */
+  public function testUsageView() {
+    $this->container->get('module_handler')->install(array('node'));
+    $file = $this->createFileEntity(array('uid' => $this->userAdmin));
+    $this->drupalLogin($this->userAdmin);
+
+    // Check the usage links on the file overview.
+    $this->drupalGet('admin/content/files');
+    $this->assertLink('0 places');
+    $this->assertNoLink('1 place');
+
+    // Check the usage view.
+    $this->clickLink('0 places');
+    $this->assertText('This file is not currently used.');
+
+    // Attach a file field to article nodes.
+    $content_type = $this->drupalCreateContentType();
+    $field_storage = FieldStorageConfig::create(array(
+      'name' => 'used_file',
+      'entity_type' => 'node',
+      'type' => 'file',
+    ));
+    $field_storage->save();
+    $field_instance = FieldInstanceConfig::create(array(
+      'field_storage' => $field_storage,
+      'entity_type' => 'node',
+      'bundle' => $content_type->id(),
+    ));
+    $field_instance->save();
+
+    // Create a node using a file.
+    $node = Node::create(array(
+      'title' => 'An article that uses a file',
+      'type' => $content_type->id(),
+      'used_file' => $file->id(),
+    ));
+    debug($node->toArray());
+    $node->save();
+    \Drupal::entityManager()->getStorage('node')->resetCache();
+    \Drupal::entityManager()->getStorage('file')->resetCache();
+
+    // Check that the usage link is updated.
+    $this->drupalGet('admin/content/files');
+    $this->assertLink('1 place');
+
+    // Check that the using node shows up on the usage view.
+    $this->clickLink('1 place');
+    $this->assertLink('An article that uses a file');
+
+    // Check local tasks.
+    $this->clickLink('View');
+    $this->assertResponse(200);
+    $this->clickLink('Usage');
+    $this->assertResponse(200);
   }
 }
