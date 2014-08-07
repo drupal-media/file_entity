@@ -21,68 +21,6 @@ function file_entity_view_page($file) {
 }
 
 /**
- * Page callback to show file usage information.
- */
-function file_entity_usage_page($file) {
-  $rows = array();
-  $occured_entities = array();
-
-  foreach (file_usage_list($file) as $module => $usage) {
-    $info = system_get_info('module', $module);
-
-    // There are cases, where actual entitiy doesen't exist.
-    // We have to handle this.
-    foreach ($usage as $entity_type => $entity_ids) {
-      $entity_info = entity_get_info($entity_type);
-      $entities = empty($entity_info) ? NULL : entity_load($entity_type, array_keys($entity_ids));
-
-      foreach ($entity_ids as $entity_id => $count) {
-        // If some other module already added this entity just sum all counts.
-        if (isset($occured_entities[$entity_type][$entity_id])) {
-          $rows[$occured_entities[$entity_type][$entity_id]][2] += $count;
-          continue;
-        }
-
-        $label = empty($entities[$entity_id]) ? $module : entity_label($entity_type, $entities[$entity_id]);
-        $entity_uri = empty($entities[$entity_id]) ? NULL : entity_uri($entity_type, $entities[$entity_id]);
-
-        // Some entities do not have URL.
-        if (empty($entity_uri)) {
-          $rows[] = array(check_plain($label), $entity_type, $module, $count);
-        }
-        else {
-          $uri = $entity_uri['path'];
-          $rows[] = array(l($label, $uri), $entity_type, $module, $count);
-        }
-
-        $occured_entities[$entity_type][$entity_id] = count($rows) - 1;
-      }
-    }
-  }
-  $header[] = array(
-    'data' => t('Entity'),
-  );
-  $header[] = array(
-    'data' => t('Entity type'),
-  );
-  $header[] = array(
-    'data' => t('Registering module'),
-  );
-  $header[] = array(
-    'data' => t('Use count'),
-  );
-  $build['usage_table'] = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
-    '#caption' => t('This table lists all of the places where @filename is used.',
-    array('@filename' => $file->filename)),
-    '#empty' => t('This file is not currently used.'),
-  );
-  return $build;
-}
-
-/**
  * Form submission handler for file_entity_delete_form().
  */
 function file_entity_delete_form_submit($form, &$form_state) {

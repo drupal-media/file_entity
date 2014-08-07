@@ -1166,7 +1166,7 @@ display:
     position: 2
     display_options:
       display_description: ''
-      path: admin/content/files/usage/%
+      path: file/%file/usage
       empty: {  }
       defaults:
         empty: false
@@ -1426,6 +1426,9 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          dependencies:
+            module:
+              - file
           default_action: 'not found'
           exception:
             value: all
@@ -1436,7 +1439,7 @@ display:
           default_argument_type: fixed
           default_argument_options:
             argument: ''
-          default_argument_skip_url: false
+          default_argument_skip_url: true
           summary_options:
             base_path: ''
             count: true
@@ -1518,3 +1521,16 @@ display:
           required: true
       field_langcode: '***CURRENT_LANGUAGE***'
       field_langcode_add_to_query: null
+      menu:
+        type: tab
+        title: Usage
+        description: 'Overview content that uses this file'
+        name: admin
+        weight: 5
+        context: '0'
+      tab_options:
+        type: none
+        title: ''
+        description: ''
+        name: admin
+        weight: 0

@@ -113,17 +113,6 @@ function file_entity_menu() {
     'weight' => -5,
   );
 
-  $items['file/%file/usage'] = array(
-    'title' => 'Usage',
-    'page callback' => 'file_entity_usage_page',
-    'page arguments' => array(1),
-    'access callback' => 'file_entity_access',
-    'access arguments' => array('update', 1),
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE,
-    'file' => 'file_entity.pages.inc',
-  );
-
   // Attach a "Manage file display" tab to each file type in the same way that
   // Field UI attaches "Manage fields" and "Manage display" tabs. Note that
   // Field UI does not have to be enabled; we're just using the same IA pattern
