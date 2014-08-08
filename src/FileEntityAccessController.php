@@ -10,13 +10,13 @@ namespace Drupal\file_entity;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\file\FileAccessController;
+use Drupal\file\FileAccessControlHandler;
 use Drupal\file_entity\Entity\FileEntity;
 
 /**
  * Defines the access controller for the file entity type.
  */
-class FileEntityAccessController extends FileAccessController {
+class FileEntityAccessController extends FileAccessControlHandler {
 
   /**
    * {@inheritdoc}
