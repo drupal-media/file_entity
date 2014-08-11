@@ -9,8 +9,7 @@ namespace Drupal\file_entity\Entity;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
-use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\file\Entity\File;
 
 /**
@@ -96,7 +95,7 @@ class FileEntity extends File {
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
-    $fields['type'] = FieldDefinition::create('entity_reference')
+    $fields['type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('File type'))
       ->setDescription(t('The type of the file.'))
       ->setSetting('target_type', 'file_type');
