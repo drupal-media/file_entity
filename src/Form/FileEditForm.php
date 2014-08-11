@@ -24,8 +24,14 @@ class FileEditForm extends ContentEntityForm {
     $file = $this->entity;
 
     if ($this->operation == 'edit') {
+      if($file->bundle() == 'undefined') {
+        $type = 'file';
+      } else {
+        $type = FileType::load($file->bundle())->label();
+      }
+
       $form['#title'] = $this->t('<em>Edit @type</em> "@title"', array(
-        '@type' => FileType::load($file->bundle())->label(),
+        '@type' => $type,
         '@title' => $file->label(),
       ));
     }

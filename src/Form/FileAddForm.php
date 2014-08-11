@@ -243,7 +243,7 @@ class FileAddForm extends FormBase {
     $candidates = array();
     foreach ($types as $type) {
 
-      if ($has_access = \Drupal::entityManager()->getAccessController('file')
+      if ($has_access = \Drupal::entityManager()->getAccessControlHandler('file')
         ->createAccess($type)
       ) {
         $candidates[$type] = FileType::load($type)->label();
