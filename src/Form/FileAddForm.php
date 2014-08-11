@@ -472,10 +472,10 @@ class FileAddForm extends FormBase {
 
       // Figure out destination.
       if (\Drupal::currentUser()->hasPermission('administer files')) {
-        $form_state['redirect_route'] = new Url('view.file_entity_files.overview');
+        $form_state->setRedirect('view.file_entity_files.overview');
       }
       else {
-        $form_state['redirect_route'] = $file->urlInfo();
+        $form_state->setRedirectUrl($file->urlInfo());
       }
     }
     else {
