@@ -42,7 +42,7 @@ class FileTypeDeleteForm extends EntityConfirmFormBase {
       'The file type %label has been deleted.',
       array('%label' => $this->entity->label())
     ));
-    $form_state['redirect_route'] = new Url('file_entity.file_types_overview');
+    $form_state->setRedirect('file_entity.file_types_overview');
   }
 
   /**

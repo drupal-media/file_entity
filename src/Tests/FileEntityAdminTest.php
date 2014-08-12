@@ -158,7 +158,6 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->drupalLogin($this->userViewOwn);
     $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
-    debug($files['private_document']->getOwnerId(), $this->userViewOwn->id());
     $this->assertLinkByHref('file/' . $files['private_document']->id());
     // Verify no operation links are displayed.
     $this->assertNoLinkByHref('file/' . $files['private_document']->id() . '/edit');
@@ -319,7 +318,6 @@ class FileEntityAdminTest extends FileEntityTestBase {
         'description' => '',
       ),
     ));
-    debug($node->toArray());
     $node->save();
     \Drupal::entityManager()->getStorage('node')->resetCache();
     \Drupal::entityManager()->getStorage('file')->resetCache();

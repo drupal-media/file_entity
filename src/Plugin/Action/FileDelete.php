@@ -9,9 +9,6 @@ namespace Drupal\file_entity\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\file_entity\Entity\FileEntity;
-use Drupal\user\Entity\User;
-use Drupal\user\TempStore;
 use Drupal\user\TempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -22,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "file_delete_action",
  *   label = @Translation("Delete file"),
  *   type = "file",
- *   confirm_form_path = "admin/content/files/delete",
+ *   confirm_form_route_name = "file_entity.multiple_delete_confirm",
  * )
  */
 class FileDelete extends ActionBase implements ContainerFactoryPluginInterface {
@@ -37,17 +34,16 @@ class FileDelete extends ActionBase implements ContainerFactoryPluginInterface {
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, TempStoreFactory $temp_store_factory/*, User $user*/) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, TempStoreFactory $temp_store_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->tempStore = $temp_store_factory->get('file_multiple_delete_confirm');
-//    $this->user = $user;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('user.tempstore')/*, $container->get('current_user')*/);
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('user.tempstore'));
   }
 
   /**

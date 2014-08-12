@@ -45,7 +45,7 @@ class FileTypeDisableForm extends EntityConfirmFormBase {
       'The file type %label has been disabled.',
       array('%label' => $type->label())
     ));
-    $form_state['redirect_route'] = new Url('file_entity.file_types_overview');
+    $form_state->setRedirect('file_entity.file_types_overview');
   }
 
   /**
