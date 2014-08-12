@@ -61,7 +61,7 @@ class FileEditForm extends ContentEntityForm {
       $form_state['values']['nid'] = $file->id();
       $form_state['nid'] = $file->id();
 
-      $form_state['redirect_route'] = $file->urlInfo();
+      $form_state->setRedirectUrl($file->urlInfo());
     }
     else {
       // In the unlikely case something went wrong on save, the node will be

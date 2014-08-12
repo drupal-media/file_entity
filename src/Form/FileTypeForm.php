@@ -101,7 +101,7 @@ class FileTypeForm extends EntityForm {
     $id = trim($form_state['values']['id']);
     // '0' is invalid, since elsewhere we check it using empty().
     if ($id == '0') {
-      $this->setFormError('id', $form_state, $this->t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $id)));
+      $form_state->setError($form['id'], $this->t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $id)));
     }
   }
 
@@ -121,7 +121,7 @@ class FileTypeForm extends EntityForm {
       \Drupal::logger('file_entity')->log(WATCHDOG_NOTICE, t('Added file type %name.', $t_args));
     }
 
-    $form_state['redirect_route']['route_name'] = 'file_entity.file_types_overview';
+    $form_state->setRedirect('file_entity.file_types_overview');
   }
 
   /**
