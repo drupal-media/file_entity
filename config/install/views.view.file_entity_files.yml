@@ -1108,24 +1108,7 @@ display:
           provider: file_entity
       sorts: {  }
       title: Files
-      header:
-        area_text_custom:
-          id: area_text_custom
-          table: views
-          field: area_text_custom
-          relationship: none
-          group_type: group
-          admin_label: ''
-          dependencies:
-            module:
-              - views
-              - views
-              - views
-          empty: false
-          tokenize: true
-          content: 'This table lists all of the places where <em>%1</em> is used.'
-          plugin_id: text_custom
-          provider: views
+      header: {  }
       footer: {  }
       empty:
         area_text_custom:
@@ -1216,6 +1199,7 @@ display:
         style: false
         row: false
         relationships: false
+        header: false
       pager:
         type: mini
         options:
@@ -1569,3 +1553,19 @@ display:
         description: ''
         name: admin
         weight: 0
+      header:
+        area_text_custom:
+          id: area_text_custom
+          table: views
+          field: area_text_custom
+          relationship: none
+          group_type: group
+          admin_label: ''
+          dependencies:
+            module:
+              - views
+          empty: true
+          tokenize: true
+          content: 'This table lists all of the places where <em>%1</em> is used.'
+          plugin_id: text_custom
+          provider: views
