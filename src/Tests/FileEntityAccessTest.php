@@ -8,7 +8,7 @@
 namespace Drupal\file_entity\Tests;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\file\FileInterface;
-use Drupal\file_entity\FileEntityAccessController;
+use Drupal\file_entity\FileEntityAccessControlHandler;
 
 /**
  * Tests the access aspects of file entity.
@@ -20,14 +20,14 @@ class FileEntityAccessTest extends FileEntityTestBase {
   /**
    * The File Entity access controller.
    *
-   * @var FileEntityAccessController
+   * @var FileEntityAccessControlHandler
    */
-  protected $accessController;
+  protected $accessControlHandler;
 
   function setUp() {
     parent::setUp();
     $this->setUpFiles(array('uid' => 0));
-    $this->accessController = $this->container->get('entity.manager')->getAccessController('file');
+    $this->accessControlHandler = $this->container->get('entity.manager')->getAccessControlHandler('file');
 
     // Unset the fact that file_entity_install() adds the 'view files'
     // permission to all user roles. This messes with being able to fully unit
@@ -39,16 +39,16 @@ class FileEntityAccessTest extends FileEntityTestBase {
   }
 
   /**
-   * Asserts FileEntityAccessController correctly grants or denies access.
+   * Asserts FileEntityAccessControlHandler correctly grants or denies access.
    */
   function assertFileEntityAccess($ops, $file, $account) {
-    $this->accessController->resetCache();
+    $this->accessControlHandler->resetCache();
     foreach ($ops as $op => $expected) {
       $this->assertEqual(
         $expected,
         $op === 'create' ?
-          $this->accessController->createAccess($file, $account) :
-          $this->accessController->access($file, $op, LanguageInterface::LANGCODE_DEFAULT, $account)
+          $this->accessControlHandler->createAccess($file, $account) :
+          $this->accessControlHandler->access($file, $op, LanguageInterface::LANGCODE_DEFAULT, $account)
       );
     }
   }

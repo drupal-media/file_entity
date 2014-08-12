@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\file_entity\FileEntityAccessController.
+ * Contains \Drupal\file_entity\FileEntityAccessControlHandler.
  */
 
 namespace Drupal\file_entity;
@@ -14,9 +14,9 @@ use Drupal\file\FileAccessControlHandler;
 use Drupal\file_entity\Entity\FileEntity;
 
 /**
- * Defines the access controller for the file entity type.
+ * Defines the access control handler for the file entity type.
  */
-class FileEntityAccessController extends FileAccessControlHandler {
+class FileEntityAccessControlHandler extends FileAccessControlHandler {
 
   /**
    * {@inheritdoc}
