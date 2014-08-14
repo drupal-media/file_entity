@@ -60,7 +60,7 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
     $file_resource = fopen($entity->getFileUri(), 'xb');
     if (!$file_resource) {
       // @todo Instead append number to filename?
-      throw new UnexpectedValueException(String::format('The file %filename already exists.'));
+      throw new UnexpectedValueException(String::format('The file @filename already exists.', array('@filename' => $entity->getFilename())));
     }
     fwrite($file_resource, $file_contents);
     fclose($file_resource);
