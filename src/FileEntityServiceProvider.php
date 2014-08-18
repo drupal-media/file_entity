@@ -31,6 +31,15 @@ class FileEntityServiceProvider extends ServiceProviderBase {
       // serializer.normalizer.file_entity.hal in hal.services.yml
       $service_definition->addTag('normalizer', array('priority' => 30));
       $container->setDefinition('serializer.normalizer.entity.file_entity', $service_definition);
+
+      // Add a normalizer service for file fields.
+      $service_definition = new Definition('Drupal\file_entity\Normalizer\FileItemNormalizer', array(
+        new Reference('rest.link_manager'),
+        new Reference('serializer.entity_resolver'),
+      ));
+      // Supersede EntityReferenceItemNormalizer.
+      $service_definition->addTag('normalizer', array('priority' => 20));
+      $container->setDefinition('serializer.normalizer.entity_reference_item.file_entity', $service_definition);
     }
   }
 }

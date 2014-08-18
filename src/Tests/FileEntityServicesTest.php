@@ -10,6 +10,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
+use Drupal\node\Entity\Node;
 use Drupal\rest\Tests\RESTTestBase;
 
 /**
@@ -28,27 +29,25 @@ class FileEntityServicesTest extends RESTTestBase {
     'node',
     'hal',
     'file_entity',
+    'basic_auth',
   );
 
   /**
-   * {@inheritdoc}
+   * Tests that a file field is correctly handled with REST.
    */
-  public function setUp() {
-    parent::setUp();
-    $this->enableService('entity:node');
-  }
+  public function testFileFieldREST() {
+    $this->enableService('entity:node', 'GET');
 
-  /**
-   * Tests that the entity reference normalizer is used.
-   */
-  public function testNormalizer() {
     // Create user and log in.
-    $this->drupalLogin($this->drupalCreateUser(array(
+    $account = $this->drupalCreateUser(array(
       'access content',
+      'create resttest content',
       'restful get entity:node',
-    )));
+      'restful post entity:node',
+    ));
+    $this->drupalLogin($account);
 
-    // Setup node type to use file field.
+    // Add a file field to the resttest content type.
     $file_field_storage = FieldStorageConfig::create(array(
       'type' => 'file',
       'entity_type' => 'node',
@@ -74,58 +73,38 @@ class FileEntityServicesTest extends RESTTestBase {
       'type' => 'resttest',
       'field_file' => array(
         'target_id' => $file->id(),
-        'display' => TRUE,
-        'description' => '',
+        'display' => 0,
+        'description' => 'An attached file',
       ),
       'status' => TRUE,
     ));
     $node->save();
 
     // GET node.
-    $url = url($node->getSystemPath(), array('absolute' => FALSE));
-    $response_json = $this->httpRequest($url, 'GET', NULL, $this->defaultMimeType);
+    $node_url = $node->getSystemPath();
+    $response_json = $this->httpRequest($node_url, 'GET', NULL, $this->defaultMimeType);
+    $this->assertResponse(200);
     $response_data = Json::decode($response_json);
 
     // Test that field_file refers to the file entity.
     $normalized_field = $response_data['_embedded'][$this->getAbsoluteUrl('/rest/relation/node/resttest/field_file')];
     $this->assertEqual($normalized_field[0]['_links']['self']['href'], $this->getAbsoluteUrl($file->urlInfo()->toString()));
+
+    // Remove the node.
+    $node->delete();
+    $this->httpRequest($node_url, 'GET', NULL, $this->defaultMimeType);
+    $this->assertResponse(404);
+
+    // POST node to create new.
+    $serialized = Json::encode($response_data);
+    $this->enableService('entity:node', 'POST');
+    $this->httpRequest('entity/node', 'POST', $serialized, $this->defaultMimeType);
+    $this->assertResponse(201);
+
+    // Test that the new node has a valid file field.
+    $nodes = Node::loadMultiple();
+    $last_node = array_pop($nodes);
+    $this->assertEqual($last_node->get('field_file')->target_id, $file->id());
   }
 
-  /**
-   * Tests file normalization and denormalization.
-   */
-  public function testFileNormalize() {
-    // Create user and log in.
-    $this->drupalLogin($this->drupalCreateUser(array(
-      'view files',
-      'restful get entity:file',
-    )));
-
-    foreach ($this->drupalGetTestFiles('binary') as $file_uri) {
-      $file_contents = file_get_contents($file_uri);
-
-      // Create file entity.
-      $file = File::create(array('uri' => $file_uri));
-      $file->save();
-
-      // Get normalized entity.
-      $response = Json::decode($this->httpRequest($file->urlInfo()->toString(), 'GET', NULL, $this->defaultMimeType));
-
-      // Remove file.
-      $file->delete();
-      $this->assertEqual(FALSE, file_exists($file_uri));
-
-      // Post normalized entity.
-      unset($response['uuid']);
-      $this->httpRequest($this->getAbsoluteUrl('/entity/file'), 'POST', $response, $this->defaultMimeType);
-      $this->assertResponse(201);
-      $last_file = array_pop(File::loadMultiple());
-
-      // Assert file is equal.
-      foreach (array('filename', 'uri', 'filemime', 'filesize', 'type') as $property) {
-        $this->assertEqual($response[$property], $last_file[$property]);
-      }
-      $this->assertEqual($file_contents, file_get_contents($last_file->urlInfo()->toString()), 'File contents are equal.');
-    }
-  }
 }

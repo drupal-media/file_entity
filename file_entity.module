@@ -1913,11 +1913,13 @@ function file_entity_entity_storage_load($entities, $entity_type) {
 function file_entity_get_public_and_private_stream_wrapper_names($flag = STREAM_WRAPPERS_VISIBLE) {
   $wrappers = array();
   foreach (file_get_stream_wrappers($flag) as $key => $wrapper) {
+    // Some wrappers, e.g. those set in KernelTestBase, do not provide a name.
+    $wrapper_name = isset($wrapper['name']) ? $wrapper['name'] : substr(strrchr($wrapper['class'], '\\'), 1);
     if (empty($wrapper['private'])) {
-      $wrappers['public'][$key] = $wrapper['name'];
+      $wrappers['public'][$key] = $wrapper_name;
     }
     else {
-      $wrappers['private'][$key] = $wrapper['name'];
+      $wrappers['private'][$key] = $wrapper_name;
     }
   }
   return $wrappers;
