@@ -37,9 +37,7 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
     if (!isset($context['included_fields']) || in_array('data', $context['included_fields'])) {
       // Save base64-encoded file contents to the "data" property.
       // @todo Allow non-binary but beware of line-ending characters.
-      $file_resource = fopen($entity->getFileUri(), 'rb');
-      $file_data = base64_encode(fread($file_resource, $entity->get('filesize')->value));
-      fclose($file_resource);
+      $file_data = base64_encode(file_get_contents($entity->getFileUri()));
       $data += array(
         'data' => array(array('value' => $file_data)),
       );
