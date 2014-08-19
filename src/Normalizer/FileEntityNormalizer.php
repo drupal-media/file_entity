@@ -8,6 +8,7 @@ namespace Drupal\file_entity\Normalizer;
 
 use Drupal\Component\Utility\String;
 use Drupal\hal\Normalizer\ContentEntityNormalizer;
+use Gliph\Exception\RuntimeException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 
 /**
@@ -36,7 +37,6 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
     $data = parent::normalize($entity, $format, $context);
     if (!isset($context['included_fields']) || in_array('data', $context['included_fields'])) {
       // Save base64-encoded file contents to the "data" property.
-      // @todo Allow non-binary but beware of line-ending characters.
       $file_data = base64_encode(file_get_contents($entity->getFileUri()));
       $data += array(
         'data' => array(array('value' => $file_data)),
@@ -55,13 +55,14 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
     // Decode and save to file.
     $file_contents = base64_decode($file_data);
     $entity = parent::denormalize($data, $class, $format, $context);
-    $file_resource = fopen($entity->getFileUri(), 'xb');
-    if (!$file_resource) {
-      // @todo Instead append number to filename?
-      throw new UnexpectedValueException(String::format('The file @filename already exists.', array('@filename' => $entity->getFilename())));
+    $dirname = drupal_dirname($entity->getFileUri());
+    file_prepare_directory($dirname, FILE_CREATE_DIRECTORY);
+    if ($uri = file_unmanaged_save_data($file_contents, $entity->getFileUri())) {
+      $entity->setFileUri($uri);
     }
-    fwrite($file_resource, $file_contents);
-    fclose($file_resource);
+    else {
+      throw new RuntimeException(String::format('Failed to write @filename.', array('@filename' => $entity->getFilename())));
+    }
     return $entity;
   }
 }
