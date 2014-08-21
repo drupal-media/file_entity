@@ -8,10 +8,13 @@
 /**
  * Implements hook_views_data().
  */
-function file_entity_views_data() {
+function file_entity_views_data_alter(&$data) {
   // Define the base group of this table. Fields that don't have a group defined
   // will go into this field by default.
   $data['file_managed']['table']['group'] = t('Media');
+
+  // Add access tag for all queries against file_managed.
+  $data['file_managed']['table']['base']['access query tag'] = 'file_access';
 
   // File Name.
   $data['file_managed']['filename'] = array(
@@ -153,16 +156,4 @@ function file_entity_views_data() {
       'left_field' => 'fid',
     ),
   );
-
-  return $data;
-}
-
-/**
- * Implements hook_views_data_alter().
- */
-function file_entity_views_data_alter(&$data) {
-  // Add access tag for all queries against file_managed.
-  $data['file_managed']['table']['base']['access query tag'] = 'file_access';
-  // Override the filename field handler.
-  $data['file_managed']['filename']['field']['handler'] = 'views_handler_field_file_filename';
 }

@@ -39,6 +39,23 @@ class FileEntity extends File {
     parent::__construct($values, $entity_type, $bundle, $translations);
   }
 
+
+  /**
+   * {@inheritdoc}
+   */
+  public function url($rel = 'canonical', $options = array()) {
+    // While self::urlInfo() will throw an exception if the entity is new,
+    // the expected result for a URL is always a string.
+    if ($this->isNew() || !$this->hasLinkTemplate($rel)) {
+      return '';
+    }
+
+    $uri = $this->urlInfo($rel);
+    $options += $uri->getOptions();
+    $uri->setOptions($options);
+    return $uri->toString();
+  }
+
   /**
    * {@inheritdoc}
    */
