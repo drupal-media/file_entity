@@ -70,7 +70,7 @@ class FileName extends FieldPluginBase {
     if (!empty($this->options['link_to_file']) && $data !== NULL && $data !== '') {
       $file = $entity = $this->getEntity($values);
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = $file->urlInfo()->toString();
+      $this->options['alter']['path'] = $file->getSystemPath();
     }
 
     return $data;
