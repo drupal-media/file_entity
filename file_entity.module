@@ -1884,10 +1884,10 @@ function _file_entity_get_fields_by_type($field_type) {
 function file_entity_entity_storage_load($entities, $entity_type) {
   // Loop over all the entities looking for entities with attached images.
   foreach ($entities as $entity) {
-    //list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     // Examine every image field instance attached to this entity's bundle.
     foreach ($entity->getFieldDefinitions() as $field_definition) {
-      if ($field_definition->getType() != 'image') {
+      if ($field_definition->getSetting('target_type') == 'file' && $field_definition->getType() != 'image') {
         $field_name = $field_definition->getName();
         if (!empty($entity->{$field_name})) {
           foreach ($entity->$field_name as $delta => $item) {
