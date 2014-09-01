@@ -19,7 +19,7 @@ use string;
  * @ConfigEntityType(
  *   id = "file_type",
  *   label = @Translation("File type"),
- *   controllers = {
+ *   handlers = {
  *     "list_builder" = "Drupal\file_entity\FileTypeListBuilder",
  *     "form" = {
  *       "default" = "Drupal\file_entity\Form\FileTypeForm",
