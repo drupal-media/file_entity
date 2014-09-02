@@ -714,6 +714,7 @@ function file_entity_entity_type_alter(&$entity_types) {
   $entity_types['file']->set('bundle_entity_type', 'file_type');
   $entity_types['file']->set('admin_permission', 'administer files');
   $entity_types['file']->setClass('Drupal\file_entity\Entity\FileEntity');
+  $entity_types['file']->setFormClass('default', 'Drupal\file_entity\Form\FileEditForm');
   $entity_types['file']->setFormClass('edit', 'Drupal\file_entity\Form\FileEditForm');
   $entity_types['file']->setFormClass('delete', 'Drupal\file_entity\Form\FileDeleteForm');
   $entity_types['file']->setAccessClass('Drupal\file_entity\FileEntityAccessControlHandler');
