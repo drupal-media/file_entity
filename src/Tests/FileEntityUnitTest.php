@@ -83,7 +83,7 @@ class FileEntityUnitTest extends FileEntityTestBase {
 
     // Test hook_file load.
     // Clear the cache and load fresh files objects to test file_load behavior.
-    entity_get_controller('file')->resetCache();
+    \Drupal::entityManager()->getStorage('file')->resetCache();
     foreach (file_load_multiple(array_keys($files)) as $file) {
       $this->assertTrue(
         isset($file->metadata['height']),
@@ -134,7 +134,7 @@ class FileEntityUnitTest extends FileEntityTestBase {
       'Image file width updated by file save.'
     );
     // Clear the cache and reload the file.
-    entity_get_controller('file')->resetCache();
+    \Drupal::entityManager()->getStorage('file')->resetCache();
     $file = File::load($file->id());
     $this->assertEqual(
       $file->metadata['height'],
