@@ -9,10 +9,9 @@ namespace Drupal\file_entity\Form;
 
 use Drupal\Component\Utility\Bytes;
 use Drupal\Component\Utility\String;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
-use Drupal\entity\Entity\EntityFormDisplay;
 use Drupal\field\FieldInstanceConfigInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
