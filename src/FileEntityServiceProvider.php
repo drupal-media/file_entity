@@ -20,8 +20,8 @@ class FileEntityServiceProvider extends ServiceProviderBase {
    * {@inheritdoc}
    */
   public function alter(ContainerBuilder $container) {
-    $extensions = $container->get('config.storage.active')->read('core.extension');
-    if (isset($extensions['module']['rest'])) {
+    $modules = $container->getParameter('container.modules');
+    if (isset($modules['rest'])) {
       // Add a normalizer service for file entities.
       $service_definition = new Definition('Drupal\file_entity\Normalizer\FileEntityNormalizer', array(
         new Reference('rest.link_manager'),
