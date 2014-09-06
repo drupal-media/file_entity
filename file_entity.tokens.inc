@@ -4,7 +4,7 @@
  * @file
  * Token integration for the file_entity module.
  */
-
+use Drupal\Component\Utility\String;
 use Drupal\file_entity\Entity\FileType;
 
 /**
@@ -80,8 +80,8 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'type':
-          if ($file_type = FileType::load($file->type)) {
-            $replacements[$original] = $sanitize ? check_plain($file_type->label) : $file_type->label;
+          if ($file_type = FileType::load($file->bundle())) {
+            $replacements[$original] = $sanitize ? String::checkPlain($file_type->label()) : $file_type->label();
           }
           break;
 
@@ -94,7 +94,7 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
 
     // Chained token relationships.
     $token_service = \Drupal::service('token');
-    if (($file_type_tokens = $token_service->findWithPrefix($tokens, 'type')) && $file_type = FileType::load($file->type)) {
+    if (($file_type_tokens = $token_service->findWithPrefix($tokens, 'type')) && $file_type = FileType::load($file->bundle())) {
       $replacements += $token_service->generate('file-type', $file_type_tokens, array('file_type' => $file_type), $options);
     }
     if ($download_url_tokens = $token_service->findWithPrefix($tokens, 'download-url')) {
@@ -109,17 +109,17 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'name':
-          $replacements[$original] = $sanitize ? check_plain($file_type->label) : $file_type->label;
+          $replacements[$original] = $sanitize ? String::checkPlain($file_type->label()) : $file_type->label();
           break;
 
         case 'machine-name':
           // This is a machine name so does not ever need to be sanitized.
-          $replacements[$original] = $file_type->type;
+          $replacements[$original] = $file_type->id();
           break;
 
         case 'count':
           $query = db_select('file_managed');
-          $query->condition('type', $file_type->type);
+          $query->condition('type', $file_type->id());
           $query->addTag('file_type_file_count');
           $count = $query->countQuery()->execute()->fetchField();
           $replacements[$original] = (int) $count;

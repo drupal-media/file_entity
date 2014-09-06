@@ -4,6 +4,7 @@
  * @file
  * Install, update and uninstall functions for the file_entity module.
  */
+use Drupal\views\Entity\View;
 
 /**
  * Implements hook_schema().
@@ -161,6 +162,11 @@ function file_entity_install() {
   if ($queue->numberOfItems()) {
     drupal_set_message(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
   }
+
+  // Disable the core files view.
+  $view = View::load('files');
+  $view->set('status', FALSE);
+  $view->save();
 }
 
 /**
