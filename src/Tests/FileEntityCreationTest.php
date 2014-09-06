@@ -137,18 +137,4 @@ class FileEntityCreationTest extends FileEntityTestBase {
       $this->assertEqual($value, $created_file->get($field)->value);
     }
   }
-
-  /**
-   * Tests Pathauto support.
-   */
-  public function testPathauto() {
-    $this->container->get('module_handler')
-      ->install(array('token', 'path', 'pathauto'), FALSE);
-    $file = $this->createFileEntity();
-    $alias = \Drupal::service('pathauto.manager')->createAlias(
-      'file', 'insert', $file->getSystemPath(), array('file' => $file),
-      $file->bundle(), $file->language()->getId());
-    $this->drupalGet($alias);
-    $this->assertResponse(200);
-  }
 }
