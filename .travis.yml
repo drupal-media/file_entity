@@ -49,6 +49,8 @@ install:
   # Get latest drupal 8 core
   - cd $TRAVIS_BUILD_DIR/..
   - git clone --depth 1 --branch 8.0.x http://git.drupal.org/project/drupal.git
+  - cd drupal/modules
+  - git clone --depth 1 --branch 8.x-1.x git@github.com:md-systems/pathauto.git
   # Restart apache and test it
   - sudo service apache2 restart
   - curl -v "http://localhost"
