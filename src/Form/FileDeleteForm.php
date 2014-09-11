@@ -31,7 +31,7 @@ class FileDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->delete();
     drupal_set_message(t('The file %file has been deleted.', array('%file' => $this->entity->label())));
     $form_state->setRedirect('view.file_entity_files.overview');

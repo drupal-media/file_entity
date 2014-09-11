@@ -47,6 +47,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
     parent::setUp();
     $this->installEntitySchema('node');
     $this->installEntitySchema('file');
+    $this->installEntitySchema('user');
     $this->installSchema('file', array('file_usage'));
     $this->installSchema('file_entity', array('file_metadata'));
 
