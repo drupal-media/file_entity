@@ -16,7 +16,10 @@ use Drupal\file\Entity\File;
  */
 class FileEntityReplaceTest extends FileEntityTestBase {
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp();
     $this->setUpFiles();
   }
@@ -25,7 +28,7 @@ class FileEntityReplaceTest extends FileEntityTestBase {
    * @todo Test image dimensions for an image field are reset when a file is replaced.
    * @todo Test image styles are cleared when an image is updated.
    */
-  function testReplaceFile() {
+  public function testReplaceFile() {
     // Select the first text test file to use.
     $file = reset($this->files['text']);
 
@@ -39,7 +42,7 @@ class FileEntityReplaceTest extends FileEntityTestBase {
 
     // Test that file saves without uploading a file.
     $this->drupalPostForm(NULL, array(), t('Save'));
-    $this->assertText(t('Document @file has been updated.', array('@file' => $file->getFilename())), 'File was updated without file upload.');
+    $this->assertText(t('@file has been updated.', array('@file' => $file->getFilename()))/*, 'File was updated without file upload.'*/);
 
     // Get the next text file to use as a replacement.
     $original = clone $file;
@@ -49,17 +52,18 @@ class FileEntityReplaceTest extends FileEntityTestBase {
     $edit = array();
     $edit['files[replace_upload]'] = drupal_realpath($replacement->getFileUri());
     $this->drupalPostForm('file/' . $file->id() . '/edit', $edit, t('Save'));
-    $this->assertText(t('Document @file has been updated.', array('@file' => $file->getFilename())), 'File was updated with file upload.');
+    $this->assertText(t('@file has been updated.', array('@file' => $file->getFilename()))/*, 'File was updated with file upload.'*/);
 
     // Re-load the file from the database.
-    $file = file_load($file->id());
+    /** @var \Drupal\file\FileInterface $file */
+    $file = File::load($file->id());
 
     // Test how file properties changed after the file has been replaced.
     $this->assertEqual($file->getFilename(), $original->getFilename(), 'Updated file name did not change.');
     $this->assertNotEqual($file->getSize(), $original->getSize(), 'Updated file size changed from previous file.');
     $this->assertEqual($file->getSize(), $replacement->getSize(), 'Updated file size matches uploaded file.');
     $this->assertEqual(file_get_contents($file->getFileUri()), file_get_contents($replacement->getFileUri()), 'Updated file contents matches uploaded file.');
-    $this->assertFalse(entity_load('file', FALSE, array('status' => 0)), 'Temporary file used for replacement was deleted.');
+    $this->assertFalse(\Drupal::entityQuery('file')->condition('status', 0)->execute(), 'Temporary file used for replacement was deleted.');
 
     // Get an image file.
     $image = reset($this->files['image']);
@@ -70,16 +74,14 @@ class FileEntityReplaceTest extends FileEntityTestBase {
     $this->assertRaw(t('The specified file %file could not be uploaded. Only files with the following extensions are allowed:', array('%file' => $image->getFilename())), 'File validation works, upload failed correctly.');
 
     // Create a non-local file record.
+    /** @var \Drupal\file\FileInterface $file2 */
     $file2 = File::create(array('type' => 'image'));
-    $file2->setFileUri('oembed://' . $this->randomMachineName());
+    $file2->setFileUri('http://' . $this->randomMachineName());
     $file2->getFilename(drupal_basename($file2->getFileUri()));
     $file2->setMimeType('image/oembed');
     $file2->setOwnerId(1);
     $file2->getSize(0);
-    $file2->save();
-    // Write the record directly rather than calling file_save() so we don't
-    // invoke the hooks.
-    //$this->assertTrue(drupal_write_record('file_managed', $file2), 'Non-local file was added to the database.');
+    $this->assertTrue($file2->save(), 'Non-local file was added to the database.');
 
     // Test that Upload widget does not appear for non-local file.
     $this->drupalGet('file/' . $file2->id() . '/edit');

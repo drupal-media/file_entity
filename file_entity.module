@@ -1912,7 +1912,6 @@ function file_entity_entity_storage_load($entities, $entity_type) {
     }
   }
 
-
 }
 
 function file_entity_get_public_and_private_stream_wrapper_names($flag = STREAM_WRAPPERS_VISIBLE) {

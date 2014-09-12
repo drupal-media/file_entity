@@ -132,7 +132,7 @@ class FileAddForm extends FormBase {
    *   An array suitable for passing to file_save_upload() or for a managed_file
    *   or upload element's '#upload_validators' property.
    */
-  function getUploadValidators(array $options = array()) {
+  public static function getUploadValidators(array $options = array()) {
     // Set up file upload validators.
     $validators = array();
 
@@ -214,8 +214,6 @@ class FileAddForm extends FormBase {
       '#button_type' => 'primary',
       '#value' => t('Next'),
     );
-
-
 
     return $form;
   }

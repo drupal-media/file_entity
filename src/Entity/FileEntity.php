@@ -72,7 +72,9 @@ class FileEntity extends File {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage) {
-    parent::preSave($storage);
+    if (file_exists($this->getFileUri())) {
+      $this->setSize(filesize($this->getFileUri()));
+    }
 
     $this->setMimeType(\Drupal::service('file.mime_type.guesser')->guess($this->getFileUri()));
 
