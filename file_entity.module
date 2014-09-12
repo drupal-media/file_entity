@@ -1092,8 +1092,8 @@ function file_entity_modules_disabled($modules) {
  *   A file object.
  */
 function file_entity_is_page($file) {
-  $page_file = \Drupal::routeMatch()->getParameter('node');
-  return (!empty($page_file) ? $page_file->fid == $file->fid : FALSE);
+  $page_file = \Drupal::routeMatch()->getParameter('file');
+  return !empty($page_file) && $page_file->id() == $file->id();
 }
 
 /**
