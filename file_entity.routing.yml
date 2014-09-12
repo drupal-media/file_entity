@@ -1,6 +1,6 @@
 # @todo Move this back to admin/config/media/file-types in Drupal 8 if MenuTreeStorage::MAX_DEPTH is increased to a value higher than 9.
 file_entity.file_types_overview:
-  path: 'admin/structure/file-types'
+  path: /admin/structure/file-types
   defaults:
     _entity_list: 'file_type'
     _title: 'File types'
@@ -8,7 +8,7 @@ file_entity.file_types_overview:
     _permission: 'administer file types'
 
 file_entity.file_types_add:
-  path: 'admin/structure/file-types/add'
+  path: /admin/structure/file-types/add
   defaults:
     _entity_form: 'file_type.default'
     _title: 'Add file type'
@@ -16,7 +16,7 @@ file_entity.file_types_add:
     _permission: 'administer file types'
 
 file_entity.file_types_manage:
-  path: 'admin/structure/file-types/manage/{file_type}/edit'
+  path: /admin/structure/file-types/manage/{file_type}/edit
   defaults:
     _entity_form: 'file_type.default'
     _title: 'Manage file types'
@@ -24,7 +24,7 @@ file_entity.file_types_manage:
     _permission: 'administer file types'
 
 file_entity.file_types_manage_enable:
-  path: 'admin/structure/file-types/manage/{file_type}/enable'
+  path: /admin/structure/file-types/manage/{file_type}/enable
   defaults:
     _entity_form: 'file_type.enable'
     _title: 'Enable file type'
@@ -32,7 +32,7 @@ file_entity.file_types_manage_enable:
     _permission: 'administer file types'
 
 file_entity.file_types_manage_disable:
-  path: 'admin/structure/file-types/manage/{file_type}/disable'
+  path: /admin/structure/file-types/manage/{file_type}/disable
   defaults:
     _entity_form: 'file_type.disable'
     _title: 'Disable file type'
@@ -40,7 +40,7 @@ file_entity.file_types_manage_disable:
     _permission: 'administer file types'
 
 file_entity.file_types_manage_delete:
-  path: 'admin/structure/file-types/manage/{file_type}/delete'
+  path: /admin/structure/file-types/manage/{file_type}/delete
   defaults:
     _entity_form: 'file_type.delete'
     _title: 'Delete file type'
@@ -48,7 +48,7 @@ file_entity.file_types_manage_delete:
     _permission: 'administer file types'
 
 file_entity.file_add:
-  path: 'file/add'
+  path: /file/add
   defaults:
     _form: '\Drupal\file_entity\Form\FileAddForm'
     _title: 'Add file'
@@ -58,7 +58,7 @@ file_entity.file_add:
     _admin_route: TRUE
 
 file_entity.file_add_upload:
-  path: 'file/add/upload'
+  path: /file/add/upload
   defaults:
     _content: '\Drupal\file_entity\Controller\FileController::FileAddUpload'
     _title: 'Upload'
@@ -68,7 +68,7 @@ file_entity.file_add_upload:
     _admin_route: TRUE
 
 file_entity.file_add_upload_file:
-  path: 'file/add/upload/file'
+  path: /file/add/upload/file
   defaults:
     _content: '\Drupal\file_entity\Controller\FileController::FileAddUploadFile'
     _title: 'File'
@@ -78,7 +78,7 @@ file_entity.file_add_upload_file:
     _admin_route: TRUE
 
 file_entity.file_add_upload_archive:
-  path: 'file/add/upload/archive'
+  path: /file/add/upload/archive
   defaults:
     _content: '\Drupal\file_entity\Controller\FileController::FileAddUploadArchive'
     _title: 'Archive'
@@ -88,7 +88,7 @@ file_entity.file_add_upload_archive:
     _admin_route: TRUE
 
 file_entity.file:
-  path: 'file/{file}'
+  path: /file/{file}
   defaults:
     _entity_view: 'file.full'
     _title: 'File'
@@ -96,7 +96,7 @@ file_entity.file:
     _entity_access: 'file.view'
 
 file_entity.file_download:
-  path: 'file/{file}/download'
+  path: /file/{file}/download
   defaults:
     _controller: '\Drupal\file_entity\Controller\FileController::download'
     _title: 'Download file'
@@ -104,7 +104,7 @@ file_entity.file_download:
     _entity_access: 'file.download'
 
 file_entity.file_edit:
-  path: 'file/{file}/edit'
+  path: /file/{file}/edit
   defaults:
     _entity_form: 'file.edit'
     _title: 'Edit'
@@ -114,7 +114,7 @@ file_entity.file_edit:
     _admin_route: TRUE
 
 file_entity.file_delete:
-  path: 'file/{file}/delete'
+  path: /file/{file}/delete
   defaults:
     _entity_form: 'file.delete'
     _title: 'Delete file'
@@ -124,14 +124,14 @@ file_entity.file_delete:
     _admin_route: TRUE
 
 file_entity.multiple_delete_confirm:
-  path: 'admin/content/files/delete'
+  path: /admin/content/files/delete
   defaults:
     _form: '\Drupal\file_entity\Form\FileDeleteMultipleForm'
   requirements:
     _permission: 'administer files'
 
 file_entity.settings:
-  path: 'admin/config/media/file-settings'
+  path: /admin/config/media/file-settings
   defaults:
     _form: '\Drupal\file_entity\Form\FileSettingsForm'
     _title: 'File settings'
