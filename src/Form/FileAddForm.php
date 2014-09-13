@@ -36,14 +36,9 @@ class FileAddForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, array $options = array()) {
-    $step = (isset($form_state['step']) && in_array($form_state['step'], array(
-        1,
-        2,
-        3,
-        4
-      ))) ? $form_state['step'] : 1;
-    $form['#step'] = $step;
-    $form['#options'] = $options;
+    $step = in_array($form_state->get('step'), array(1, 2, 3, 4)) ? $form_state->get('step') : 1;
+    $form_state->set('step', $step);
+    $form_state->set('options', $options);
 
     switch ($step) {
       case 1:
@@ -79,15 +74,15 @@ class FileAddForm extends FormBase {
       '#type' => 'managed_file',
       '#title' => t('Upload a new file'),
       '#description' => t('Just a description'),
-      '#upload_location' => $this->getUploadDestinationUri($form['#options']),
-      '#upload_validators' => $this->getUploadValidators($form['#options']),
+      '#upload_location' => $this->getUploadDestinationUri($form_state->get('options')),
+      '#upload_validators' => $this->getUploadValidators($form_state->get('options')),
       '#progress_indicator' => 'bar',
       '#required' => TRUE,
       '#pre_render' => array(
         'file_managed_file_pre_render',
         'file_entity_upload_validators_pre_render'
       ),
-      '#default_value' => isset($form_state['storage']['upload']) ? $form_state['storage']['upload'] : NULL,
+      '#default_value' => $form_state->has('file') ? array($form_state->get('file')->id()) : NULL,
     );
 
     $form['actions'] = array('#type' => 'actions');
@@ -155,12 +150,12 @@ class FileAddForm extends FormBase {
 
     // Cap the upload size according to the system or user defined limit.
     $max_filesize = Bytes::toInt(file_upload_max_size());
-    $file_entity_max_filesize = Bytes::toInt(\Drupal::config('file_entity.settings')
+    $user_max_filesize = Bytes::toInt(\Drupal::config('file_entity.settings')
       ->get('max_filesize'));
 
     // If the user defined a size limit, use the smaller of the two.
-    if (!empty($file_entity_max_filesize)) {
-      $max_filesize = min($max_filesize, $file_entity_max_filesize);
+    if (!empty($user_max_filesize)) {
+      $max_filesize = min($max_filesize, $user_max_filesize);
     }
 
     if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
@@ -197,13 +192,13 @@ class FileAddForm extends FormBase {
    * @param $form_state
    */
   function stepFileType(array $form, FormStateInterface $form_state) {
-    $file = $form_state['file'];
+    $file = $form_state->get('file');
 
     $form['type'] = array(
       '#type' => 'radios',
       '#title' => t('File type'),
       '#options' => $this->getCandidateFileTypes($file),
-      '#default_value' => isset($form_state['storage']['type']) ? $form_state['storage']['type'] : NULL,
+      '#default_value' => $form_state->get('type'),
       '#required' => TRUE,
     );
 
@@ -269,7 +264,7 @@ class FileAddForm extends FormBase {
       '#type' => 'radios',
       '#title' => t('Destination'),
       '#options' => $options,
-      '#default_value' => isset($form_state['storage']['scheme']) ? $form_state['storage']['scheme'] : file_default_scheme(),
+      '#default_value' => $form_state->get('scheme') ?: file_default_scheme(),
       '#required' => TRUE,
     );
 
@@ -297,11 +292,11 @@ class FileAddForm extends FormBase {
   function stepFields(array $form, FormStateInterface $form_state) {
 
     // Load the file and overwrite the filetype set on the previous screen.
-    /** @var $file File */
-    $file = $form_state['file'];
+    /** @var \Drupal\file\FileInterface$file*/
+    $file = $form_state->get('file');
 
-    $form_state['form_display'] = EntityFormDisplay::collectRenderDisplay($file, 'default');
-    $form_state['form_display']->buildForm($file, $form, $form_state);
+    $form_state->set('form_display', EntityFormDisplay::collectRenderDisplay($file, 'default'));
+    $form_state->get('form_display')->buildForm($file, $form, $form_state);
 
 
     $form['actions'] = array('#type' => 'actions');
@@ -324,11 +319,11 @@ class FileAddForm extends FormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
 
-    if ($form['#step'] == 4) {
+    if ($form_state->get('step') == 4) {
       /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
-      $form_display = $form_state['form_display'];
-      $form_display->extractFormValues($form_state['file'], $form, $form_state);
-      $form_display->validateFormValues($form_state['file'], $form, $form_state);
+      $form_display = $form_state->get('form_display');
+      $form_display->extractFormValues($form_state->get('file'), $form, $form_state);
+      $form_display->validateFormValues($form_state->get('file'), $form, $form_state);
     }
 
     parent::validateForm($form, $form_state);
@@ -338,12 +333,10 @@ class FileAddForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $form_state['storage'] = isset($form_state['storage']) ? $form_state['storage'] : array();
-    $form_state['storage'] = array_merge($form_state['storage'], $form_state['values']);
-
     // This var is set to TRUE when we are ready to save the file.
     $save = FALSE;
-    $trigger = $form_state['triggering_element']['#id'];
+    $trigger = $form_state->getTriggeringElement()['#id'];
+    $current_step = $form_state->get('step');
 
     $steps_to_check = array(2, 3);
     if ($trigger == 'edit-previous') {
@@ -354,17 +347,17 @@ class FileAddForm extends FormBase {
 
     /* @var \Drupal\file\FileInterface $file */
 
-    if (isset($form_state['file'])) {
-      $file = $form_state['file'];
+    if ($form_state->has('file')) {
+      $file = $form_state->get('file');
     }
     else {
-      $file = File::load($form_state['storage']['upload'][0]);
-      $form_state['file'] = $file;
+      $file = File::load($form_state->getValue(array('upload', 0)));
+      $form_state->set('file', $file);
     }
 
     foreach ($steps_to_check as $step) {
       // Check if we can skip step 2 and 3.
-      if (($form['#step'] == $step - 1 && $trigger == 'edit-next') || ($form['#step'] == $step + 1 && $trigger == 'edit-previous')) {
+      if (($current_step == $step - 1 && $trigger == 'edit-next') || ($current_step == $step + 1 && $trigger == 'edit-previous')) {
 
         if ($step == 2) {
           // Check if we can skip step 2.
@@ -373,15 +366,13 @@ class FileAddForm extends FormBase {
             $candidates_keys = array_keys($candidates);
             // There is only one possible filetype for this file.
             // Skip the second page.
-            $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
-            $form_state['storage']['type'] = reset($candidates_keys);
+            $current_step += ($trigger == 'edit-previous') ? -1 : 1;
+            $form_state->set('type', reset($candidates_keys));
           }
-          elseif (\Drupal::config('file_entity.settings')
-            ->get('file_upload_wizard_skip_file_type')
-          ) {
+          elseif (\Drupal::config('file_entity.settings')->get('wizard_skip_file_type')) {
             // Do not assign the file a file type.
-            $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
-            $form_state['storage']['type'] = FILE_TYPE_NONE;
+            $current_step += ($trigger == 'edit-previous') ? -1 : 1;
+            $form_state->set('type', FILE_TYPE_NONE);
           }
         }
         else {
@@ -389,65 +380,65 @@ class FileAddForm extends FormBase {
           $schemes = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
           if (!file_entity_file_is_writeable($file)) {
             // The file is read-only (remote) and must use its provided scheme.
-            $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
-            $form_state['storage']['scheme'] = file_uri_scheme($file->getFileUri());
+            $current_step += ($trigger == 'edit-previous') ? -1 : 1;
+            $form_state->set('scheme', file_uri_scheme($file->getFileUri()));
           }
           elseif (count($schemes) == 1) {
             // There is only one possible stream wrapper for this file.
             // Skip the third page.
-            $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
-            $form_state['storage']['scheme'] = key($schemes);
+            $current_step += ($trigger == 'edit-previous') ? -1 : 1;
+            $form_state->set('scheme', key($schemes));
           }
-          elseif (\Drupal::config('file_entity.settings')
-            ->get('file_upload_wizard_skip_scheme')
-          ) {
+          elseif (\Drupal::config('file_entity.settings')->get('wizard_skip_scheme')) {
             // Assign the file the default scheme.
-            $form['#step'] += ($trigger == 'edit-previous') ? -1 : 1;
-            $form_state['storage']['scheme'] = file_default_scheme();
+            $current_step += ($trigger == 'edit-previous') ? -1 : 1;
+            $form_state->set('scheme', file_default_scheme());
           }
         }
       }
     }
 
     // We have the filetype, check if we can skip step 4.
-    if (($form['#step'] == 3 && $trigger == 'edit-next')) {
-      $file->updateBundle($form_state['storage']['type']);
+    if (($current_step == 3 && $trigger == 'edit-next')) {
+      $file->updateBundle($form_state->get('type'));
 
       $save = TRUE;
 
       foreach ($file->getFieldDefinitions() as $field_definition) {
         if ($field_definition instanceof FieldInstanceConfigInterface) {
-          // This filetype does have configurable fields, do not save.
+          // This filetype does have configurable fields, do not save as we
+          // do step 4 first.
           $save = FALSE;
           break;
         }
       }
 
-      if ($this->config('file_entity.settings')
-        ->get('file_upload_wizard_skip_fields', FALSE)
-      ) {
+      if ($this->config('file_entity.settings')->get('wizard_skip_fields', FALSE)) {
         // Save the file with blanks fields.
         $save = TRUE;
       }
 
     }
 
+
     // Form id's can vary depending on how many other forms are displayed, so we
     // need to do string comparissons. e.g edit-submit--2.
     if (strpos($trigger, 'edit-next') !== FALSE) {
-      $form_state['step'] = $form['#step'] + 1;
+      $current_step++;
     }
     elseif (strpos($trigger, 'edit-previous') !== FALSE) {
-      $form_state['step'] = $form['#step'] - 1;
+      $current_step--;
     }
     elseif (strpos($trigger, 'edit-submit') !== FALSE) {
       $save = TRUE;
     }
 
+    $form_state->set('step', $current_step);
+
     if ($save) {
-      if (file_uri_scheme($file->getFileUri()) != $form_state['storage']['scheme']) {
+      if (file_uri_scheme($file->getFileUri()) != $form_state->get('scheme')) {
         // @TODO: Users should not be allowed to create private files without permission ('view private files')
-        if ($moved_file = file_move($file, $form_state['storage']['scheme'] . '://' . file_uri_target($file->getFileUri()), FILE_EXISTS_RENAME)) {
+        if ($moved_file = file_move($file, $form_state->get('scheme') . '://' . file_uri_target($file->getFileUri()), FILE_EXISTS_RENAME)) {
           // Only re-assign the file object if file_move() did not fail.
           $moved_file->setFilename($file->getFilename());
 
@@ -462,7 +453,7 @@ class FileAddForm extends FormBase {
       // Save entity
       $file->save();
 
-      $form_state['file'] = $file;
+      $form_state->set('file', $file);
 
       drupal_set_message(t('@type %name was uploaded.', array(
         '@type' => $file->type->entity->label(),
@@ -478,7 +469,7 @@ class FileAddForm extends FormBase {
       }
     }
     else {
-      $form_state['rebuild'] = TRUE;
+      $form_state->setRebuild();
     }
 
   }

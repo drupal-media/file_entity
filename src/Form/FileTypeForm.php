@@ -98,7 +98,7 @@ class FileTypeForm extends EntityForm {
   public function validate(array $form, FormStateInterface $form_state) {
     parent::validate($form, $form_state);
 
-    $id = trim($form_state['values']['id']);
+    $id = trim($form_state->getValue('id'));
     // '0' is invalid, since elsewhere we check it using empty().
     if ($id == '0') {
       $form_state->setError($form['id'], $this->t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $id)));
@@ -129,7 +129,7 @@ class FileTypeForm extends EntityForm {
    */
   protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
     // Convert multi-line string to array before copying.
-    $form_state['values']['mimetypes'] = explode("\n", $form_state['values']['mimetypes']);
+    $form_state->setValue('mimetypes', explode("\n", $form_state->getValue('mimetypes')));
     parent::copyFormValuesToEntity($entity, $form, $form_state);
   }
 }

@@ -34,12 +34,12 @@ file_entity.settings:
     title:
       type: string
       label: 'Title attribute'
-    file_upload_wizard_skip_file_type:
+    wizard_skip_file_type:
       type: boolean
       label: 'Skip filetype selection'
-    file_upload_wizard_skip_scheme:
+    wizard_skip_scheme:
       type: boolean
       label: 'Skip scheme selection'
-    file_upload_wizard_skip_fields:
+    wizard_skip_fields:
       type: boolean
       label: 'Skip available fields'

@@ -123,7 +123,7 @@ class FileDeleteMultipleForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    if ($form_state['values']['confirm'] && !empty($this->files)) {
+    if ($form_state->getValue('confirm') && !empty($this->files)) {
       $this->storage->delete($this->files);
       $this->tempStore->delete('delete');
     }

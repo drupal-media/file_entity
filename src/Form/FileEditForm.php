@@ -58,16 +58,13 @@ class FileEditForm extends ContentEntityForm {
 
     // Check if file ID exists.
     if ($file->id()) {
-      $form_state['values']['nid'] = $file->id();
-      $form_state['nid'] = $file->id();
-
       $form_state->setRedirectUrl($file->urlInfo());
     }
     else {
-      // In the unlikely case something went wrong on save, the node will be
-      // rebuilt and node form redisplayed the same way as in preview.
+      // In the unlikely case something went wrong on save, the file will be
+      // rebuilt and file form redisplayed the same way as in preview.
       drupal_set_message(t('The post could not be saved.'), 'error');
-      $form_state['rebuild'] = TRUE;
+      $form_state->setRebuild();
     }
   }
 
