@@ -338,6 +338,13 @@ class FileAddForm extends FormBase {
     $trigger = $form_state->getTriggeringElement()['#id'];
     $current_step = $form_state->get('step');
 
+    // Store select values in $form_state.
+    foreach (array('type', 'scheme') as $key) {
+      if ($form_state->hasValue($key)) {
+        $form_state->set($key, $form_state->getValue($key));
+      }
+    }
+
     $steps_to_check = array(2, 3);
     if ($trigger == 'edit-previous') {
       // If the previous button was hit,

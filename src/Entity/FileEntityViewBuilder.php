@@ -29,7 +29,7 @@ class FileEntityViewBuilder extends EntityViewBuilder {
       $build[$id]['filesize'][0]['#markup'] = format_size($entity->getSize(), $langcode);
 
       // Try to display a visual.
-      if ($entity->bundle() == 'image') {
+      if ($entity->bundle() == 'image' && \Drupal::moduleHandler()->moduleExists('image')) {
         // Approach described at http://drupal.stackexchange.com/a/115143
         $definition = BaseFieldDefinition::create('image')
           ->setName('image');
