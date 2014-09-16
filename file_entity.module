@@ -715,6 +715,7 @@ function file_entity_entity_type_alter(&$entity_types) {
     ->set('bundle_entity_type', 'file_type')
     ->set('admin_permission', 'administer files')
     ->setClass('Drupal\file_entity\Entity\FileEntity')
+    ->setHandlerClass('storage_schema', 'Drupal\file_entity\FileEntityStorageSchema')
     ->setFormClass('default', 'Drupal\file_entity\Form\FileEditForm')
     ->setFormClass('edit', 'Drupal\file_entity\Form\FileEditForm')
     ->setFormClass('delete', 'Drupal\file_entity\Form\FileDeleteForm')
@@ -723,8 +724,7 @@ function file_entity_entity_type_alter(&$entity_types) {
     ->setLinkTemplate('canonical', 'file_entity.file')
     ->setLinkTemplate('edit-form', 'file_entity.file_edit')
     ->setLinkTemplate('delete-form', 'file_entity.file_delete')
-    ->setViewBuilderClass('Drupal\file_entity\Entity\FileEntityViewBuilder')
-  ;
+    ->setViewBuilderClass('Drupal\file_entity\Entity\FileEntityViewBuilder');
 
   //$entity_types['file']['uri callback'] = 'file_entity_uri';
   /*$entity_types['file']['view modes']['teaser'] = array(

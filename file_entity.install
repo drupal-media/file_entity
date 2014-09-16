@@ -104,7 +104,6 @@ function file_entity_schema() {
  */
 function file_entity_install() {
   $type_storage_definition = \Drupal::entityManager()->getFieldStorageDefinitions('file')['type'];
-  $type_storage_definition->setSetting('initial', FILE_TYPE_NONE);
   \Drupal::entityManager()->getStorage('file')->onFieldStorageDefinitionCreate($type_storage_definition);
 
   // Set permissions.
