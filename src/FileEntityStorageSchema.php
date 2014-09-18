@@ -7,7 +7,7 @@
 
 namespace Drupal\file_entity;
 
-use Drupal\Core\Entity\ContentEntityTypeInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\file\FileStorageSchema;
 
 /**
@@ -18,14 +18,11 @@ class FileEntityStorageSchema extends FileStorageSchema {
   /**
    * {@inheritdoc}
    */
-  protected function getEntitySchema(ContentEntityTypeInterface $entity_type, $reset = FALSE) {
-    $schema = parent::getEntitySchema($entity_type, $reset);
-
-    // Set an initial for the type, which is needed when the column is added
-    // and there is already data stored.
-    $schema['file_managed']['type']['initial'] = FILE_TYPE_NONE;
-    debug($schema['file_managed']['type']);
-
+  protected function getSharedTableFieldSchema(FieldStorageDefinitionInterface $storage_definition, $table_name, array $column_mapping) {
+    $schema = parent::getSharedTableFieldSchema($storage_definition, $table_name, $column_mapping);
+    if ($storage_definition->getName() == 'type') {
+      $schema['fields']['type']['initial'] = FILE_TYPE_NONE;
+    }
     return $schema;
   }
 
