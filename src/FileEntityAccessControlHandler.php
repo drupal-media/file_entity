@@ -76,5 +76,7 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
         ->orIf(AccessResult::allowedIf($is_owner)
           ->andIf(AccessResult::allowedIfHasPermission($account, "$operation own $type files")));
     }
+
+    return AccessResult::forbidden();
   }
 }
