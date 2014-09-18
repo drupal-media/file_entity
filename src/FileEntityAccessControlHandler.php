@@ -58,12 +58,12 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
       $wrapper = file_entity_get_stream_wrapper(file_uri_scheme($entity->getFileUri()));
       if (!empty($wrapper['private'])) {
         return AccessResult::allowedIfHasPermission($account, 'view private files')
-          ->orIf(AccessResult::allowedIf($account->isAuthenticated() && $is_owner)
+          ->orIf(AccessResult::allowedIf($account->isAuthenticated() && $is_owner)->cacheUntilEntityChanges($entity)
             ->andIf(AccessResult::allowedIfHasPermission($account, 'view own private files')));
       }
       elseif ($entity->isPermanent()) {
         return AccessResult::allowedIfHasPermission($account, 'view files')
-          ->orIf(AccessResult::allowedIf($is_owner)
+          ->orIf(AccessResult::allowedIf($is_owner)->cacheUntilEntityChanges($entity)
             ->andIf(AccessResult::allowedIfHasPermission($account, 'view own files')));
       }
     }
@@ -73,7 +73,7 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
     if (in_array($operation, array('download', 'edit', 'delete'))) {
       $type = $entity->get('type')->target_id;
       return AccessResult::allowedIfHasPermission($account, "$operation any $type files")
-        ->orIf(AccessResult::allowedIf($is_owner)
+        ->orIf(AccessResult::allowedIf($is_owner)->cacheUntilEntityChanges($entity)
           ->andIf(AccessResult::allowedIfHasPermission($account, "$operation own $type files")));
     }
 
