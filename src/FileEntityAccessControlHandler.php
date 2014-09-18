@@ -7,6 +7,7 @@
 
 namespace Drupal\file_entity;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -21,26 +22,28 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  public function access(EntityInterface $entity, $operation, $langcode = LanguageInterface::LANGCODE_DEFAULT, AccountInterface $account = NULL) {
+  public function access(EntityInterface $entity, $operation, $langcode = LanguageInterface::LANGCODE_DEFAULT, AccountInterface $account = NULL, $return_as_object = FALSE) {
     $account = $this->prepareUser($account);
-    return $account->hasPermission('bypass file access') ||
-      parent::access($entity, $operation, $langcode, $account);
+    $result = AccessResult::allowedIfHasPermission($account, 'bypass file access')
+      ->orIf(parent::access($entity, $operation, $langcode, $account, TRUE));
+    return $return_as_object ? $result : $result->isAllowed();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function createAccess($entity_bundle = NULL, AccountInterface $account = NULL, array $context = array()) {
+  public function createAccess($entity_bundle = NULL, AccountInterface $account = NULL, array $context = array(), $return_as_object = FALSE) {
     $account = $this->prepareUser($account);
-    return $account->hasPermission('bypass file access') ||
-      parent::createAccess($entity_bundle, $account, $context);
+    $result = AccessResult::allowedIfHasPermission($account, 'bypass file access')
+      ->orIf(parent::createAccess($entity_bundle, $account, $context, TRUE));
+    return $return_as_object ? $result : $result->isAllowed();
   }
 
   /**
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return $account->hasPermission('create files');
+    return AccessResult::allowedIfHasPermission($account, 'create files');
   }
 
   /**
@@ -54,14 +57,14 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
     if ($operation == 'view') {
       $wrapper = file_entity_get_stream_wrapper(file_uri_scheme($entity->getFileUri()));
       if (!empty($wrapper['private'])) {
-        return
-          $account->hasPermission('view private files') ||
-          ($account->isAuthenticated() && $is_owner && $account->hasPermission('view own private files'));
+        return AccessResult::allowedIfHasPermission($account, 'view private files')
+          ->orIf(AccessResult::allowedIf($account->isAuthenticated() && $is_owner)
+            ->andIf(AccessResult::allowedIfHasPermission($account, 'view own private files')));
       }
       elseif ($entity->isPermanent()) {
-        return
-          $account->hasPermission('view files') ||
-          ($is_owner && $account->hasPermission('view own files'));
+        return AccessResult::allowedIfHasPermission($account, 'view files')
+          ->orIf(AccessResult::allowedIf($is_owner)
+            ->andIf(AccessResult::allowedIfHasPermission($account, 'view own files')));
       }
     }
 
@@ -69,8 +72,9 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
     // they own it and have the "own" permission.
     if (in_array($operation, array('download', 'edit', 'delete'))) {
       $type = $entity->get('type')->target_id;
-      return $account->hasPermission("$operation any $type files") ||
-        ($is_owner && $account->hasPermission("$operation own $type files"));
+      return AccessResult::allowedIfHasPermission($account, "$operation any $type files")
+        ->orIf(AccessResult::allowedIf($is_owner)
+          ->andIf(AccessResult::allowedIfHasPermission($account, "$operation own $type files")));
     }
   }
 }
