@@ -4,11 +4,10 @@ status: true
 dependencies:
   module:
     - file
-    - text
 id: file.field_image_title_text
 name: field_image_title_text
 entity_type: file
-type: text
+type: string
 settings:
   max_length: 255
 module: text

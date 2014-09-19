@@ -1,4 +1,3 @@
-uuid: cf8376cf-e41c-41c2-b408-086f471c3199
 langcode: en
 status: true
 dependencies:
@@ -6,8 +5,6 @@ dependencies:
     - field.instance.file.image.field_image_alt_text
     - field.instance.file.image.field_image_title_text
     - file_entity.type.image
-  module:
-    - text
 id: file.image.default
 label: null
 targetEntityType: file
@@ -15,13 +12,13 @@ bundle: image
 mode: default
 content:
   field_image_alt_text:
-    type: text_default
+    type: string
     weight: 0
     settings: {  }
     third_party_settings: {  }
     label: above
   field_image_title_text:
-    type: text_default
+    type: string
     weight: 0
     settings: {  }
     third_party_settings: {  }
