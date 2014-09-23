@@ -36,7 +36,7 @@ class FileEntityPermissions {
 
   /**
    * Generates standard file permissions for all applicable file types.
-   * 
+   *
    * @return array
    *   File type permissions.
    */
@@ -69,5 +69,5 @@ class FileEntityPermissions {
     }
     return $permissions;
   }
-  
+
 }
