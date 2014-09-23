@@ -7,7 +7,7 @@
 
 namespace Drupal\file_entity\Tests;
 
-use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file_entity\Entity\FileEntity;
 use Drupal\node\Entity\Node;
@@ -301,7 +301,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
       'type' => 'file',
     ));
     $field_storage->save();
-    $field_instance = FieldInstanceConfig::create(array(
+    $field_instance = FieldConfig::create(array(
       'field_storage' => $field_storage,
       'entity_type' => 'node',
       'bundle' => $content_type->id(),

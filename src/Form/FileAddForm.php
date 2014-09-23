@@ -12,7 +12,7 @@ use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\field\FieldInstanceConfigInterface;
+use Drupal\field\FieldConfigInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileType;
@@ -410,7 +410,7 @@ class FileAddForm extends FormBase {
       $save = TRUE;
 
       foreach ($file->getFieldDefinitions() as $field_definition) {
-        if ($field_definition instanceof FieldInstanceConfigInterface) {
+        if ($field_definition instanceof FieldConfigInterface) {
           // This filetype does have configurable fields, do not save as we
           // do step 4 first.
           $save = FALSE;

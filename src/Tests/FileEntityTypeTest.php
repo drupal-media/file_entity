@@ -7,7 +7,7 @@
 
 namespace Drupal\file_entity\Tests;
 
-use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file_entity\Entity\FileType;
 
@@ -67,7 +67,7 @@ class FileEntityTypeTest extends FileEntityTestBase {
       'type' => 'string',
     ));
     $field_storage->save();
-    $field_instance = FieldInstanceConfig::create(array(
+    $field_instance = FieldConfig::create(array(
       'field_storage' => $field_storage,
       'entity_type' => 'file',
       'bundle' => 'image2',
@@ -131,7 +131,7 @@ class FileEntityTypeTest extends FileEntityTestBase {
       'type' => 'string',
     ));
     $field_storage->save();
-    $field_instance = FieldInstanceConfig::create(array(
+    $field_instance = FieldConfig::create(array(
       'field_storage' => $field_storage,
       'entity_type' => 'file',
       'bundle' => 'image',

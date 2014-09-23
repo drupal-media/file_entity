@@ -7,7 +7,7 @@
 namespace Drupal\file_entity\Tests;
 
 use Drupal\Core\StreamWrapper\PublicStream;
-use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
 use Drupal\node\Entity\NodeType;
@@ -80,7 +80,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
       'name' => 'field_file',
     ));
     $file_field_storage->save();
-    $file_field_instance = FieldInstanceConfig::create(array(
+    $file_field_instance = FieldConfig::create(array(
       'field_storage' => $file_field_storage,
       'entity_type' => 'node',
       'bundle' => $node_type->id(),
