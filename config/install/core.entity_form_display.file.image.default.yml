@@ -2,8 +2,8 @@ langcode: en
 status: true
 dependencies:
   entity:
-    - field.instance.file.image.field_image_alt_text
-    - field.instance.file.image.field_image_title_text
+    - field.field.file.image.field_image_alt_text
+    - field.field.file.image.field_image_title_text
     - file_entity.type.image
 id: file.image.default
 targetEntityType: file
