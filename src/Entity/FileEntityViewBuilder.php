@@ -33,7 +33,7 @@ class FileEntityViewBuilder extends EntityViewBuilder {
         // Approach described at http://drupal.stackexchange.com/a/115143
         $definition = BaseFieldDefinition::create('image')
           ->setName('image');
-        $items = \Drupal::typedDataManager()->create($definition, $entity->id(), $definition->getName(), $entity);
+        $items = \Drupal::typedDataManager()->create($definition, $entity->id(), $definition->getName(), $entity->getTypedData());
         /** @var FormatterInterface $formatter */
         $formatter = \Drupal::service('plugin.manager.field.formatter')->getInstance(array(
           'field_definition' => $definition,

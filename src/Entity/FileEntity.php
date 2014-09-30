@@ -104,7 +104,7 @@ class FileEntity extends File {
     $this->get('type')->target_id = $type;
     // Clear the field definitions, so that they will be fetched for the new bundle.
     $this->fieldDefinitions = NULL;
-    $this->dataDefinition = NULL;
+    $this->typedData = NULL;
     // Update the entity keys cache.
     $this->entityKeys['bundle'] = $type;
   }
