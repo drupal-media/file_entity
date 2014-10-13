@@ -26,7 +26,7 @@ class Type extends InOperator {
    *   Returns options.
    */
   public function getValueOptions() {
-    if (!isset($this->value_options)) {
+    if (!isset($this->valueOptions)) {
       // Load entity File.
       $types = FileType::loadMultiple();
 
@@ -37,7 +37,7 @@ class Type extends InOperator {
       }
 
       // Returns candidates.
-      $this->value_options = $candidates;
+      $this->valueOptions = $candidates;
     }
   }
 
