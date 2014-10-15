@@ -5,6 +5,7 @@
  * Token integration for the file_entity module.
  */
 use Drupal\Component\Utility\String;
+use Drupal\Core\Url;
 use Drupal\file_entity\Entity\FileType;
 
 /**
@@ -86,8 +87,7 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
           break;
 
         case 'download-url':
-          $uri = file_entity_download_uri($file);
-          $replacements[$original] = url($uri['path'], $uri['options'] + $url_options);
+          $replacements[$original] = file_entity_download_url($file, $url_options)->toString();
           break;
       }
     }
@@ -98,7 +98,7 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
       $replacements += $token_service->generate('file-type', $file_type_tokens, array('file_type' => $file_type), $options);
     }
     if ($download_url_tokens = $token_service->findWithPrefix($tokens, 'download-url')) {
-      $replacements += $token_service->generate('url', $download_url_tokens, file_entity_download_uri($file), $options);
+      $replacements += $token_service->generate('url', $download_url_tokens, file_entity_download_url($file)->toString(), $options);
     }
   }
 
@@ -126,7 +126,7 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
           break;
 
         case 'edit-url':
-          $replacements[$original] = url('admin/structure/file-types/manage/' . $file_type->type . '/fields', $url_options);
+          $replacements[$original] = Url::fromUri('admin/structure/file-types/manage/' . $file_type->type . '/fields', $url_options)->toString();
           break;
       }
     }

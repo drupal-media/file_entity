@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\file_entity\Tests;
+use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 
 /**
@@ -47,7 +48,7 @@ class FileEntityEditTest extends FileEntityTestBase {
 
     // Check that "edit" link points to correct page.
     $this->clickLink(t('Edit'));
-    $edit_url = url('file/' . $file->id() . '/edit', array('absolute' => TRUE));
+    $edit_url = \Drupal::url('file_entity.file_edit', array('file' => $file->id()), array('absolute' => TRUE));
     $actual_url = $this->getURL();
     $this->assertEqual($edit_url, $actual_url, t('On edit page.'));
 

@@ -6,6 +6,8 @@
 
 require_once dirname(__FILE__) . '/file_entity.pages.inc';
 
+use Drupal\Component\Utility\String;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\file_entity\Entity\FileType;
 use Drupal\user\Entity\User;
 
@@ -13,10 +15,10 @@ use Drupal\user\Entity\User;
  * List file administration filters that can be applied.
  */
 function file_filters() {
-  $visible_steam_wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE);
+  $visible_steam_wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::VISIBLE);
   $options = array();
   foreach ($visible_steam_wrappers as $scheme => $information) {
-    $options[$scheme] = check_plain($information['name']);
+    $options[$scheme] = String::checkPlain($information['name']);
   }
   $filters['uri'] = array(
     'title' => t('scheme'),

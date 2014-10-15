@@ -8,6 +8,8 @@
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
+use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileType;
@@ -945,7 +947,7 @@ function file_entity_file_formatter_file_image_view($file, $display, $langcode) 
  */
 function file_entity_file_is_readable($file) {
   $scheme = file_uri_scheme($file->uri);
-  $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_READ);
+  $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::READ);
   return !empty($wrappers[$scheme]);
 }
 
@@ -1169,16 +1171,6 @@ function file_entity_type_get_names() {
 function file_entity_view_mode_label($view_mode, $default = FALSE) {
   $labels = \Drupal::entityManager()->getViewModeOptions('file');
   return isset($labels[$view_mode]) ? $labels[$view_mode] : $default;
-}
-
-/**
- * Helper function to get a list of hidden stream wrappers.
- *
- * This is used in several places to filter queries for media so that files in
- * temporary:// don't show up.
- */
-function file_entity_get_hidden_stream_wrappers() {
-  return array_diff_key(file_get_stream_wrappers(STREAM_WRAPPERS_ALL), file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE));
 }
 
 /**
@@ -1542,7 +1534,7 @@ function file_entity_invalidate_field_caches($file) {
  */
 function file_entity_file_is_local($file) {
   $scheme = file_uri_scheme($file->uri);
-  $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_LOCAL);
+  $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::LOCAL);
   return !empty($wrappers[$scheme]) && empty($wrappers[$scheme]['remote']);
 }
 
@@ -1558,7 +1550,7 @@ function file_entity_file_is_local($file) {
  */
 function file_entity_file_is_writeable(FileInterface $file) {
   $scheme = file_uri_scheme($file->getFileUri());
-  $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+  $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::WRITE_VISIBLE);
   return !empty($wrappers[$scheme]);
 }
 
@@ -1710,14 +1702,22 @@ function file_entity_match_mimetypes($needle, $haystack) {
 }
 
 /**
- * Return an URI for a file download.
+ * Return a Url for a file download.
+ *
+ * @param \Drupal\file\FileInterface $file
+ *   The file to get a download url for.
+ * @param array $options
+ *   (optional) Options for the URL object.
+ *
+ * @return \Drupal\Core\Url
+ *   An Url object for the download url.
  */
-function file_entity_download_uri($file) {
-  $uri = array('path' => "file/{$file->fid}/download", 'options' => array());
+function file_entity_download_url($file, $options = array()) {
+  $url = new Url('file_entity.file_download', array('file' => $file->id()), $options);
   if (!\Drupal::config('file_entit.settings')->get('allow_insecure_download', FALSE)) {
-    $uri['options']['query']['token'] = file_entity_get_download_token($file);
+    $url->setOption('query', array('token' => file_entity_get_download_token($file)));
   }
-  return $uri;
+  return $url;
 }
 
 function file_entity_file_get_mimetype_type(FileInterface $file) {
@@ -1825,9 +1825,9 @@ function file_entity_entity_storage_load($entities, $entity_type) {
 
 }
 
-function file_entity_get_public_and_private_stream_wrapper_names($flag = STREAM_WRAPPERS_VISIBLE) {
+function file_entity_get_public_and_private_stream_wrapper_names($flag = StreamWrapperInterface::VISIBLE) {
   $wrappers = array();
-  foreach (file_get_stream_wrappers($flag) as $key => $wrapper) {
+  foreach (\Drupal::service('stream_wrapper_manager')->getWrappers($flag) as $key => $wrapper) {
     // Some wrappers, e.g. those set in KernelTestBase, do not provide a name.
     $wrapper_name = isset($wrapper['name']) ? $wrapper['name'] : substr(strrchr($wrapper['class'], '\\'), 1);
     if (empty($wrapper['private'])) {

@@ -12,6 +12,7 @@ use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\field\FieldConfigInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
@@ -254,8 +255,8 @@ class FileAddForm extends FormBase {
    */
   function stepScheme(array $form, FormStateInterface $form_state) {
     $options = array();
-    foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
-      $options[$scheme] = String::checkPlain($info['description']);
+    foreach (\Drupal::service('stream_wrapper_manager')->getDescriptions(StreamWrapperInterface::WRITE_VISIBLE) as $scheme => $description) {
+      $options[$scheme] = String::checkPlain($description);
     }
 
     $form['scheme'] = array(
@@ -382,7 +383,7 @@ class FileAddForm extends FormBase {
         }
         else {
           // Check if we can skip step 3.
-          $schemes = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+          $schemes = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::WRITE_VISIBLE);
           if (!file_entity_file_is_writeable($file)) {
             // The file is read-only (remote) and must use its provided scheme.
             $current_step += ($trigger == 'edit-previous') ? -1 : 1;

@@ -1,4 +1,6 @@
 <?php
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
+
 /**
  * @file
  * Filter by the file schema type.
@@ -8,7 +10,7 @@ class views_handler_filter_schema_type extends views_handler_filter_in_operator 
   function get_value_options() {
     if (!isset($this->value_options)) {
       $this->value_title = t('File Schema types');
-      $types = file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE);
+      $types = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::VISIBLE);
       $options = array();
       foreach ($types as $type => $info) {
         $options[$type] = t($info['name']);
