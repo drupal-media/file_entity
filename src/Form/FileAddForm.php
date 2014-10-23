@@ -80,7 +80,6 @@ class FileAddForm extends FormBase {
       '#progress_indicator' => 'bar',
       '#required' => TRUE,
       '#pre_render' => array(
-        'file_managed_file_pre_render',
         'file_entity_upload_validators_pre_render'
       ),
       '#default_value' => $form_state->has('file') ? array($form_state->get('file')->id()) : NULL,
@@ -259,6 +258,12 @@ class FileAddForm extends FormBase {
       $options[$scheme] = String::checkPlain($description);
     }
 
+    // @todo Manually remove private scheme until hook_stream_wrappers_alter()
+    //   is fixed.
+    if (!\Drupal::config('system.file')->get('path.private')) {
+      unset($options['private']);
+    }
+
     $form['scheme'] = array(
       '#type' => 'radios',
       '#title' => t('Destination'),
@@ -384,6 +389,12 @@ class FileAddForm extends FormBase {
         else {
           // Check if we can skip step 3.
           $schemes = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::WRITE_VISIBLE);
+          // @todo Manually remove private scheme until hook_stream_wrappers_alter()
+          //   is fixed.
+          if (!\Drupal::config('system.file')->get('path.private')) {
+            unset($schemes['private']);
+          }
+
           if (!file_entity_file_is_writeable($file)) {
             // The file is read-only (remote) and must use its provided scheme.
             $current_step += ($trigger == 'edit-previous') ? -1 : 1;

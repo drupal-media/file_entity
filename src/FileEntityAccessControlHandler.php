@@ -51,7 +51,6 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
    */
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
     /** @var FileEntity $entity */
-
     $is_owner = $entity->getOwnerId() === $account->id();
 
     if ($operation == 'view') {
@@ -77,6 +76,8 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
           ->andIf(AccessResult::allowedIfHasPermission($account, "$operation own $type files")));
     }
 
-    return AccessResult::forbidden();
+    // Fall back to the parent implementation so that file uploads work.
+    // @todo Merge that in here somehow?
+    return parent::checkAccess($entity, $operation, $langcode, $account);
   }
 }
