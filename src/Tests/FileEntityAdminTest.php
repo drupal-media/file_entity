@@ -158,15 +158,15 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->drupalLogin($this->userViewOwn);
     $this->drupalGet('admin/content/files');
     $this->assertResponse(200);
-    $this->assertLinkByHref('file/' . $files['private_document']->id());
+    $this->assertLinkByHref($files['private_document']->url());
     // Verify no operation links are displayed.
-    $this->assertNoLinkByHref('file/' . $files['private_document']->id() . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['private_document']->id() . '/delete');
+    $this->assertNoLinkByHref($files['private_document']->url('edit-form'));
+    $this->assertNoLinkByHref($files['private_document']->url('delete-form'));
 
     // Verify user cannot see private file of other users.
-    $this->assertNoLinkByHref('file/' . $files['private_image']->id());
-    $this->assertNoLinkByHref('file/' . $files['private_image']->id() . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['private_image']->id() . '/delete');
+    $this->assertNoLinkByHref($files['private_image']->url());
+    $this->assertNoLinkByHref($files['private_image']->url('edit-form'));
+    $this->assertNoLinkByHref($files['private_image']->url('delete-form'));
 
     // Verify no tableselect.
     $this->assertNoFieldByName('bulk_form[' . $files['private_document']->id() . ']', '', t('No bulk form checkbox found.'));
@@ -296,7 +296,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
     // Attach a file field to article nodes.
     $content_type = $this->drupalCreateContentType();
     $field_storage = FieldStorageConfig::create(array(
-      'name' => 'used_file',
+      'field_name' => 'used_file',
       'entity_type' => 'node',
       'type' => 'file',
     ));

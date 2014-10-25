@@ -1,7 +1,7 @@
 langcode: en
 status: true
 dependencies:
-  entity:
+  config:
     - field.storage.file.field_image_title_text
     - file_entity.type.image
 id: file.image.field_image_title_text

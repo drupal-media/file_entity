@@ -51,7 +51,7 @@ class FileEntityServicesTest extends RESTTestBase {
     $file_field_storage = FieldStorageConfig::create(array(
       'type' => 'file',
       'entity_type' => 'node',
-      'name' => 'field_file',
+      'field_name' => 'field_file',
     ));
     $file_field_storage->save();
     $file_field_instance = FieldConfig::create(array(
@@ -64,7 +64,7 @@ class FileEntityServicesTest extends RESTTestBase {
     // Create a file.
     $file_uri = 'public://' . $this->randomMachineName();
     file_put_contents($file_uri, 'This is some file contents');
-    $file = File::create(array('uri' => $file_uri));
+    $file = File::create(array('uri' => $file_uri, 'status' => FILE_STATUS_PERMANENT));
     $file->save();
 
     // Create a node with a file.

@@ -199,7 +199,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
       if ($authenticated_user) {
         $account = $this->drupalCreateUser($case['permissions']);
         $this->drupalLogin($account);
-        $user_name = $account->getName();
+        $user_name = $account->getUsername();
         if (!empty($case['owner'])) {
           $file->setOwner($account)->save();
         }

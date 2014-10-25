@@ -223,33 +223,6 @@ function file_entity_menu() {
   return $items;
 }
 
-/*
- * Implements hook_queue_info().
- */
-function file_entity_queue_info() {
-  $queues['file_entity_type_determine'] = array(
-    'worker callback' => 'file_entity_type_determine',
-    // Only needed if this queue should be processed by cron.
-    'cron' => array(
-      'time' => 60,
-    ),
-  );
-  return $queues;
-}
-
-/*
- * Determines file type for a given file ID and saves the file.
- *
- * @param $fid
- *   A file ID.
- */
-function file_entity_type_determine($fid) {
-  if ($file = File::load($fid)) {
-    // The file type will be automatically determined when saving the file.
-    $file->save();
-  }
-}
-
 /**
  * Gather the rankings from the the hook_ranking implementations.
  *

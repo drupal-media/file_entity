@@ -7,6 +7,7 @@
 
 namespace Drupal\file_entity\Tests;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file_entity\Entity\FileType;
@@ -60,9 +61,9 @@ class FileEntityTypeTest extends FileEntityTestBase {
     );
 
     // Attach a text field to one of the file types.
-    $field_name = drupal_strtolower($this->randomMachineName());
+    $field_name = Unicode::strtolower($this->randomMachineName());
     $field_storage = FieldStorageConfig::create(array(
-      'name' => $field_name,
+      'field_name' => $field_name,
       'entity_type' => 'file',
       'type' => 'string',
     ));
@@ -126,7 +127,7 @@ class FileEntityTypeTest extends FileEntityTestBase {
     // Attach a text field to the default image file type.
     $field_name = drupal_strtolower($this->randomMachineName());
     $field_storage = FieldStorageConfig::create(array(
-      'name' => $field_name,
+      'field_name' => $field_name,
       'entity_type' => 'file',
       'type' => 'string',
     ));

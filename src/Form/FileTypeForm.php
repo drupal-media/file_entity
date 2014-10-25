@@ -118,7 +118,7 @@ class FileTypeForm extends EntityForm {
     }
     elseif ($status == SAVED_NEW) {
       drupal_set_message(t('The file type %name has been added.', $t_args));
-      \Drupal::logger('file_entity')->log(WATCHDOG_NOTICE, t('Added file type %name.', $t_args));
+      \Drupal::logger('file_entity')->notice(t('Added file type %name.', $t_args));
     }
 
     $form_state->setRedirect('file_entity.file_types_overview');

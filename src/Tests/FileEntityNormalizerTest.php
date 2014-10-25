@@ -77,7 +77,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
     $file_field_storage = FieldStorageConfig::create(array(
       'type' => 'file',
       'entity_type' => 'node',
-      'name' => 'field_file',
+      'field_name' => 'field_file',
     ));
     $file_field_storage->save();
     $file_field_instance = FieldConfig::create(array(
