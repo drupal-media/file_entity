@@ -133,7 +133,7 @@ class FileEntity extends File {
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['uid']->setDisplayOptions('view', array(
-      'type' => 'link',
+      'type' => 'uri_link',
       'weight' => 1,
     ))
       ->setDisplayOptions('form', array(
