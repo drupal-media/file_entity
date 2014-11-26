@@ -125,7 +125,7 @@ class FileEntityTypeTest extends FileEntityTestBase {
    */
   public function testTypeWithoutCandidates() {
     // Attach a text field to the default image file type.
-    $field_name = drupal_strtolower($this->randomMachineName());
+    $field_name = Unicode::strtolower($this->randomMachineName());
     $field_storage = FieldStorageConfig::create(array(
       'field_name' => $field_name,
       'entity_type' => 'file',

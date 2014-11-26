@@ -57,7 +57,7 @@ class FileEntityFileTypeClassificationTest extends WebTestBase {
 
     // Enable file entity which adds adds a file type property to files and
     // queues up existing files for classification.
-    \Drupal::moduleHandler()->install(array('file_entity'));
+    \Drupal::service('module_installer')->install(array('file_entity'));
 
     // Existing files have yet to be classified and should have an undefined
     // file type.

@@ -60,7 +60,7 @@ file_entity.file_add:
 file_entity.file_add_upload:
   path: /file/add/upload
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileAddUpload'
+    _controller: '\Drupal\file_entity\Controller\FileController::FileAddUpload'
     _title: 'Upload'
   requirements:
     _permission: 'access content'
@@ -70,7 +70,7 @@ file_entity.file_add_upload:
 file_entity.file_add_upload_file:
   path: /file/add/upload/file
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileAddUploadFile'
+    _controller: '\Drupal\file_entity\Controller\FileController::FileAddUploadFile'
     _title: 'File'
   requirements:
     _permission: 'access content'
@@ -80,7 +80,7 @@ file_entity.file_add_upload_file:
 file_entity.file_add_upload_archive:
   path: /file/add/upload/archive
   defaults:
-    _content: '\Drupal\file_entity\Controller\FileController::FileAddUploadArchive'
+    _controller: '\Drupal\file_entity\Controller\FileController::FileAddUploadArchive'
     _title: 'Archive'
   requirements:
     _permission: 'administer files'
