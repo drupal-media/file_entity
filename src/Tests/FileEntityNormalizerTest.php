@@ -41,6 +41,13 @@ class FileEntityNormalizerTest extends KernelTestBase {
   );
 
   /**
+   * Disable strict schema checking until schema is updated.
+   *
+   * @todo Update schema and remove this.
+   */
+  protected $strictConfigSchema = FALSE;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {

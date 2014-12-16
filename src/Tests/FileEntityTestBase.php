@@ -25,6 +25,13 @@ abstract class FileEntityTestBase extends WebTestBase {
   public static $modules = array('file_entity');
 
   /**
+   * Disable strict schema checking until schema is updated.
+   *
+   * @todo Update schema and remove this.
+   */
+  protected $strictConfigSchema = FALSE;
+
+  /**
    * File entity config.
    *
    * @var Config
