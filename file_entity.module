@@ -1160,18 +1160,6 @@ function file_entity_get_stream_wrapper($scheme) {
 }
 
 /**
- * Implements hook_stream_wrappers_alter().
- */
-function file_entity_stream_wrappers_alter(&$wrappers) {
-  if (isset($wrappers['private'])) {
-    $wrappers['private']['private'] = TRUE;
-  }
-  if (isset($wrappers['temporary'])) {
-    $wrappers['temporary']['private'] = TRUE;
-  }
-}
-
-/**
  * Implements hook_ctools_plugin_api().
  */
 function file_entity_ctools_plugin_api($owner, $api) {

@@ -6,7 +6,9 @@
  */
 
 namespace Drupal\file_entity\Tests;
+
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Site\Settings;
 use Drupal\file_entity\Entity\FileEntity;
 
 /**
@@ -40,15 +42,10 @@ class FileEntityCreationTest extends FileEntityTestBase {
    */
   public function testSingleFileEntityCreation() {
     // Configure private file system path.
-    $config = \Drupal::config('system.file');
-
     // Unset private file system path so it skips the scheme selecting, because
     // there is only one file system path available (public://) by default.
-    $private_file_system_path = NULL;
-    $config->set('path.private', $private_file_system_path);
-    $this->assertIdentical($config->get('path.private'), $private_file_system_path, 'Private Path is succesfully disabled.');
-    $config->save();
-    $this->drupalGet('admin/config/media/file-system');
+    new Settings(['file_private_path' => NULL] + Settings::getAll());
+    $this->rebuildContainer();
 
     $test_file = $this->getTestFile('text');
     // Create a file.
@@ -106,8 +103,8 @@ class FileEntityCreationTest extends FileEntityTestBase {
    */
   public function testImageAltTitleFields() {
     // Disable private path to avoid irrelevant second form step.
-    $this->container->get('config.factory')->get('system.file')
-      ->set('path.private', NULL)->save();
+    new Settings(['file_private_path' => NULL] + Settings::getAll());
+    $this->rebuildContainer();
 
     // Create an image.
     $test_file = $this->getTestFile('image');

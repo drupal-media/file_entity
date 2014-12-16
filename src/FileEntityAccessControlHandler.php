@@ -54,8 +54,9 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
     $is_owner = $entity->getOwnerId() === $account->id();
 
     if ($operation == 'view') {
-      $wrapper = file_entity_get_stream_wrapper(file_uri_scheme($entity->getFileUri()));
-      if (!empty($wrapper['private'])) {
+      // @todo Make the set of private schemes/stream wrappers extendable.
+      $private_schemes = ['private', 'temporary'];
+      if (in_array(file_uri_scheme($entity->getFileUri()), $private_schemes)) {
         return AccessResult::allowedIfHasPermission($account, 'view private files')
           ->orIf(AccessResult::allowedIf($account->isAuthenticated() && $is_owner)->cacheUntilEntityChanges($entity)
             ->andIf(AccessResult::allowedIfHasPermission($account, 'view own private files')));
