@@ -280,7 +280,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
    * Tests the file usage view.
    */
   public function testUsageView() {
-    $this->container->get('module_handler')->install(array('node'));
+    $this->container->get('module_installer')->install(array('node'));
     $file = $this->createFileEntity(array('uid' => $this->userAdmin));
     $this->drupalLogin($this->userAdmin);
 

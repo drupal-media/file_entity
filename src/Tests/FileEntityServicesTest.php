@@ -71,7 +71,7 @@ class FileEntityServicesTest extends RESTTestBase {
     // Create a file.
     $file_uri = 'public://' . $this->randomMachineName();
     file_put_contents($file_uri, 'This is some file contents');
-    $file = File::create(array('uri' => $file_uri, 'status' => FILE_STATUS_PERMANENT));
+    $file = File::create(array('uri' => $file_uri, 'status' => FILE_STATUS_PERMANENT, 'uid' => $account->id()));
     $file->save();
 
     // Create a node with a file.
@@ -88,7 +88,7 @@ class FileEntityServicesTest extends RESTTestBase {
     $node->save();
 
     // GET node.
-    $node_url = $node->getSystemPath();
+    $node_url = $node->url();
     $response_json = $this->httpRequest($node_url, 'GET', NULL, $this->defaultMimeType);
     $this->assertResponse(200);
     $response_data = Json::decode($response_json);
