@@ -5,6 +5,7 @@
  * Extends Drupal file entities to be fieldable and viewable.
  */
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -1087,8 +1088,8 @@ function template_preprocess_file(&$variables) {
   }
 
   // Gather file classes.
-  $variables['classes_array'][] = drupal_html_class('file-' . $file->bundle());
-  $variables['classes_array'][] = drupal_html_class('file-' . $file->getMimeType());
+  $variables['classes_array'][] = Html::getClass('file-' . $file->bundle());
+  $variables['classes_array'][] = Html::getClass('file-' . $file->getMimeType());
   if (!$file->isPermanent()) {
     $variables['classes_array'][] = 'file-temporary';
   }

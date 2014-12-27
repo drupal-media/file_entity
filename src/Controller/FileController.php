@@ -6,6 +6,7 @@
 
 namespace Drupal\file_entity\Controller;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\file\FileInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -65,8 +66,8 @@ class FileController extends ControllerBase {
     }
 
     $headers = array(
-      'Content-Type' => mime_header_encode($file->getMimeType()),
-      'Content-Disposition' => 'attachment; filename="' . mime_header_encode(drupal_basename($file->getFileUri())) . '"',
+      'Content-Type' => Unicode::mimeHeaderEncode($file->getMimeType()),
+      'Content-Disposition' => 'attachment; filename="' . Unicode::mimeHeaderEncode(drupal_basename($file->getFileUri())) . '"',
       'Content-Length' => $file->getSize(),
       'Content-Transfer-Encoding' => 'binary',
       'Pragma' => 'no-cache',
