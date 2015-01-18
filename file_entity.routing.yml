@@ -103,7 +103,7 @@ file_entity.file_download:
   requirements:
     _entity_access: 'file.download'
 
-file_entity.file_edit:
+entity.file.edit_form:
   path: /file/{file}/edit
   defaults:
     _entity_form: 'file.edit'
@@ -113,7 +113,7 @@ file_entity.file_edit:
   options:
     _admin_route: TRUE
 
-file_entity.file_delete:
+entity.file.delete_form:
   path: /file/{file}/delete
   defaults:
     _entity_form: 'file.delete'

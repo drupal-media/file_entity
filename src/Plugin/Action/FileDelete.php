@@ -7,8 +7,11 @@
 
 namespace Drupal\file_entity\Plugin\Action;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\file\FileInterface;
 use Drupal\user\TempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -60,4 +63,14 @@ class FileDelete extends ActionBase implements ContainerFactoryPluginInterface {
     // Just save in temp store for now, delete after confirmation.
     $this->tempStore->set('delete', $entities);
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+    $result = AccessResult::allowedIf($object instanceof FileInterface)->andIf(AccessResult::allowedIf($object->access('delete')));
+    return $return_as_object ? $result : $result->isAllowed();
+  }
+
+
 }
