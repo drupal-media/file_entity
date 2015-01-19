@@ -25,7 +25,7 @@ class FileDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('file_entity.file', array('file' => $this->entity->id()));
+    return $this->entity->urlInfo();
   }
 
   /**

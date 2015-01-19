@@ -48,7 +48,7 @@ class FileEntityEditTest extends FileEntityTestBase {
 
     // Check that "edit" link points to correct page.
     $this->clickLink(t('Edit'));
-    $edit_url = \Drupal::url('file_entity.file_edit', array('file' => $file->id()), array('absolute' => TRUE));
+    $edit_url = $file->url('edit-form', ['absolute' => TRUE]);
     $actual_url = $this->getURL();
     $this->assertEqual($edit_url, $actual_url, t('On edit page.'));
 

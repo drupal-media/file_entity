@@ -87,7 +87,7 @@ file_entity.file_add_upload_archive:
   options:
     _admin_route: TRUE
 
-file_entity.file:
+entity.file.canonical:
   path: /file/{file}
   defaults:
     _entity_view: 'file.full'

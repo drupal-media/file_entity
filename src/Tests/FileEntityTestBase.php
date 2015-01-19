@@ -48,7 +48,7 @@ abstract class FileEntityTestBase extends WebTestBase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->config = $this->container->get('config.factory')->get('file_entity.settings');
+    $this->config = $this->config('file_entity.settings');
   }
 
   /**

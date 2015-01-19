@@ -60,7 +60,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
 
     // Set the file route to provide entity URI for serialization.
     $route_collection = new RouteCollection();
-    $route_collection->add('file_entity.file', new Route('file/{file}'));
+    $route_collection->add('entity.file.canonical', new Route('file/{file}'));
     $this->container->set('router.route_provider', new MockRouteProvider($route_collection));
   }
 
