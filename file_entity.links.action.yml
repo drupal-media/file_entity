@@ -1,11 +1,11 @@
 file_entity.file_type_add:
-  route_name: file_entity.file_types_add
+  route_name: entity.file_type.add_form
   title: 'Add file type'
   appears_on:
-    - file_entity.file_types_overview
+    - entity.file_type.collection
 
-file_entity.file_add:
-  route_name: file_entity.file_add
+entity.file.add_form:
+  route_name: entity.file.add_form
   title: 'Add file'
   appears_on:
     - view.file_entity_files.overview

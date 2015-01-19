@@ -121,7 +121,7 @@ class FileTypeForm extends EntityForm {
       \Drupal::logger('file_entity')->notice(t('Added file type %name.', $t_args));
     }
 
-    $form_state->setRedirect('file_entity.file_types_overview');
+    $form_state->setRedirect('entity.file_type.collection');
   }
 
   /**

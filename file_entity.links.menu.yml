@@ -1,7 +1,7 @@
 file_entity.types:
   title: 'File types'
   description: 'Manage settings for the type of files used on your site.'
-  route_name: file_entity.file_types_overview
+  route_name: entity.file_type.collection
   parent: system.admin_structure
 
 

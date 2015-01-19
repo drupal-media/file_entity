@@ -644,7 +644,7 @@ function file_entity_entity_type_alter(&$entity_types) {
     ->setFormClass('edit', 'Drupal\file_entity\Form\FileEditForm')
     ->setFormClass('delete', 'Drupal\file_entity\Form\FileDeleteForm')
     ->setAccessClass('Drupal\file_entity\FileEntityAccessControlHandler')
-    ->set('field_ui_base_route', 'file_entity.file_types_manage')
+    ->set('field_ui_base_route', 'entity.file_type.edit_form')
     ->setLinkTemplate('canonical', '/file/{file}')
     ->setLinkTemplate('edit-form', '/file/{file}/edit')
     ->setLinkTemplate('delete-form', '/file/{file}/delete')

@@ -37,11 +37,11 @@ use string;
  *     "status" = "status",
  *   },
  *   links = {
- *     "canonical" = "file_entity.file_types_overview",
- *     "edit-form" = "file_entity.file_types_manage",
- *     "delete-form" = "file_entity.file_types_manage_delete",
- *     "enable" = "file_entity.file_types_manage_enable",
- *     "disable" = "file_entity.file_types_manage_disable",
+ *     "collection" = "/admin/structure/file-types",
+ *     "edit-form" = "/admin/structure/file-types/manage/{file_type}/edit",
+ *     "delete-form" = "/admin/structure/file-types/manage/{file_type}/delete",
+ *     "enable" = "/admin/structure/file-types/manage/{file_type}/enable",
+ *     "disable" = "/admin/structure/file-types/manage/{file_type}/disable",
  *   },
  * )
  */

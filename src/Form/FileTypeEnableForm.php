@@ -45,13 +45,13 @@ class FileTypeEnableForm extends EntityConfirmFormBase {
       'The file type %label has been enabled.',
       array('%label' => $type->label())
     ));
-    $form_state->setRedirect('file_entity.file_types_overview');
+    $form_state->setRedirect('entity.file_type.collection');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('file_entity.file_types_overview');
+    return new Url('entity.file_type.collection');
   }
 }

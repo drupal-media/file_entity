@@ -1,7 +1,7 @@
-file_entity.file_types_manage:
-  route_name: file_entity.file_types_manage
+entity.file_type.edit_form:
+  route_name: entity.file_type.edit_form
   title: 'Edit'
-  base_route: file_entity.file_types_manage
+  base_route: entity.file_type.edit_form
 
 file_entity.file:
   route_name: entity.file.canonical
