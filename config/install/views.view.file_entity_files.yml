@@ -668,7 +668,7 @@ display:
             alter_text: false
             text: ''
             make_link: true
-            path: 'file/[fid]/usage'
+            path: 'file/{{ fid }}/usage'
             absolute: false
             external: false
             replace_spaces: false

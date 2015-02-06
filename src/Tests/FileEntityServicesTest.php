@@ -103,6 +103,15 @@ class FileEntityServicesTest extends RESTTestBase {
     $this->assertResponse(404);
 
     // POST node to create new.
+    unset($response_data['created']);
+    unset($response_data['changed']);
+    unset($response_data['status']);
+    unset($response_data['promote']);
+    unset($response_data['sticky']);
+    unset($response_data['revision_timestamp']);
+    unset($response_data['_embedded'][$this->getAbsoluteUrl('/rest/relation/node/resttest/uid')]);
+    unset($response_data['_embedded'][$this->getAbsoluteUrl('/rest/relation/node/resttest/revision_uid')]);
+
     $serialized = Json::encode($response_data);
     $this->enableService('entity:node', 'POST');
     $this->httpRequest('entity/node', 'POST', $serialized, $this->defaultMimeType);
