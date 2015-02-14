@@ -9,7 +9,7 @@ namespace Drupal\file_entity\Tests;
 /**
  * Tests Pathauto support.
  *
- * @requires module pathauto
+ * @dependencies pathauto
  *
  * @group file_entity
  */
