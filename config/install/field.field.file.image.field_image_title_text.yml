@@ -1,6 +1,9 @@
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - file_entity
   config:
     - field.storage.file.field_image_title_text
     - file_entity.type.image

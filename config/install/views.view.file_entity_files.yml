@@ -24,11 +24,9 @@ display:
         type: perm
         options:
           perm: 'administer files'
-        provider: views
       cache:
         type: none
         options: {  }
-        provider: views
       query:
         type: views_query
         options:
@@ -37,7 +35,6 @@ display:
           replica: false
           query_comment: false
           query_tags: {  }
-        provider: views
       exposed_form:
         type: basic
         options:
@@ -48,7 +45,6 @@ display:
           expose_sort_order: true
           sort_asc_label: Asc
           sort_desc_label: Desc
-        provider: views
       pager:
         type: mini
         options:
@@ -67,7 +63,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-        provider: views
       style:
         type: table
         options:
@@ -193,10 +188,8 @@ display:
               responsive: ''
           default: created
           empty_table: true
-        provider: views
       row:
         type: fields
-        provider: views
       fields:
         bulk_form:
           id: bulk_form
@@ -205,9 +198,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - system
           label: ''
           exclude: false
           alter:
@@ -253,7 +243,6 @@ display:
           include_exclude: exclude
           selected_actions: {  }
           plugin_id: bulk_form
-          provider: system
         fid:
           id: fid
           table: file_managed
@@ -293,10 +282,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - file_entity
-              - file_entity
           label: Name
           exclude: false
           alter:
@@ -347,9 +332,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - file_entity
           label: Type
           exclude: false
           alter:
@@ -394,7 +376,6 @@ display:
           text: ''
           filemime_image: 0
           plugin_id: file_entity_type
-          provider: file_entity
         filemime:
           id: filemime
           table: file_managed
@@ -604,9 +585,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
           label: 'Changed date'
           exclude: false
           alter:
@@ -659,9 +637,6 @@ display:
           relationship: fid
           group_type: sum
           admin_label: ''
-          dependencies:
-            module:
-              - views
           label: 'Used in'
           exclude: false
           alter:
@@ -720,9 +695,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - file_entity
           label: ''
           exclude: true
           alter:
@@ -766,7 +738,6 @@ display:
           hide_alter_empty: true
           text: ''
           plugin_id: file_entity_link_edit
-          provider: file_entity
         delete:
           id: delete
           table: file_managed
@@ -774,9 +745,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - file_entity
           label: ''
           exclude: true
           alter:
@@ -820,7 +788,6 @@ display:
           hide_alter_empty: true
           text: ''
           plugin_id: file_entity_link_delete
-          provider: file_entity
         download:
           id: download
           table: file_managed
@@ -828,9 +795,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - file_entity
           label: ''
           exclude: true
           alter:
@@ -874,7 +838,6 @@ display:
           hide_alter_empty: true
           text: ''
           plugin_id: file_entity_link_download
-          provider: file_entity
         dropbutton:
           id: dropbutton
           table: views
@@ -882,13 +845,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
-              - views
-              - views
-              - views
-              - views
           label: Operations
           exclude: false
           alter:
@@ -945,7 +901,6 @@ display:
             count: '0'
           destination: true
           plugin_id: dropbutton
-          provider: views
       filters:
         filename:
           id: filename
@@ -1069,10 +1024,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - file_entity
-              - file_entity
           operator: in
           value: {  }
           group: 1
@@ -1105,7 +1056,6 @@ display:
             default_group_multiple: {  }
             group_items: {  }
           plugin_id: file_entity_type
-          provider: file_entity
       sorts: {  }
       title: Files
       header: {  }
@@ -1130,8 +1080,6 @@ display:
       arguments: {  }
       group_by: false
       show_admin_links: true
-      field_langcode: '***CURRENT_LANGUAGE***'
-      field_langcode_add_to_query: null
   overview:
     display_plugin: page
     id: overview
@@ -1161,8 +1109,6 @@ display:
           group_type: group
           admin_label: 'File usage'
           required: false
-      field_langcode: '***CURRENT_LANGUAGE***'
-      field_langcode_add_to_query: null
   usage:
     display_plugin: page
     id: usage
@@ -1179,14 +1125,10 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
           empty: true
           tokenize: false
           content: 'This file is not currently used.'
           plugin_id: text_custom
-          provider: views
       defaults:
         empty: false
         pager: false
@@ -1219,7 +1161,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-        provider: views
       pager_options: false
       filters: {  }
       filter_groups:
@@ -1276,7 +1217,6 @@ display:
           hide_alter_empty: true
           link_to_entity: true
           plugin_id: entity_label
-          provider: views
         type:
           id: type
           table: file_usage
@@ -1326,7 +1266,6 @@ display:
           empty_zero: false
           hide_alter_empty: true
           plugin_id: standard
-          provider: views
         module:
           id: module
           table: file_usage
@@ -1376,7 +1315,6 @@ display:
           empty_zero: false
           hide_alter_empty: true
           plugin_id: standard
-          provider: views
         count:
           id: count
           table: file_usage
@@ -1435,7 +1373,6 @@ display:
           prefix: ''
           suffix: ''
           plugin_id: numeric
-          provider: views
       group_by: false
       title: 'File usage'
       arguments:
@@ -1446,9 +1383,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - file
           default_action: 'not found'
           exception:
             value: all
@@ -1477,7 +1411,6 @@ display:
           break_phrase: false
           not: false
           plugin_id: file_fid
-          provider: file
       style:
         type: table
         options:
@@ -1525,11 +1458,9 @@ display:
               responsive: ''
           default: entity_label
           empty_table: true
-        provider: views
       row:
         type: fields
         options: {  }
-        provider: views
       relationships:
         fid:
           id: fid
@@ -1539,8 +1470,6 @@ display:
           group_type: group
           admin_label: 'File usage'
           required: true
-      field_langcode: '***CURRENT_LANGUAGE***'
-      field_langcode_add_to_query: null
       menu:
         type: tab
         title: Usage
@@ -1562,11 +1491,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
           empty: true
           tokenize: true
           content: 'This table lists all of the places where <em>%1</em> is used.'
           plugin_id: text_custom
-          provider: views

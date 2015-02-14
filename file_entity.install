@@ -133,9 +133,10 @@ function file_entity_install() {
   }
 
   // Disable the core files view.
-  $view = View::load('files');
-  $view->set('status', FALSE);
-  $view->save();
+  if ($view = View::load('files')) {
+    $view->set('status', FALSE);
+    $view->save();
+  }
 }
 
 /**

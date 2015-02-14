@@ -1,7 +1,9 @@
-uuid: ef5f71b9-d524-4e04-8d00-b27cd5803272
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - file_entity
   module:
     - file
 id: file.field_image_title_text

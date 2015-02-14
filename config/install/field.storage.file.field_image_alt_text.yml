@@ -1,6 +1,9 @@
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - file_entity
   module:
     - file
 id: file.field_image_alt_text

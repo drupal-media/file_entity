@@ -8,4 +8,4 @@ dependencies:
   - text
   - entity_reference
   - views
-#configure = admin/config/media/file-settings
+configure: file_entity.settings

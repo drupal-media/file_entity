@@ -43,3 +43,15 @@ file_entity.settings:
     wizard_skip_fields:
       type: boolean
       label: 'Skip available fields'
+
+action.configuration.file_delete_action:
+  type: action_configuration_default
+  label: 'Delete file configuration'
+
+action.configuration.file_permanent_action:
+  type: action_configuration_default
+  label: 'Set file to permanent configuration'
+
+action.configuration.file_temporary_action:
+  type: action_configuration_default
+  label: 'Set file to temporary configuration'
