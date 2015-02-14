@@ -210,13 +210,4 @@ abstract class FileEntityTestBase extends WebTestBase {
     return $file;
   }
 
-  /**
-   * Overrides DrupalWebTestCase::drupalGetToken() to support the hash salt.
-   *
-   * @todo Remove when http://drupal.org/node/1555862 is fixed in core.
-   */
-  protected function drupalGetToken($value = '') {
-    $private_key = drupal_get_private_key();
-    return drupal_hmac_base64($value, $this->session_id . $private_key . drupal_get_hash_salt());
-  }
 }
