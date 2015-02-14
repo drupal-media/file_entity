@@ -43,6 +43,9 @@ file_entity.settings:
     wizard_skip_fields:
       type: boolean
       label: 'Skip available fields'
+    allow_insecure_download:
+      type: boolean
+      label: Allow insecure downloads
 
 action.configuration.file_delete_action:
   type: action_configuration_default

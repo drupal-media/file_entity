@@ -5,6 +5,7 @@ dependencies:
     - file
     - file_entity
     - system
+    - user
 id: file_entity_files
 label: 'File Entity Files'
 module: file_entity
@@ -33,7 +34,7 @@ display:
           disable_sql_rewrite: false
           distinct: false
           replica: false
-          query_comment: false
+          query_comment: ''
           query_tags: {  }
       exposed_form:
         type: basic
@@ -202,7 +203,6 @@ display:
           exclude: false
           alter:
             alter_text: false
-            text: ''
             make_link: false
             path: ''
             absolute: false
@@ -217,7 +217,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -231,7 +231,7 @@ display:
           element_class: ''
           element_label_type: ''
           element_label_class: ''
-          element_label_colon: false
+          element_label_colon: true
           element_wrapper_type: ''
           element_wrapper_class: ''
           element_default_classes: true
@@ -242,6 +242,7 @@ display:
           action_title: 'With selection'
           include_exclude: exclude
           selected_actions: {  }
+          entity_type: file
           plugin_id: bulk_form
         fid:
           id: fid
@@ -286,7 +287,6 @@ display:
           exclude: false
           alter:
             alter_text: false
-            text: ''
             make_link: false
             path: ''
             absolute: false
@@ -301,7 +301,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: false
             ellipsis: false
             more_link: false
@@ -336,7 +336,6 @@ display:
           exclude: false
           alter:
             alter_text: false
-            text: ''
             make_link: false
             path: ''
             absolute: false
@@ -351,7 +350,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -373,8 +372,6 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          text: ''
-          filemime_image: 0
           plugin_id: file_entity_type
         filemime:
           id: filemime
@@ -387,7 +384,6 @@ display:
           exclude: false
           alter:
             alter_text: false
-            text: ''
             make_link: false
             path: ''
             absolute: false
@@ -402,7 +398,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -425,7 +421,6 @@ display:
           empty_zero: false
           hide_alter_empty: true
           link_to_file: false
-          filemime_image: false
           plugin_id: file_filemime
         filesize:
           id: filesize
@@ -453,7 +448,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -503,7 +498,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -552,7 +547,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -604,7 +599,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -656,7 +651,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -714,7 +709,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -736,7 +731,6 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          text: ''
           plugin_id: file_entity_link_edit
         delete:
           id: delete
@@ -764,7 +758,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -786,7 +780,6 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          text: ''
           plugin_id: file_entity_link_delete
         download:
           id: download
@@ -814,7 +807,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -836,7 +829,6 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          text: ''
           plugin_id: file_entity_link_download
         dropbutton:
           id: dropbutton
@@ -864,7 +856,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -890,6 +882,7 @@ display:
             edit: edit
             delete: delete
             download: download
+            bulk_form: '0'
             fid: '0'
             filename: '0'
             type: '0'
@@ -1003,7 +996,6 @@ display:
               authenticated: authenticated
               anonymous: '0'
               administrator: '0'
-            reduce: false
           is_grouped: false
           group_info:
             label: ''
@@ -1025,7 +1017,6 @@ display:
           group_type: group
           admin_label: ''
           operator: in
-          value: {  }
           group: 1
           exposed: true
           expose:
@@ -1042,7 +1033,6 @@ display:
               authenticated: authenticated
               anonymous: '0'
               administrator: '0'
-            reduce: 0
           is_grouped: false
           group_info:
             label: ''
@@ -1080,6 +1070,7 @@ display:
       arguments: {  }
       group_by: false
       show_admin_links: true
+      display_extenders: {  }
   overview:
     display_plugin: page
     id: overview
@@ -1092,13 +1083,11 @@ display:
         type: tab
         title: Files
         description: ''
-        name: admin
         weight: 0
         context: ''
       display_description: ''
       defaults:
         pager: true
-        pager_options: true
         relationships: false
       relationships:
         fid:
@@ -1109,6 +1098,7 @@ display:
           group_type: group
           admin_label: 'File usage'
           required: false
+      display_extenders: {  }
   usage:
     display_plugin: page
     id: usage
@@ -1132,7 +1122,6 @@ display:
       defaults:
         empty: false
         pager: false
-        pager_options: false
         filters: false
         filter_groups: false
         fields: false
@@ -1161,7 +1150,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-      pager_options: false
       filters: {  }
       filter_groups:
         operator: AND
@@ -1178,7 +1166,6 @@ display:
           exclude: false
           alter:
             alter_text: false
-            text: ''
             make_link: false
             path: ''
             absolute: false
@@ -1193,7 +1180,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -1228,7 +1215,6 @@ display:
           exclude: false
           alter:
             alter_text: false
-            text: ''
             make_link: false
             path: ''
             absolute: false
@@ -1243,7 +1229,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -1277,7 +1263,6 @@ display:
           exclude: false
           alter:
             alter_text: false
-            text: ''
             make_link: false
             path: ''
             absolute: false
@@ -1292,7 +1277,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -1326,7 +1311,6 @@ display:
           exclude: false
           alter:
             alter_text: false
-            text: ''
             make_link: false
             path: ''
             absolute: false
@@ -1341,7 +1325,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -1474,14 +1458,12 @@ display:
         type: tab
         title: Usage
         description: 'Overview content that uses this file'
-        name: admin
         weight: 5
         context: '0'
       tab_options:
         type: none
         title: ''
         description: ''
-        name: admin
         weight: 0
       header:
         area_text_custom:
@@ -1495,3 +1477,4 @@ display:
           tokenize: true
           content: 'This table lists all of the places where <em>%1</em> is used.'
           plugin_id: text_custom
+      display_extenders: {  }

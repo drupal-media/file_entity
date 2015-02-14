@@ -1666,7 +1666,7 @@ function file_entity_match_mimetypes($needle, $haystack) {
  */
 function file_entity_download_url($file, $options = array()) {
   $url = new Url('file_entity.file_download', array('file' => $file->id()), $options);
-  if (!\Drupal::config('file_entit.settings')->get('allow_insecure_download', FALSE)) {
+  if (!\Drupal::config('file_entity.settings')->get('allow_insecure_download')) {
     $url->setOption('query', array('token' => file_entity_get_download_token($file)));
   }
   return $url;
@@ -1784,11 +1784,11 @@ function file_entity_get_public_and_private_stream_wrapper_names($flag = StreamW
   foreach (\Drupal::service('stream_wrapper_manager')->getWrappers($flag) as $key => $wrapper) {
     // Some wrappers, e.g. those set in KernelTestBase, do not provide a name.
     $wrapper_name = isset($wrapper['name']) ? $wrapper['name'] : substr(strrchr($wrapper['class'], '\\'), 1);
-    if (in_array($wrapper_name, $private_schemes)) {
-      $wrappers['public'][$key] = $wrapper_name;
+    if (in_array($key, $private_schemes)) {
+      $wrappers['private'][$key] = $wrapper_name;
     }
     else {
-      $wrappers['private'][$key] = $wrapper_name;
+      $wrappers['public'][$key] = $wrapper_name;
     }
   }
   return $wrappers;
