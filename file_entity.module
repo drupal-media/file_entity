@@ -642,10 +642,11 @@ function file_entity_entity_type_alter(&$entity_types) {
     ->setHandlerClass('storage_schema', 'Drupal\file_entity\FileEntityStorageSchema')
     ->setFormClass('default', 'Drupal\file_entity\Form\FileEditForm')
     ->setFormClass('edit', 'Drupal\file_entity\Form\FileEditForm')
-    ->setFormClass('delete', 'Drupal\file_entity\Form\FileDeleteForm')
+    ->setFormClass('delete', 'Drupal\Core\Entity\ContentEntityDeleteForm')
     ->setAccessClass('Drupal\file_entity\FileEntityAccessControlHandler')
     ->set('field_ui_base_route', 'entity.file_type.edit_form')
     ->setLinkTemplate('canonical', '/file/{file}')
+    ->setLinkTemplate('collection', '/admin/content/files')
     ->setLinkTemplate('edit-form', '/file/{file}/edit')
     ->setLinkTemplate('delete-form', '/file/{file}/delete')
     ->setViewBuilderClass('Drupal\file_entity\Entity\FileEntityViewBuilder');
@@ -1220,17 +1221,6 @@ function file_entity_query_file_access_alter(SelectInterface $query) {
 }
 
 /**
- * Implements hook_query_TAG_alter().
- *
- * This function implements the same functionality as
- * file_entity_query_file_access_alter() for the SQL field storage engine. File
- * access conditions are added for field values belonging to files only.
- */
-function file_entity_query_entity_field_access_alter(SelectInterface $query) {
-  //_file_entity_query_file_entity_access_alter($query, 'entity');
-}
-
-/**
  * Helper for file entity access functions.
  *
  * @param $query
@@ -1788,11 +1778,13 @@ function file_entity_entity_storage_load($entities, $entity_type) {
 }
 
 function file_entity_get_public_and_private_stream_wrapper_names($flag = StreamWrapperInterface::VISIBLE) {
-  $wrappers = array();
+  $wrappers = array('public' => [], 'private' => []);
+  // @todo Make the set of private schemes/stream wrappers extendable.
+  $private_schemes = ['private', 'temporary'];
   foreach (\Drupal::service('stream_wrapper_manager')->getWrappers($flag) as $key => $wrapper) {
     // Some wrappers, e.g. those set in KernelTestBase, do not provide a name.
     $wrapper_name = isset($wrapper['name']) ? $wrapper['name'] : substr(strrchr($wrapper['class'], '\\'), 1);
-    if (empty($wrapper['private'])) {
+    if (in_array($wrapper_name, $private_schemes)) {
       $wrappers['public'][$key] = $wrapper_name;
     }
     else {

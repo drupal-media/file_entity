@@ -668,7 +668,7 @@ display:
             alter_text: false
             text: ''
             make_link: true
-            path: 'file/{{ fid }}/usage'
+            path: 'file/{{fid}}/usage'
             absolute: false
             external: false
             replace_spaces: false
@@ -1139,6 +1139,7 @@ display:
     position: 1
     display_options:
       path: admin/content/files
+      route_name: entity.file.collection
       menu:
         type: tab
         title: Files

@@ -33,7 +33,7 @@ class LinkEdit extends Link {
     $text = NULL;
 
     // Ensure user has access to edit this media.
-    if ($file->access('edit')) {
+    if ($file->access('update')) {
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = 'file/' . $file->id() . '/edit';
       $this->options['alter']['query'] = drupal_get_destination();

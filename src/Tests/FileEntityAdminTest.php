@@ -218,7 +218,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertLinkByHref('file/2/delete');
     $this->drupalGet('file/1/delete');
     $this->assertTitle(t('Are you sure you want to delete the file @filename? | Drupal', array('@filename' => FileEntity::load(1)->label())));
-    $this->drupalPostForm(NULL, array(), t('Confirm'));
+    $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->assertNoLinkByHref('file/1/delete');
     $this->assertLinkByHref('file/2/delete');
 

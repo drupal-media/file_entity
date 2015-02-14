@@ -9,9 +9,7 @@ namespace Drupal\file_entity\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
-use Drupal\file\FileInterface;
 use Drupal\file_entity\FileTypeInterface;
-use string;
 
 /**
  * Defines the File type configuration entity.
@@ -23,7 +21,7 @@ use string;
  *     "list_builder" = "Drupal\file_entity\FileTypeListBuilder",
  *     "form" = {
  *       "default" = "Drupal\file_entity\Form\FileTypeForm",
- *       "delete" = "Drupal\file_entity\Form\FileTypeDeleteForm",
+ *       "delete" = "Drupal\Core\Entity\EntityDeleteForm",
  *       "enable" = "Drupal\file_entity\Form\FileTypeEnableForm",
  *       "disable" = "Drupal\file_entity\Form\FileTypeDisableForm",
  *     },

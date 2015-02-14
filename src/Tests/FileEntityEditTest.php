@@ -95,10 +95,9 @@ class FileEntityEditTest extends FileEntityTestBase {
     $this->drupalPostForm('file/' . $file->id() . '/edit', $edit, t('Save'));
     $this->assertText('There are no entities matching "invalid-name".');
 
-    // Change the associated user field to an empty string, which should assign
-    // association to the anonymous user (uid 0).
+    // Change the associated user field to the anonymous user (uid 0).
     $edit = array();
-    $edit['uid[0][target_id]'] = '';
+    $edit['uid[0][target_id]'] = 'Anonymous (0)';
     $this->drupalPostForm('file/' . $file->id() . '/edit', $edit, t('Save'));
     \Drupal::entityManager()->getStorage('file')->resetCache();
     $file = File::load($file->id());

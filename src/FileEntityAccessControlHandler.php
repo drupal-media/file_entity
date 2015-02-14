@@ -54,9 +54,8 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
     $is_owner = $entity->getOwnerId() === $account->id();
 
     if ($operation == 'view') {
-      // @todo Make the set of private schemes/stream wrappers extendable.
-      $private_schemes = ['private', 'temporary'];
-      if (in_array(file_uri_scheme($entity->getFileUri()), $private_schemes)) {
+      $schemes = file_entity_get_public_and_private_stream_wrapper_names();
+      if (in_array(file_uri_scheme($entity->getFileUri()), $schemes['private'])) {
         return AccessResult::allowedIfHasPermission($account, 'view private files')
           ->orIf(AccessResult::allowedIf($account->isAuthenticated() && $is_owner)->cacheUntilEntityChanges($entity)
             ->andIf(AccessResult::allowedIfHasPermission($account, 'view own private files')));
@@ -70,11 +69,12 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
 
     // User can perform these operations if they have the "any" permission or if
     // they own it and have the "own" permission.
-    if (in_array($operation, array('download', 'edit', 'delete'))) {
+    if (in_array($operation, array('download', 'update', 'delete'))) {
+      $permission_action = $operation == 'update' ? 'edit' : $operation;
       $type = $entity->get('type')->target_id;
-      return AccessResult::allowedIfHasPermission($account, "$operation any $type files")
+      return AccessResult::allowedIfHasPermission($account, "$permission_action any $type files")
         ->orIf(AccessResult::allowedIf($is_owner)->cacheUntilEntityChanges($entity)
-          ->andIf(AccessResult::allowedIfHasPermission($account, "$operation own $type files")));
+          ->andIf(AccessResult::allowedIfHasPermission($account, "$permission_action own $type files")));
     }
 
     // Fall back to the parent implementation so that file uploads work.

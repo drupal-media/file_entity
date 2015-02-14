@@ -8,4 +8,4 @@ entity.file.add_form:
   route_name: entity.file.add_form
   title: 'Add file'
   appears_on:
-    - view.file_entity_files.overview
+    - entity.file.collection

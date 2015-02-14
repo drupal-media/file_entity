@@ -89,7 +89,7 @@ class FileDeleteMultipleForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('view.file_entity_files.overview');
+    return new Url('entity.file.collection');
   }
 
   /**
@@ -105,7 +105,7 @@ class FileDeleteMultipleForm extends ConfirmFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $this->files = $this->tempStore->get('delete');
     if (empty($this->files)) {
-      $form_state->setRedirect('view.file_entity_files.overview');
+      $form_state->setRedirect('entity.file.collection');
     }
 
     $form['files'] = array(
@@ -127,7 +127,7 @@ class FileDeleteMultipleForm extends ConfirmFormBase {
       $this->storage->delete($this->files);
       $this->tempStore->delete('delete');
     }
-    $form_state->setRedirect('view.file_entity_files.overview');
+    $form_state->setRedirect('entity.file.collection');
   }
 
 }

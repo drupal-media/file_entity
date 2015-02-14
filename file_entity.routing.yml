@@ -109,7 +109,7 @@ entity.file.edit_form:
     _entity_form: 'file.edit'
     _title: 'Edit'
   requirements:
-    _entity_access: 'file.edit'
+    _entity_access: 'file.update'
   options:
     _admin_route: TRUE
 
