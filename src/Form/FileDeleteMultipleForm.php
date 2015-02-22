@@ -13,7 +13,7 @@ use Drupal\Core\Url;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\FileInterface;
-use Drupal\user\TempStoreFactory;
+use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -33,7 +33,7 @@ class FileDeleteMultipleForm extends ConfirmFormBase {
   /**
    * The tempstore factory.
    *
-   * @var \Drupal\user\TempStore
+   * @var \Drupal\user\PrivateTempStore
    */
   protected $tempStore;
 
@@ -47,12 +47,12 @@ class FileDeleteMultipleForm extends ConfirmFormBase {
   /**
    * Constructs a FileDeleteMultipleForm object.
    *
-   * @param \Drupal\user\TempStoreFactory $temp_store_factory
+   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
    *   The tempstore factory.
    * @param \Drupal\Core\Entity\EntityManagerInterface $manager
    *   The entity manager.
    */
-  public function __construct(TempStoreFactory $temp_store_factory, EntityManagerInterface $manager) {
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, EntityManagerInterface $manager) {
     $this->tempStore = $temp_store_factory->get('file_multiple_delete_confirm');
     $this->storage = $manager->getStorage('file');
   }
