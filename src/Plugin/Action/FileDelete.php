@@ -12,7 +12,7 @@ use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\file\FileInterface;
-use Drupal\user\TempStoreFactory;
+use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -30,14 +30,14 @@ class FileDelete extends ActionBase implements ContainerFactoryPluginInterface {
   /**
    * The temp store.
    *
-   * @var \Drupal\user\TempStore
+   * @var \Drupal\user\PrivateTempStore
    */
   protected $tempStore;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, TempStoreFactory $temp_store_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, PrivateTempStoreFactory $temp_store_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->tempStore = $temp_store_factory->get('file_multiple_delete_confirm');
   }
@@ -46,7 +46,7 @@ class FileDelete extends ActionBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('user.tempstore'));
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('user.private_tempstore'));
   }
 
   /**
