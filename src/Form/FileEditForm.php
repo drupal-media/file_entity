@@ -47,10 +47,15 @@ class FileEditForm extends ContentEntityForm {
         $form['replace_upload'] = array(
           '#type' => 'managed_file',
           '#title' => $this->t('Replace file'),
-          '#description' => $this->t('This file will replace the existing file. This action cannot be undone.'),
           '#upload_validators' => FileAddForm::getUploadValidators($replacement_options),
-          '#pre_render' => array('file_entity_upload_validators_pre_render'),
         );
+
+        $file_upload_help = array(
+          '#theme' => 'file_upload_help',
+          '#description' => $this->t('This file will replace the existing file. This action cannot be undone.'),
+          '#upload_validators' => $form['replace_upload']['#upload_validators'],
+        );
+        $form['replace_upload']['#description'] = drupal_render($file_upload_help);
       }
     }
 
