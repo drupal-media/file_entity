@@ -95,7 +95,7 @@ function file_entity_file_delete($file) {
   // module because file entity is implementing search module's API, not the
   // other way around.
   if (\Drupal::moduleHandler()->moduleExists('search')) {
-    search_reindex($file->id(), 'file');
+    //search_reindex($file->id(), 'file');
   }
 }
 
