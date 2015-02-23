@@ -8,7 +8,4 @@ dependencies:
   - text
   - entity_reference
   - views
-  # @todo Currently necessary because the schema for views.field.bulk_form is
-  #   defined there, https://www.drupal.org/node/2426477
-  - action
 configure: file_entity.settings
