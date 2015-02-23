@@ -74,16 +74,18 @@ class FileAddForm extends FormBase {
     $form['upload'] = array(
       '#type' => 'managed_file',
       '#title' => t('Upload a new file'),
-      '#description' => t('Just a description'),
       '#upload_location' => $this->getUploadDestinationUri($form_state->get('options')),
       '#upload_validators' => $this->getUploadValidators($form_state->get('options')),
       '#progress_indicator' => 'bar',
       '#required' => TRUE,
-      '#pre_render' => array(
-        'file_entity_upload_validators_pre_render'
-      ),
       '#default_value' => $form_state->has('file') ? array($form_state->get('file')->id()) : NULL,
     );
+
+    $file_upload_help = array(
+      '#theme' => 'file_upload_help',
+      '#upload_validators' => $form['upload']['#upload_validators'],
+    );
+    $form['upload']['#description'] = drupal_render($file_upload_help);
 
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['next'] = array(

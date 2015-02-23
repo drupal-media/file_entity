@@ -1507,27 +1507,6 @@ function file_entity_file_is_writeable(FileInterface $file) {
 }
 
 /**
- * Pre-render callback for adding validation descriptions to file upload fields.
- */
-function file_entity_upload_validators_pre_render($element) {
-  if (!empty($element['#upload_validators'])) {
-    if (!isset($element['#description'])) {
-      $element['#description'] = '';
-    }
-    if ($element['#description'] !== FALSE) {
-      $file_upload_help = array(
-        '#type' => 'file_upload_help',
-        '#description' => $element['#description'],
-        '#upload_validators' => $element['#upload_validators'],
-      );
-
-      $element['#description'] = drupal_render($file_upload_help);
-    }
-  }
-  return $element;
-}
-
-/**
  * @name pathauto_file Pathauto integration for the core file module.
  * @{
  */
