@@ -14,3 +14,9 @@ entity.file.edit_form:
   title: 'Edit'
   base_route: entity.file.canonical
   weight: 0
+
+entity.file.collection:
+  route_name: entity.file.collection
+  base_route: system.admin_content
+  title: 'Files'
+  description: 'Manage files for your site.'
