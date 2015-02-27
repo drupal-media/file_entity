@@ -101,7 +101,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
   /**
    * Tests files overview with different user permissions.
    */
-  public function testFilesAdminPages() {
+  public function dtestFilesAdminPages() {
     $this->drupalLogin($this->userAdmin);
 
     /** @var FileEntity[] $files */
@@ -208,7 +208,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
   /**
    * Tests single and bulk operations on the file overview.
    */
-  public function testFileOverviewOperations() {
+  public function dtestFileOverviewOperations() {
     $this->setUpFiles();
     $this->drupalLogin($this->userEditDelete);
 
@@ -279,7 +279,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
   /**
    * Tests the file usage view.
    */
-  public function testUsageView() {
+  public function dtestUsageView() {
     $this->container->get('module_installer')->install(array('node'));
     $file = $this->createFileEntity(array('uid' => $this->userAdmin));
     $this->drupalLogin($this->userAdmin);
@@ -336,4 +336,16 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->clickLink('Usage');
     $this->assertResponse(200);
   }
+
+  /**
+   * Tests that the remove button is not on /file/add page.
+   */
+  public function testRemoveButton() {
+    $this->drupalLogin($this->userAdmin);
+
+    // Check if the button is on this page.
+    $this->drupalGet('file/add');
+    $this->assertFalse($this->xpath('//input[@id="edit-upload-remove-button"]'), 'Remove');
+  }
+
 }
