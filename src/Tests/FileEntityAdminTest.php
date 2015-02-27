@@ -101,7 +101,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
   /**
    * Tests files overview with different user permissions.
    */
-  public function dtestFilesAdminPages() {
+  public function testFilesAdminPages() {
     $this->drupalLogin($this->userAdmin);
 
     /** @var FileEntity[] $files */
@@ -208,7 +208,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
   /**
    * Tests single and bulk operations on the file overview.
    */
-  public function dtestFileOverviewOperations() {
+  public function testFileOverviewOperations() {
     $this->setUpFiles();
     $this->drupalLogin($this->userEditDelete);
 
@@ -279,7 +279,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
   /**
    * Tests the file usage view.
    */
-  public function dtestUsageView() {
+  public function testUsageView() {
     $this->container->get('module_installer')->install(array('node'));
     $file = $this->createFileEntity(array('uid' => $this->userAdmin));
     $this->drupalLogin($this->userAdmin);
