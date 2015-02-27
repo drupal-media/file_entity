@@ -337,15 +337,4 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertResponse(200);
   }
 
-  /**
-   * Tests that the remove button is not on /file/add page.
-   */
-  public function testRemoveButton() {
-    $this->drupalLogin($this->userAdmin);
-
-    // Check if the button is on this page.
-    $this->drupalGet('file/add');
-    $this->assertFalse($this->xpath('//input[@id="edit-upload-remove-button"]'), 'Remove');
-  }
-
 }
