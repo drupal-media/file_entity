@@ -336,5 +336,4 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->clickLink('Usage');
     $this->assertResponse(200);
   }
-
 }
