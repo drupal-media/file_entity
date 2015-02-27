@@ -73,6 +73,8 @@ class FileEntityCreationTest extends FileEntityTestBase {
     // Create a file.
     $edit = array();
     $edit['files[upload]'] = drupal_realpath($test_file->uri);
+    $this->drupalGet('file/add');
+    $this->assertFalse($this->xpath('//input[@id="edit-upload-remove-button"]'), 'Remove');
     $this->drupalPostForm('file/add', $edit, t('Next'));
 
     // Check if your on form step 2, scheme selecting.
