@@ -64,12 +64,12 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
   $replacements = array();
 
   $url_options = array('absolute' => TRUE);
-  if (isset($options['language'])) {
-    $url_options['language'] = $options['language'];
-    $language_code = $options['language']->language;
+  if (isset($options['langcode'])) {
+    $url_options['language'] = language_load($options['langcode']);
+    $langcode = $options['langcode'];
   }
   else {
-    $language_code = NULL;
+    $langcode = NULL;
   }
 
   $sanitize = !empty($options['sanitize']);
