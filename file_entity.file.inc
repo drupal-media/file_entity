@@ -150,7 +150,7 @@ function file_entity_file_load($files) {
   }*/
 
   // Load and unserialize metadata.
-  $results = db_query("SELECT * FROM {file_metadata} WHERE fid IN (:fids)", array(':fids' => array_keys($files)));
+  $results = db_query("SELECT * FROM {file_metadata} WHERE fid IN (:fids[])", array(':fids[]' => array_keys($files)));
   foreach ($results as $result) {
     $files[$result->fid]->metadata[$result->name] = unserialize($result->value);
   }
