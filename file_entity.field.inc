@@ -83,7 +83,7 @@ function file_entity_field_formatter_info_alter(&$info) {
   // default mimetype restriction added to the image/* mime type for use with
   // file formatters.
   foreach ($info as &$formatter) {
-    if (!isset($formatter['file formatter']) && in_array('image', $formatter['field types']) && !in_array('file', $formatter['field types'])) {
+    if (!isset($formatter['file formatter']) && in_array('image', $formatter['field_types']) && !in_array('file', $formatter['field_types'])) {
       $formatter['file formatter']['mime types'] = array('image/*');
     }
   }
