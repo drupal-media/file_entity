@@ -129,7 +129,10 @@ class FileTypeForm extends EntityForm {
    */
   protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
     // Convert multi-line string to array before copying.
-    $form_state->setValue('mimetypes', explode("\n", $form_state->getValue('mimetypes')));
+    // This may be called multiple times and exectued only if it is a string.
+    if (is_string($form_state->getValue('mimetypes'))) {
+      $form_state->setValue('mimetypes', explode("\n", $form_state->getValue('mimetypes')));
+    }
     parent::copyFormValuesToEntity($entity, $form, $form_state);
   }
 }
