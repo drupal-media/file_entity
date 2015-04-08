@@ -7,7 +7,7 @@
 
 namespace Drupal\file_entity\Tests;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
@@ -106,13 +106,14 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
     $node3->save();
 
     // Check cache tags.
-    $contexts = ['theme', 'timezone', 'user.roles'];
+    $contexts = ['languages:language_interface', 'user.permissions', 'theme', 'timezone', 'user.roles'];
     $this->assertPageCacheContextsAndTags($node1->urlInfo(), $contexts, [
       'node:' . $node1->id(),
       'node_view',
       'rendered',
       'user:0',
       'user_view',
+      'config:user.role.anonymous',
     ]);
     $this->assertPageCacheContextsAndTags($node2->urlInfo(), $contexts, [
       'node:' . $node2->id(),
@@ -120,6 +121,7 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
       'rendered',
       'user:0',
       'user_view',
+      'config:user.role.anonymous',
     ]);
     $this->assertPageCacheContextsAndTags($node3->urlInfo(), $contexts, [
       'node:' . $node3->id(),
@@ -127,6 +129,7 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
       'rendered',
       'user:0',
       'user_view',
+      'config:user.role.anonymous',
     ]);
 
     // Save the first file to invalidate cache tags.
@@ -152,7 +155,7 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
    */
   protected function verifyPageCache(Url $url, $hit_or_miss, $tags = FALSE) {
     $this->drupalGet($url);
-    $message = String::format('Page cache @hit_or_miss for %path.', array('@hit_or_miss' => $hit_or_miss, '%path' => $url->toString()));
+    $message = SafeMarkup::format('Page cache @hit_or_miss for %path.', array('@hit_or_miss' => $hit_or_miss, '%path' => $url->toString()));
     $this->assertEqual($this->drupalGetHeader('X-Drupal-Cache'), $hit_or_miss, $message);
     if ($hit_or_miss === 'HIT' && is_array($tags)) {
       $absolute_url = $url->setAbsolute()->toString();

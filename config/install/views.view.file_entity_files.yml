@@ -678,8 +678,7 @@ display:
           decimal: .
           separator: ','
           format_plural: true
-          format_plural_singular: '1 place'
-          format_plural_plural: '@count places'
+          format_plural_string: "1 place\x03@count places"
           prefix: ''
           suffix: ''
           plugin_id: numeric
@@ -1352,8 +1351,7 @@ display:
           decimal: .
           separator: ','
           format_plural: false
-          format_plural_singular: '1'
-          format_plural_plural: '@count'
+          format_plural_string: "1 place\x03@count places"
           prefix: ''
           suffix: ''
           plugin_id: numeric
