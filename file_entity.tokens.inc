@@ -4,7 +4,7 @@
  * @file
  * Token integration for the file_entity module.
  */
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Url;
 use Drupal\file_entity\Entity\FileType;
 
@@ -82,7 +82,7 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
       switch ($name) {
         case 'type':
           if ($file_type = FileType::load($file->bundle())) {
-            $replacements[$original] = $sanitize ? String::checkPlain($file_type->label()) : $file_type->label();
+            $replacements[$original] = $sanitize ? SafeMarkup::checkPlain($file_type->label()) : $file_type->label();
           }
           break;
 
@@ -109,7 +109,7 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'name':
-          $replacements[$original] = $sanitize ? String::checkPlain($file_type->label()) : $file_type->label();
+          $replacements[$original] = $sanitize ? SafeMarkup::checkPlain($file_type->label()) : $file_type->label();
           break;
 
         case 'machine-name':
