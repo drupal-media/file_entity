@@ -7,10 +7,10 @@
 
 namespace Drupal\file_entity\Form;
 
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Url;
-use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\FileInterface;
 use Drupal\user\PrivateTempStoreFactory;
@@ -111,7 +111,7 @@ class FileDeleteMultipleForm extends ConfirmFormBase {
     $form['files'] = array(
       '#theme' => 'item_list',
       '#items' => array_map(function (FileInterface $file) {
-        return String::checkPlain($file->label());
+        return SafeMarkup::checkPlain($file->label());
       }, $this->files),
     );
     $form = parent::buildForm($form, $form_state);

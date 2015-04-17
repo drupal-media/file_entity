@@ -8,7 +8,7 @@
 namespace Drupal\file_entity\Form;
 
 use Drupal\Component\Utility\Bytes;
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -257,7 +257,7 @@ class FileAddForm extends FormBase {
   function stepScheme(array $form, FormStateInterface $form_state) {
     $options = array();
     foreach (\Drupal::service('stream_wrapper_manager')->getDescriptions(StreamWrapperInterface::WRITE_VISIBLE) as $scheme => $description) {
-      $options[$scheme] = String::checkPlain($description);
+      $options[$scheme] = SafeMarkup::checkPlain($description);
     }
 
     $form['scheme'] = array(

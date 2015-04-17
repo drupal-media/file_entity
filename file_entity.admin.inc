@@ -6,7 +6,7 @@
 
 require_once dirname(__FILE__) . '/file_entity.pages.inc';
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\file_entity\Entity\FileType;
 use Drupal\user\Entity\User;
@@ -18,7 +18,7 @@ function file_filters() {
   $visible_steam_wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::VISIBLE);
   $options = array();
   foreach ($visible_steam_wrappers as $scheme => $information) {
-    $options[$scheme] = String::checkPlain($information['name']);
+    $options[$scheme] = SafeMarkup::checkPlain($information['name']);
   }
   $filters['uri'] = array(
     'title' => t('scheme'),
