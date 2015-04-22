@@ -108,6 +108,16 @@ class FileEntity extends File {
     $this->typedData = NULL;
     // Update the entity keys cache.
     $this->entityKeys['bundle'] = $type;
+    // Later on the original will be compared to the new entity, which fails if some fields do not exist.
+    if(!empty($this->original)) {
+      // Set the original type field.
+      $this->original->get('type')->target_id = $type;
+      // Set the field definitions, so that they will be fetched for the new bundle.
+      $this->original->fieldDefinitions = NULL;
+      $this->original->typedData = NULL;
+      // Set the original entity keys cache.
+      $this->original->entityKeys['bundle'] = $type;
+    }
   }
 
   /**
