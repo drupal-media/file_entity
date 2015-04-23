@@ -83,6 +83,15 @@ class FileEntity extends File {
     if ($this->bundle() === FILE_TYPE_NONE) {
       $this->updateBundle();
     }
+    // \Drupal\Core\Entity\ContentEntityStorageBase::hasFieldChanged() expects
+    // that the original entity has the same fields. Update the bundle if it was
+    // changed.
+    if (!empty($this->original) && $this->bundle() != $this->original->bundle()) {
+      $this->original->get('type')->target_id = $this->bundle();
+      $this->original->fieldDefinitions = NULL;
+      $this->original->typedData = NULL;
+      $this->original->entityKeys['bundle'] = $this->bundle();
+    }
 
     // Fetch image dimensions.
     module_load_include('inc', 'file_entity', 'file_entity.file');

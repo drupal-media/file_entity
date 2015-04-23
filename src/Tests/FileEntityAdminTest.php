@@ -282,6 +282,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
   public function testUsageView() {
     $this->container->get('module_installer')->install(array('node'));
     $file = $this->createFileEntity(array('uid' => $this->userAdmin));
+    // Next line causes an exception, core issue.
     $this->drupalLogin($this->userAdmin);
 
     // Check the usage links on the file overview.

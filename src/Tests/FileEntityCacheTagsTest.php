@@ -88,7 +88,7 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
           'target_id' => $file2->id(),
           'display' => 1,
           'description' => '',
-        )
+        ),
       ),
     ));
     $node2->save();
@@ -106,7 +106,7 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
     $node3->save();
 
     // Check cache tags.
-    $contexts = ['languages:language_interface', 'user.permissions', 'theme', 'timezone', 'user.roles'];
+    $contexts = ['languages:language_interface', 'user.permissions', 'theme', 'timezone'];
     $this->assertPageCacheContextsAndTags($node1->urlInfo(), $contexts, [
       'node:' . $node1->id(),
       'node_view',
