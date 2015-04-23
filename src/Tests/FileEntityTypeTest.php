@@ -109,7 +109,6 @@ class FileEntityTypeTest extends FileEntityTestBase {
     $edit = array();
     $edit["{$field_name}[0][value]"] = $this->randomMachineName();
     $edit['filename[0][value]'] = $this->randomMachineName();
-    debug($edit, "Edit array");
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $edit['filename[0][value]'])));
 

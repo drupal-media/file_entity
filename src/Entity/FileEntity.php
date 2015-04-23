@@ -83,14 +83,13 @@ class FileEntity extends File {
     if ($this->bundle() === FILE_TYPE_NONE) {
       $this->updateBundle();
     }
-    // If the original file entity is empty.
-    // And the updated bundle is different than the original bundle.
+    // \Drupal\Core\Entity\ContentEntityStorageBase::hasFieldChanged() expects
+    // that the original entity has the same fields. Update the bundle if it was
+    // changed.
     if (!empty($this->original) && $this->bundle() != $this->original->bundle()) {
-      // We set the original type field.
       $this->original->get('type')->target_id = $this->bundle();
       $this->original->fieldDefinitions = NULL;
       $this->original->typedData = NULL;
-      // And set the original entity keys cache.
       $this->original->entityKeys['bundle'] = $this->bundle();
     }
 
