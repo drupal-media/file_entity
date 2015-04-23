@@ -83,6 +83,16 @@ class FileEntity extends File {
     if ($this->bundle() === FILE_TYPE_NONE) {
       $this->updateBundle();
     }
+    // If the original file entity is empty.
+    // And the updated bundle is different than the original bundle.
+    if (!empty($this->original) && $this->bundle() != $this->original->bundle()) {
+      // We set the original type field.
+      $this->original->get('type')->target_id = $this->bundle();
+      $this->original->fieldDefinitions = NULL;
+      $this->original->typedData = NULL;
+      // And set the original entity keys cache.
+      $this->original->entityKeys['bundle'] = $this->bundle();
+    }
 
     // Fetch image dimensions.
     module_load_include('inc', 'file_entity', 'file_entity.file');
@@ -108,16 +118,6 @@ class FileEntity extends File {
     $this->typedData = NULL;
     // Update the entity keys cache.
     $this->entityKeys['bundle'] = $type;
-    // Later on the original will be compared to the new entity, which fails if some fields do not exist.
-    if(!empty($this->original)) {
-      // Set the original type field.
-      $this->original->get('type')->target_id = $type;
-      // Set the field definitions, so that they will be fetched for the new bundle.
-      $this->original->fieldDefinitions = NULL;
-      $this->original->typedData = NULL;
-      // Set the original entity keys cache.
-      $this->original->entityKeys['bundle'] = $type;
-    }
   }
 
   /**
