@@ -34,6 +34,12 @@ use Drupal\file_entity\FileTypeInterface;
  *     "label" = "label",
  *     "status" = "status",
  *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "description",
+ *     "mimetypes",
+ *   },
  *   links = {
  *     "collection" = "/admin/structure/file-types",
  *     "edit-form" = "/admin/structure/file-types/manage/{file_type}/edit",
