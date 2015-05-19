@@ -27,7 +27,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
    * {@inheritdoc}
    */
   public static $modules = array(
-    'entity',
+    'simpletest',
     'field',
     'file',
     'file_entity',
