@@ -6,7 +6,7 @@
 
 namespace Drupal\file_entity\Normalizer;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\hal\Normalizer\ContentEntityNormalizer;
 use Gliph\Exception\RuntimeException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
@@ -61,7 +61,7 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
       $entity->setFileUri($uri);
     }
     else {
-      throw new RuntimeException(String::format('Failed to write @filename.', array('@filename' => $entity->getFilename())));
+      throw new RuntimeException(SafeMarkup::format('Failed to write @filename.', array('@filename' => $entity->getFilename())));
     }
     return $entity;
   }

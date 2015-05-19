@@ -1049,7 +1049,7 @@ function template_preprocess_file(&$variables) {
 
   $variables['file_url']  = $file->url('canonical');
   $label                  = $file->label();
-  $variables['label']     = \Drupal\Component\Utility\String::checkPlain($label);
+  $variables['label']     = \Drupal\Component\Utility\SafeMarkup::checkPlain($label);
   $variables['page']      = $view_mode == 'full' && file_entity_is_page($file);
 
   // Hide the file name from being displayed until we can figure out a better

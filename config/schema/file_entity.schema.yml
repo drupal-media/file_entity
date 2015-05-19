@@ -23,7 +23,7 @@ file_entity.settings:
   label: 'File Entity settings'
   mapping:
     max_filesize:
-      type: string
+      type: integer
       label: 'Maximum upload size'
     default_allowed_extensions:
       type: string
