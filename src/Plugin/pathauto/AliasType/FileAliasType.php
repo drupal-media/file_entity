@@ -78,10 +78,9 @@ class FileAliasType extends EntityAliasTypeBase implements AliasTypeBatchUpdateI
     }
 
     if (!empty($options['message'])) {
-      drupal_set_message(\Drupal::translation()->formatPlural(count($fids), 'Updated URL alias for 1 node.', 'Updated URL aliases for @count nodes.'));
+      drupal_set_message(\Drupal::translation()->formatPlural(count($fids), 'Updated URL alias for 1 file.', 'Updated URL aliases for @count files.'));
     }
-
-
+    
     $context['sandbox']['count'] += count($fids);
     $context['sandbox']['current'] = max($fids);
     $context['message'] = t('Updated alias for file @fid.', array('@fid' => end($fids)));
