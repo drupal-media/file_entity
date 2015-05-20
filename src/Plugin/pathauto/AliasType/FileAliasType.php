@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\pathauto\Plugin\AliasType\NodeAliasType.
+ * Contains \Drupal\file_entity\Plugin\AliasType\FileAliasType.
  */
 
 namespace Drupal\file_entity\Plugin\pathauto\AliasType;
@@ -13,13 +13,12 @@ use Drupal\pathauto\AliasTypeBatchUpdateInterface;
 use Drupal\pathauto\Plugin\pathauto\AliasType\EntityAliasTypeBase;
 
 /**
- * A pathauto alias type plugin for content entities.
+ * A pathauto alias type plugin for file entities.
  *
  * @AliasType(
  *   id = "file",
  *   label = @Translation("File"),
  *   types = {"file"},
- *   provider = "file",
  * )
  */
 class FileAliasType extends EntityAliasTypeBase implements AliasTypeBatchUpdateInterface, ContainerFactoryPluginInterface {
@@ -80,7 +79,7 @@ class FileAliasType extends EntityAliasTypeBase implements AliasTypeBatchUpdateI
     if (!empty($options['message'])) {
       drupal_set_message(\Drupal::translation()->formatPlural(count($fids), 'Updated URL alias for 1 file.', 'Updated URL aliases for @count files.'));
     }
-    
+
     $context['sandbox']['count'] += count($fids);
     $context['sandbox']['current'] = max($fids);
     $context['message'] = t('Updated alias for file @fid.', array('@fid' => end($fids)));
