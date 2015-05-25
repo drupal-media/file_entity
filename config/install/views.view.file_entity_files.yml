@@ -682,157 +682,10 @@ display:
           prefix: ''
           suffix: ''
           plugin_id: numeric
-        edit:
-          id: edit
+        operations:
+          id: operations
           table: file_managed
-          field: edit
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: ''
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: null
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: false
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          plugin_id: file_entity_link_edit
-        delete:
-          id: delete
-          table: file_managed
-          field: delete
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: ''
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: null
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: false
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          plugin_id: file_entity_link_delete
-        download:
-          id: download
-          table: file_managed
-          field: download
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: ''
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: null
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: false
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          plugin_id: file_entity_link_download
-        dropbutton:
-          id: dropbutton
-          table: views
-          field: dropbutton
+          field: operations
           relationship: none
           group_type: group
           admin_label: ''
@@ -855,7 +708,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -869,7 +722,7 @@ display:
           element_class: ''
           element_label_type: ''
           element_label_class: ''
-          element_label_colon: false
+          element_label_colon: true
           element_wrapper_type: ''
           element_wrapper_class: ''
           element_default_classes: true
@@ -877,22 +730,9 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          fields:
-            edit: edit
-            delete: delete
-            download: download
-            bulk_form: '0'
-            fid: '0'
-            filename: '0'
-            type: '0'
-            filemime: '0'
-            filesize: '0'
-            status: '0'
-            created: '0'
-            changed: '0'
-            count: '0'
           destination: true
-          plugin_id: dropbutton
+          entity_type: file
+          plugin_id: entity_operations
       filters:
         filename:
           id: filename
@@ -1070,6 +910,15 @@ display:
       group_by: false
       show_admin_links: true
       display_extenders: {  }
+    cache_metadata:
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - url
+        - 'url.query_args.pagers:0'
+        - 'url.query_args:order'
+        - 'url.query_args:sort'
+      cacheable: false
   overview:
     display_plugin: page
     id: overview
@@ -1098,6 +947,15 @@ display:
           admin_label: 'File usage'
           required: false
       display_extenders: {  }
+    cache_metadata:
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - url
+        - 'url.query_args.pagers:0'
+        - 'url.query_args:order'
+        - 'url.query_args:sort'
+      cacheable: false
   usage:
     display_plugin: page
     id: usage
@@ -1476,3 +1334,11 @@ display:
           content: 'This table lists all of the places where <em>%1</em> is used.'
           plugin_id: text_custom
       display_extenders: {  }
+    cache_metadata:
+      contexts:
+        - 'languages:language_interface'
+        - url
+        - 'url.query_args.pagers:0'
+        - 'url.query_args:order'
+        - 'url.query_args:sort'
+      cacheable: false

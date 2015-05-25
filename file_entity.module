@@ -649,9 +649,9 @@ function file_entity_entity_type_alter(&$entity_types) {
     ->setLinkTemplate('collection', '/admin/content/files')
     ->setLinkTemplate('edit-form', '/file/{file}/edit')
     ->setLinkTemplate('delete-form', '/file/{file}/delete')
-    ->setViewBuilderClass('Drupal\file_entity\Entity\FileEntityViewBuilder');
+    ->setViewBuilderClass('Drupal\file_entity\Entity\FileEntityViewBuilder')
+    ->setListBuilderClass('Drupal\Core\Entity\EntityListBuilder');
 
-  //$entity_types['file']['uri callback'] = 'file_entity_uri';
   /*$entity_types['file']['view modes']['teaser'] = array(
     'label' => t('Teaser'),
     'custom settings' => TRUE,
@@ -679,17 +679,6 @@ function file_entity_entity_type_alter(&$entity_types) {
     $entity_types['file']['view modes']['search_result'] = array(
       'label' => t('Search result'),
       'custom settings' => FALSE,
-    );
-  }*/
-
-  /*foreach (file_type_get_enabled_types() as $type) {
-    $entity_types['file']['bundles'][$type->type] = array(
-      'label' => $type->label,
-      'admin' => array(
-        'path' => 'admin/structure/file-types/manage/%file_type',
-        'real path' => 'admin/structure/file-types/manage/' . $type->type,
-        'bundle argument' => 4,
-      ),
     );
   }*/
 
