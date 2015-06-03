@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
@@ -28,8 +29,9 @@ class FileName extends FieldPluginBase {
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
 
-    if (!empty($options['link_to_file'])) {
-      $this->additional_fields['uri'] = 'uri';
+    // Don't add the additional fields to groupby
+    if (!empty($this->options['link_to_file'])) {
+      $this->additional_fields['file'] = array('table' => 'file_managed', 'field' => 'fid');
     }
   }
 
@@ -67,12 +69,15 @@ class FileName extends FieldPluginBase {
    *   Returns a string for the link text.
    */
   protected function renderLink($data, ResultRow $values) {
-    if (!empty($this->options['link_to_file']) && $data !== NULL && $data !== '') {
-      $file = $entity = $this->getEntity($values);
-      $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = $file->getSystemPath();
+    if (!empty($this->options['link_to_file']) && !empty($this->additional_fields['fid'])) {
+      if ($data !== NULL && $data !== '') {
+        $this->options['alter']['make_link'] = TRUE;
+        $this->options['alter']['url'] = Url::fromRoute('entity.file.canonical', ['file' => $this->getValue($values, 'fid')]);
+      }
+      else {
+        $this->options['alter']['make_link'] = FALSE;
+      }
     }
-
     return $data;
   }
 
