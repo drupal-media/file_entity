@@ -85,7 +85,12 @@ class FileEntityAdminTest extends FileEntityTestBase {
     }
 
     $this->drupalGet('admin/content/files');
-    $this->assertEqual($files_query, $this->xpath('//table/tbody/tr/td[2]/a'), 'Files are sorted in the view according to the default query.');
+    $list = $this->xpath('//table[@class="views-table views-view-table cols-10 responsive-enabled"]/tbody//tr');
+    $entries = [];
+    foreach ($list as $entry) {
+      $entries[] = trim((string) $entry->td[1]);
+    }
+    $this->assertEqual($files_query, $entries, 'Files are sorted in the view according to the default query.');
 
     // Compare the rendered HTML node list to a query for the files ordered by
     // filename to account for possible database-dependent sort order.
@@ -95,7 +100,12 @@ class FileEntityAdminTest extends FileEntityTestBase {
     }
 
     $this->drupalGet('admin/content/files', array('query' => array('sort' => 'asc', 'order' => 'filename')));
-    $this->assertEqual($files_query, $this->xpath('//table/tbody/tr/td[2]/a'), 'Files are sorted in the view the same as they are in the query.');
+    $list = $this->xpath('//table[@class="views-table views-view-table cols-10 responsive-enabled"]/tbody//tr');
+    $entries = [];
+    foreach ($list as $entry) {
+      $entries[] = trim((string) $entry->td[1]);
+    }
+    $this->assertEqual($files_query, $entries, 'Files are sorted in the view the same as they are in the query.');
   }
 
   /**
@@ -145,10 +155,17 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertResponse(200);
     $this->assertLinkByHref('file/' . $files['public_image']->id());
     $this->assertLinkByHref('file/' . $files['public_document']->id());
-    $this->assertNoLinkByHref('file/' . $files['public_image']->id() . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['public_image']->id() . '/delete');
-    $this->assertNoLinkByHref('file/' . $files['public_document']->id() . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['public_document']->id() . '/delete');
+    // @todo: Operations links are currently displayed for all users.
+    // Switch back to assertNoLinkByHref() after www.drupal.org/node/2406533
+    // is resolved.
+    $this->drupalGet('file/' . $files['public_image']->id() . '/edit');
+    $this->assertResponse(403, 'User doesn\'t have permission to edit files');
+    $this->drupalGet('file/' . $files['public_image']->id() . '/delete');
+    $this->assertResponse(403, 'User doesn\'t have permission to delete files');
+    $this->drupalGet('file/' . $files['public_document']->id() . '/edit');
+    $this->assertResponse(403, 'User doesn\'t have permission to edit files');
+    $this->drupalGet('file/' . $files['public_document']->id() . '/delete');
+    $this->assertResponse(403, 'User doesn\'t have permission to delete files');
 
     // Verify no tableselect.
     $this->assertNoFieldByName('bulk_form[' . $files['public_image']->id() . ']', '', t('No bulk form checkbox found.'));
@@ -160,8 +177,10 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertResponse(200);
     $this->assertLinkByHref($files['private_document']->url());
     // Verify no operation links are displayed.
-    $this->assertNoLinkByHref($files['private_document']->url('edit-form'));
-    $this->assertNoLinkByHref($files['private_document']->url('delete-form'));
+    $this->drupalGet($files['private_document']->url('edit-form'));
+    $this->assertResponse(403, 'User doesn\'t have permission to edit files');
+    $this->drupalGet($files['private_document']->url('delete-form'));
+    $this->assertResponse(403, 'User doesn\'t have permission to delete files');
 
     // Verify user cannot see private file of other users.
     $this->assertNoLinkByHref($files['private_image']->url());
