@@ -60,8 +60,13 @@ class FileDelete extends ActionBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function executeMultiple(array $entities) {
+    // @todo Make translation-aware, similar to node.
+    $entities_by_id = [];
+    foreach ($entities as $entity) {
+      $entities_by_id[$entity->id()] = $entity;
+    }
     // Just save in temp store for now, delete after confirmation.
-    $this->tempStore->set('delete', $entities);
+    $this->tempStore->set('delete', $entities_by_id);
   }
 
   /**
