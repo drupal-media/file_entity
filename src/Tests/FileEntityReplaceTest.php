@@ -71,7 +71,8 @@ class FileEntityReplaceTest extends FileEntityTestBase {
 
     // Test that validation works by uploading a non-text file as a replacement.
     $this->drupalPostForm('file/' . $file->id() . '/edit', $edit, t('Save'));
-    $this->assertRaw(t('The specified file %file could not be uploaded. Only files with the following extensions are allowed:', array('%file' => $image->getFilename())), 'File validation works, upload failed correctly.');
+    $this->assertRaw(t('The specified file %file could not be uploaded.', array('%file' => $image->getFilename())), 'File validation works, upload failed correctly.');
+    $this->assertText('Only files with the following extensions are allowed: txt.');
 
     // Create a non-local file record.
     /** @var \Drupal\file\FileInterface $file2 */
