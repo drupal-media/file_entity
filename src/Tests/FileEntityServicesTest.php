@@ -7,6 +7,7 @@
 namespace Drupal\file_entity\Tests;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
@@ -75,7 +76,7 @@ class FileEntityServicesTest extends RESTTestBase {
     $file->save();
 
     // Create a node with a file.
-    $node = entity_create('node', array(
+    $node = Node::create(array(
       'title' => 'A node with a file',
       'type' => 'resttest',
       'field_file' => array(
@@ -88,8 +89,7 @@ class FileEntityServicesTest extends RESTTestBase {
     $node->save();
 
     // GET node.
-    $node_url = $node->url();
-    $response_json = $this->httpRequest($node_url, 'GET', NULL, $this->defaultMimeType);
+    $response_json = $this->httpRequest($node->urlInfo()->setRouteParameter('_format', $this->defaultFormat), 'GET', NULL);
     $this->assertResponse(200);
     $response_data = Json::decode($response_json);
 
@@ -99,7 +99,7 @@ class FileEntityServicesTest extends RESTTestBase {
 
     // Remove the node.
     $node->delete();
-    $this->httpRequest($node_url, 'GET', NULL, $this->defaultMimeType);
+    $this->httpRequest($node->urlInfo()->setRouteParameter('_format', $this->defaultFormat), 'GET', NULL);
     $this->assertResponse(404);
 
     // POST node to create new.
@@ -114,7 +114,7 @@ class FileEntityServicesTest extends RESTTestBase {
 
     $serialized = Json::encode($response_data);
     $this->enableService('entity:node', 'POST');
-    $this->httpRequest('entity/node', 'POST', $serialized, $this->defaultMimeType);
+    $this->httpRequest(Url::fromRoute('rest.entity.node.POST')->setRouteParameter('_format', $this->defaultFormat), 'POST', $serialized);
     $this->assertResponse(201);
 
     // Test that the new node has a valid file field.
