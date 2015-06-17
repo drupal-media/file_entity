@@ -19,6 +19,8 @@ use Symfony\Component\Routing\RouteCollection;
 /**
  * Tests the File entity normalizer.
  *
+ * @see Drupal\file_entity\Normalizer\FileEntityNormalizer
+ *
  * @group file_entity
  */
 class FileEntityNormalizerTest extends KernelTestBase {

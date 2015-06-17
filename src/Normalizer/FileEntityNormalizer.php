@@ -7,6 +7,7 @@
 namespace Drupal\file_entity\Normalizer;
 
 use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\hal\Normalizer\ContentEntityNormalizer;
 use Gliph\Exception\RuntimeException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
@@ -24,7 +25,7 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
   /**
    * {@inheritdoc}
    */
-  protected function getEntityUri($entity) {
+  protected function getEntityUri(EntityInterface $entity) {
     // The URI should refer to the entity, not only directly to the file.
     global $base_url;
     return $base_url . $entity->urlInfo()->toString();
