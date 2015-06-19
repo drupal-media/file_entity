@@ -4,66 +4,13 @@
  * @file
  * Install, update and uninstall functions for the file_entity module.
  */
+
 use Drupal\views\Entity\View;
 
 /**
  * Implements hook_schema().
  */
 function file_entity_schema() {
-  $schema['file_display'] = array(
-    'description' => 'Stores configuration options for file displays.',
-    'fields' => array(
-      // @todo Can be refactored as a compond primary key after
-      //   http://drupal.org/node/924236 is implemented.
-      'name' => array(
-        'description' => 'A combined string (FILE_TYPE__VIEW_MODE__FILE_FORMATTER) identifying a file display configuration. For integration with CTools Exportables, stored as a single string rather than as a compound primary key.',
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-      ),
-      'weight' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Weight of formatter within the display chain for the associated file type and view mode. A file is rendered using the lowest weighted enabled display configuration that matches the file type and view mode and that is capable of displaying the file.',
-      ),
-      'status' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'size' => 'tiny',
-        'description' => 'The status of the display. (1 = enabled, 0 = disabled)',
-      ),
-      'settings' => array(
-        'type' => 'blob',
-        'not null' => FALSE,
-        'size' => 'big',
-        'serialize' => TRUE,
-        'description' => 'A serialized array of name value pairs that store the formatter settings for the display.',
-      ),
-    ),
-    'primary key' => array('name'),
-    // Exportable support via CTools.
-    'export' => array(
-      'key' => 'name',
-      'key name' => 'Name',
-      'primary key' => 'name',
-      // The {file_display}.status field is used to control whether the display
-      // is active in the display chain. CTools-level disabling is something
-      // different, and it's not yet clear how to interpret it for file
-      // displays. Until that's figured out, prevent CTools-level disabling.
-      'can disable' => FALSE,
-      'default hook' => 'file_default_displays',
-      'identifier' => 'file_display',
-      'api' => array(
-        'owner' => 'file_entity',
-        'api' => 'file_default_displays',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
-  );
   $schema['file_metadata'] = array(
     'description' => 'Cache images dimensions.',
     'fields' => array(
@@ -77,7 +24,7 @@ function file_entity_schema() {
       'name' => array(
         'description' => "The name of the metadata (e.g. 'width').",
         'type' => 'varchar',
-        'length' => '255',
+        'length' => '128',
         'not null' => TRUE,
       ),
       'value' => array(
