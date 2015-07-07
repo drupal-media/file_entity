@@ -94,7 +94,7 @@ class FileEditForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     // Handle the replacement file if uploaded.
     if ($form_state->getValue('replace_upload')) {
       // Save the file as a temporary file.
@@ -108,7 +108,7 @@ class FileEditForm extends ContentEntityForm {
         $form_state->setError($form['replace_upload'], t('The replacement file could not be uploaded.'));
       }
     }
-    parent::validate($form, $form_state);
+    parent::validateForm($form, $form_state);
   }
 
   /**
