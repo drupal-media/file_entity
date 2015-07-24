@@ -1088,14 +1088,24 @@ function template_preprocess_file(&$variables) {
   if ($variables['classes_array'][0] == 'file-entity') {
     $variables['classes_array'][0] = 'file';
   }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function file_entity_theme_suggestions_file_alter(array &$suggestions, array $variables) {
+  $view_mode = $variables['view_mode'] = $variables['elements']['#view_mode'];
+
+  /** @var FileInterface $file */
+  $file = $variables['elements']['#file'];
 
   // Clean up name so there are no underscores.
-  $variables['theme_hook_suggestions'][] = 'file__' . $file->bundle();
-  $variables['theme_hook_suggestions'][] = 'file__' . $file->bundle() . '__' . $view_mode;
-  $variables['theme_hook_suggestions'][] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->getMimeType());
-  $variables['theme_hook_suggestions'][] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->getMimeType()) . '__' . $view_mode;
-  $variables['theme_hook_suggestions'][] = 'file__' . $file->id();
-  $variables['theme_hook_suggestions'][] = 'file__' . $file->id() . '__' . $view_mode;
+  $suggestions[] = 'file__' . $file->bundle();
+  $suggestions[] = 'file__' . $file->bundle() . '__' . $view_mode;
+  $suggestions[] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->getMimeType());
+  $suggestions[] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->getMimeType()) . '__' . $view_mode;
+  $suggestions[] = 'file__' . $file->id();
+  $suggestions[] = 'file__' . $file->id() . '__' . $view_mode;
 }
 
 /**
