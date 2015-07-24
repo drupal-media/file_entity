@@ -7,6 +7,8 @@
 
 namespace Drupal\file_entity\Tests;
 
+use Drupal\Core\Render\BubbleableMetadata;
+
 /**
  * Tests the file entity tokens.
  *
@@ -39,7 +41,8 @@ class FileEntityTokenTest extends FileEntityTestBase {
 
   function assertTokens($type, array $data, array $tokens, array $options = array()) {
     $token_input = array_combine(array_keys($tokens), array_keys($tokens));
-    $values = \Drupal::token()->generate($type, $token_input, $data, $options);
+    $bubbleable_metadata = new BubbleableMetadata();
+    $values = \Drupal::token()->generate($type, $token_input, $data, $options, $bubbleable_metadata);
     foreach ($tokens as $token => $expected) {
       if (!isset($expected)) {
         $this->assertTrue(!isset($values[$token]), t("Token value for [@type:@token] was not generated.", array('@type' => $type, '@token' => $token)));

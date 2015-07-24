@@ -7,6 +7,7 @@
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Url;
 use Drupal\file_entity\Entity\FileType;
+use Drupal\Core\Render\BubbleableMetadata;
 
 /**
  * Implements hook_token_info().
@@ -60,7 +61,7 @@ function file_entity_token_info_alter(&$info) {
 /**
  * Implements hook_tokens().
  */
-function file_entity_tokens($type, $tokens, array $data = array(), array $options = array()) {
+function file_entity_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $replacements = array();
 
   $url_options = array('absolute' => TRUE);
@@ -82,6 +83,7 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
       switch ($name) {
         case 'type':
           if ($file_type = FileType::load($file->bundle())) {
+            $bubbleable_metadata->addCacheableDependency($file_type);
             $replacements[$original] = $sanitize ? SafeMarkup::checkPlain($file_type->label()) : $file_type->label();
           }
           break;
@@ -95,10 +97,10 @@ function file_entity_tokens($type, $tokens, array $data = array(), array $option
     // Chained token relationships.
     $token_service = \Drupal::service('token');
     if (($file_type_tokens = $token_service->findWithPrefix($tokens, 'type')) && $file_type = FileType::load($file->bundle())) {
-      $replacements += $token_service->generate('file-type', $file_type_tokens, array('file_type' => $file_type), $options);
+      $replacements += $token_service->generate('file-type', $file_type_tokens, array('file_type' => $file_type), $options, $bubbleable_metadata);
     }
     if ($download_url_tokens = $token_service->findWithPrefix($tokens, 'download-url')) {
-      $replacements += $token_service->generate('url', $download_url_tokens, file_entity_download_url($file)->toString(), $options);
+      $replacements += $token_service->generate('url', $download_url_tokens, file_entity_download_url($file)->toString(), $options, $bubbleable_metadata);
     }
   }
 
