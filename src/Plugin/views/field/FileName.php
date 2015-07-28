@@ -31,7 +31,7 @@ class FileName extends FieldPluginBase {
 
     // Don't add the additional fields to groupby
     if (!empty($this->options['link_to_file'])) {
-      $this->additional_fields['file'] = array('table' => 'file_managed', 'field' => 'fid');
+      $this->additional_fields['fid'] = array('table' => 'file_managed', 'field' => 'fid');
     }
   }
 
