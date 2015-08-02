@@ -23,7 +23,10 @@ class FileTypeListBuilder extends ConfigEntityListBuilder {
    */
   public function buildHeader() {
     $header['label'] = t('Label');
-    $header['description'] = t('Description');
+    $header['description'] = array(
+      'data' => t('Description'),
+      'class' => array(RESPONSIVE_PRIORITY_MEDIUM),
+    );
     $header['status'] = t('Status');
     return $header + parent::buildHeader();
   }
@@ -33,8 +36,11 @@ class FileTypeListBuilder extends ConfigEntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     /** @var FileType $entity */
-    $row['label'] = $this->getLabel($entity);
-    $row['description'] = $entity->getDescription();
+    $row['label'] = array(
+      'data' => $this->getLabel($entity),
+      'class' => array('menu-label'),
+    );
+    $row['description']['data'] = ['#markup' => $entity->getDescription()];
     $row['status'] = $entity->status() ? t('Enabled') : t('Disabled');
     return $row + parent::buildRow($entity);
   }
