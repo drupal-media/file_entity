@@ -142,6 +142,14 @@ class FileEntity extends File {
       ))
       ->setDisplayConfigurable('form', TRUE);
 
+    $fields['uri']
+      ->setDisplayOptions('view', array(
+        'type' => 'file_image',
+        'label' => 'hidden',
+        'weight' => -5,
+      ))
+      ->setDisplayConfigurable('view', TRUE);
+
     $fields['uid']->setDisplayOptions('view', array(
       'type' => 'uri_link',
       'weight' => 1,
@@ -162,7 +170,7 @@ class FileEntity extends File {
       'weight' => 2,
     ));
     $fields['filesize']->setDisplayOptions('view', array(
-      'type' => 'string',
+      'type' => 'file_size',
       'weight' => 3,
     ));
 

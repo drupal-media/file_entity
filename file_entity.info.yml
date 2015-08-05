@@ -8,4 +8,5 @@ dependencies:
   - text
   - entity_reference
   - views
+  - image
 configure: file_entity.settings
