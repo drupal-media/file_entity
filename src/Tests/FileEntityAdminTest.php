@@ -300,6 +300,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
    */
   public function testUsageView() {
     $this->container->get('module_installer')->install(array('node'));
+    \Drupal::service('router.builder')->rebuild();
     $file = $this->createFileEntity(array('uid' => $this->userAdmin));
     // @todo Next line causes an exception, core issue https://www.drupal.org/node/2462283
     $this->drupalLogin($this->userAdmin);
