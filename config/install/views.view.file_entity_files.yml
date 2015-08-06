@@ -21,6 +21,7 @@ display:
     display_title: Master
     position: 0
     display_options:
+      rendering_language: '***LANGUAGE_entity_default***'
       access:
         type: perm
         options:
@@ -83,13 +84,10 @@ display:
             filemime: filemime
             filesize: filesize
             status: status
-            created: created
             changed: changed
+            created: created
             count: count
-            edit: edit
-            delete: delete
-            view: view
-            dropbutton: dropbutton
+            operations: operations
           info:
             bulk_form:
               align: ''
@@ -138,14 +136,14 @@ display:
               separator: ''
               empty_column: false
               responsive: priority-low
-            created:
+            changed:
               sortable: true
               default_sort_order: desc
               align: ''
               separator: ''
               empty_column: false
               responsive: ''
-            changed:
+            created:
               sortable: true
               default_sort_order: desc
               align: ''
@@ -159,28 +157,7 @@ display:
               separator: ''
               empty_column: false
               responsive: priority-medium
-            edit:
-              sortable: false
-              default_sort_order: asc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            delete:
-              sortable: false
-              default_sort_order: asc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            view:
-              sortable: false
-              default_sort_order: asc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            dropbutton:
+            operations:
               sortable: false
               default_sort_order: asc
               align: ''
@@ -521,58 +498,6 @@ display:
           empty_zero: false
           hide_alter_empty: true
           plugin_id: file_status
-        created:
-          id: created
-          table: file_managed
-          field: created
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: 'Upload date'
-          exclude: false
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: null
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          date_format: medium
-          custom_date_format: ''
-          timezone: ''
-          plugin_id: date
         changed:
           id: changed
           table: file_managed
@@ -580,7 +505,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Changed date'
+          label: Changed
           exclude: false
           alter:
             alter_text: false
@@ -599,7 +524,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -621,10 +546,92 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          date_format: medium
-          custom_date_format: ''
-          timezone: ''
-          plugin_id: date
+          click_sort_column: value
+          type: timestamp
+          settings:
+            date_format: short
+            custom_date_format: ''
+            timezone: ''
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          entity_type: file
+          entity_field: changed
+          plugin_id: field
+        created:
+          id: created
+          table: file_managed
+          field: created
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: Created
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: timestamp
+          settings:
+            date_format: short
+            custom_date_format: ''
+            timezone: ''
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          entity_type: file
+          entity_field: created
+          plugin_id: field
         count:
           id: count
           table: file_usage
@@ -907,17 +914,15 @@ display:
           admin_label: 'File usage'
           required: true
       arguments: {  }
-      group_by: false
+      group_by: true
       show_admin_links: true
       display_extenders: {  }
     cache_metadata:
       contexts:
-        - 'languages:language_content'
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
-        - 'url.query_args:order'
-        - 'url.query_args:sort'
+        - url.query_args
+        - user.permissions
       cacheable: false
   overview:
     display_plugin: page
@@ -925,6 +930,7 @@ display:
     display_title: 'Files overview'
     position: 1
     display_options:
+      rendering_language: '***LANGUAGE_entity_default***'
       path: admin/content/files
       route_name: entity.file.collection
       menu:
@@ -949,12 +955,10 @@ display:
       display_extenders: {  }
     cache_metadata:
       contexts:
-        - 'languages:language_content'
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
-        - 'url.query_args:order'
-        - 'url.query_args:sort'
+        - url.query_args
+        - user.permissions
       cacheable: false
   usage:
     display_plugin: page
@@ -962,6 +966,7 @@ display:
     display_title: 'File usage'
     position: 2
     display_options:
+      rendering_language: '***LANGUAGE_entity_default***'
       display_description: ''
       path: file/%file/usage
       empty:
@@ -1338,7 +1343,6 @@ display:
       contexts:
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
-        - 'url.query_args:order'
-        - 'url.query_args:sort'
+        - url.query_args
+        - user.permissions
       cacheable: false
