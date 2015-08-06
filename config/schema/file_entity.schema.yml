@@ -19,7 +19,7 @@ file_entity.type.*:
           label: 'MIME type'
 
 file_entity.settings:
-  type: mapping
+  type: config_object
   label: 'File Entity settings'
   mapping:
     max_filesize:
