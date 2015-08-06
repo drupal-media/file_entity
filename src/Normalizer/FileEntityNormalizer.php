@@ -7,10 +7,7 @@
 namespace Drupal\file_entity\Normalizer;
 
 use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\hal\Normalizer\ContentEntityNormalizer;
-use Gliph\Exception\RuntimeException;
-use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 
 /**
  * Normalizer for File entity.
@@ -21,15 +18,6 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
    * {@inheritdoc}
    */
   protected $supportedInterfaceOrClass = 'Drupal\file\FileInterface';
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEntityUri(EntityInterface $entity) {
-    // The URI should refer to the entity, not only directly to the file.
-    global $base_url;
-    return $base_url . $entity->urlInfo()->toString();
-  }
 
   /**
    * {@inheritdoc}
@@ -62,7 +50,7 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
       $entity->setFileUri($uri);
     }
     else {
-      throw new RuntimeException(SafeMarkup::format('Failed to write @filename.', array('@filename' => $entity->getFilename())));
+      throw new \RuntimeException(SafeMarkup::format('Failed to write @filename.', array('@filename' => $entity->getFilename())));
     }
     return $entity;
   }
