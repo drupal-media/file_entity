@@ -26,9 +26,13 @@ class FileEntityPathautoTest extends FileEntityTestBase {
    * Tests Pathauto support.
    */
   public function testPathauto() {
+    $this->config('pathauto.pattern')
+      ->set('patterns.file.default', 'files/[file:name]')
+      ->save();
+
     $file = $this->createFileEntity();
 
-    $path = \Drupal::service('path.alias_storage')->load(array('source' => $file->urlInfo()->getInternalPath()));
+    $path = \Drupal::service('path.alias_storage')->load(array('source' => '/' . $file->urlInfo()->getInternalPath()));
     $this->assertTrue($path, t('Alias for file found.'));
   }
 
