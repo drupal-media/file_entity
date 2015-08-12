@@ -37,8 +37,8 @@ class FileSizeFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   public function viewElements(FieldItemListInterface $items) {
-    $elements = array();
-    $files = [$items->getEntity()];;
+    $elements = [];
+    $files = [$items->getEntity()];
 
     // Early opt-out if the field is empty.
     if (empty($files)) {
@@ -46,9 +46,9 @@ class FileSizeFormatter extends FormatterBase {
     }
 
     foreach ($files as $delta => $file) {
-      $elements[$delta] = array(
+      $elements[$delta] = [
         '#markup' => format_size($file->getSize(), $file->language()->getId()),
-      );
+      ];
     }
 
     return $elements;

@@ -30,13 +30,13 @@ class FileImageFormatter extends ImageFormatter {
    * {@inheritdoc}
    */
   public function viewElements(FieldItemListInterface $items) {
-    $elements = array();
+    $elements = [];
     $file = $items->getEntity();
 
     $image_style_setting = $this->getSetting('image_style');
 
     // Collect cache tags to be added for each item in the field.
-    $cache_tags = array();
+    $cache_tags = [];
     if (!empty($image_style_setting)) {
       $image_style = $this->imageStyleStorage->load($image_style_setting);
       $cache_tags = $image_style->getCacheTags();
@@ -44,22 +44,22 @@ class FileImageFormatter extends ImageFormatter {
     $cache_tags = Cache::mergeTags($cache_tags, $file->getCacheTags());
 
     if (isset($image_style)) {
-      $elements[0] = array(
+      $elements[0] = [
         '#theme' => 'image_style',
         '#style_name' => $image_style_setting,
-      );
+      ];
     }
     else {
-      $elements[0] = array(
+      $elements[0] = [
         '#theme' => 'image',
-      );
+      ];
     }
-    $elements[0] += array(
+    $elements[0] += [
       '#uri' => $file->getFileUri(),
-      '#cache' => array(
+      '#cache' => [
         'tags' => $cache_tags,
-      ),
-    );
+      ],
+    ];
 
     return $elements;
   }
