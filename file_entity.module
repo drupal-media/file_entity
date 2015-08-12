@@ -9,6 +9,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -1789,17 +1790,28 @@ function file_entity_file_load($files) {
     'sanitize' => FALSE,
   );
 
+  /** @var \Drupal\Core\Utility\Token::replace $token_service */
+  $token_service = \Drupal::service('token');
+
+  /** @var \Drupal\file_entity\Entity\FileEntity $file */
   foreach ($files as $file) {
     $file->metadata = array();
 
-    $token_service = \Drupal::service('token');
-
     // Load alt and title text from fields.
     if (!empty($alt)) {
-      $file->alt = $token_service->replace($alt, array('file' => $file), $replace_options);
+      $token_bubbleable_metadata = new BubbleableMetadata();
+      $file->alt = $token_service->replace($alt, array('file' => $file), $replace_options, $token_bubbleable_metadata);
+      // Add the cacheability metadata of the token to the file entity. This
+      // means attachments are discarded, but it does not ever make sense to
+      // have attachments for an image's "alt" attribute anyway, so this is
+      // acceptable.
+      $file->addCacheableDependency($token_bubbleable_metadata);
     }
     if (!empty($title)) {
-      $file->title = $token_service->replace($title, array('file' => $file), $replace_options);
+      $token_bubbleable_metadata = new BubbleableMetadata();
+      $file->title = $token_service->replace($title, array('file' => $file), $replace_options, $token_bubbleable_metadata);
+      // Similar to the above, but for the "title" attribute.
+      $file->addCacheableDependency($token_bubbleable_metadata);
     }
   }
 
