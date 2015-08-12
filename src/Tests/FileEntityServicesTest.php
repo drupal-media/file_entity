@@ -95,7 +95,7 @@ class FileEntityServicesTest extends RESTTestBase {
 
     // Test that field_file refers to the file entity.
     $normalized_field = $response_data['_embedded'][$this->getAbsoluteUrl('/rest/relation/node/resttest/field_file')];
-    $this->assertEqual($normalized_field[0]['_links']['self']['href'], $this->getAbsoluteUrl($file->urlInfo()->toString()));
+    $this->assertEqual($normalized_field[0]['_links']['self']['href'], $file->urlInfo()->setAbsolute()->setRouteParameter('_format', $this->defaultFormat)->toString());
 
     // Remove the node.
     $node->delete();

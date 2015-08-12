@@ -88,7 +88,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $list = $this->xpath('//table[@class="views-table views-view-table cols-10 responsive-enabled"]/tbody//tr');
     $entries = [];
     foreach ($list as $entry) {
-      $entries[] = trim((string) $entry->td[1]);
+      $entries[] = trim((string) $entry->td[1]->a);
     }
     $this->assertEqual($files_query, $entries, 'Files are sorted in the view according to the default query.');
 
@@ -103,7 +103,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $list = $this->xpath('//table[@class="views-table views-view-table cols-10 responsive-enabled"]/tbody//tr');
     $entries = [];
     foreach ($list as $entry) {
-      $entries[] = trim((string) $entry->td[1]);
+      $entries[] = trim((string) $entry->td[1]->a);
     }
     $this->assertEqual($files_query, $entries, 'Files are sorted in the view the same as they are in the query.');
   }

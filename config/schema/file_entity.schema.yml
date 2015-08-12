@@ -47,6 +47,12 @@ file_entity.settings:
       type: boolean
       label: Allow insecure downloads
 
+field.formatter.settings.file_image:
+  type: field.formatter.settings.image
+
+field.formatter.settings.file_size:
+  type: mapping
+
 action.configuration.file_delete_action:
   type: action_configuration_default
   label: 'Delete file configuration'
