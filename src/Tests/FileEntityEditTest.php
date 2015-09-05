@@ -18,8 +18,13 @@ class FileEntityEditTest extends FileEntityTestBase {
   protected $web_user;
   protected $admin_user;
 
+  public static $modules = ['block'];
+
   function setUp() {
     parent::setUp();
+    // Add the tasks and actions blocks.
+    $this->drupalPlaceBlock('local_actions_block');
+    $this->drupalPlaceBlock('local_tasks_block');
 
     $this->web_user = $this->drupalCreateUser(array('edit own document files', 'create files'));
     $this->admin_user = $this->drupalCreateUser(array('bypass file access', 'administer files'));

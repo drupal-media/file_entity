@@ -37,10 +37,20 @@ class FileEntityAdminTest extends FileEntityTestBase {
   protected $userEditDelete;
 
   /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = ['block'];
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
+    // Add the tasks and actions blocks.
+    $this->drupalPlaceBlock('local_actions_block');
+    $this->drupalPlaceBlock('local_tasks_block');
 
     // Remove the "view files" permission which is set
     // by default for all users so we can test this permission
