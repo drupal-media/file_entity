@@ -74,6 +74,16 @@ class FileEntityReplaceTest extends FileEntityTestBase {
     $this->assertRaw(t('The specified file %file could not be uploaded.', array('%file' => $image->getFilename())), 'File validation works, upload failed correctly.');
     $this->assertText('Only files with the following extensions are allowed: txt.');
 
+    $replacement = next($this->files['text']);
+
+    // Test the file upload.
+    $edit = array();
+    $edit['files[replace_upload]'] = drupal_realpath($replacement->getFileUri());
+    $this->drupalPostForm('file/' . $file->id() . '/edit', $edit, t('Upload'));
+    $this->assertText('text-2.txt');
+    $this->drupalPostForm(NULL, array(), t('Save'));
+    $this->assertText(t('@file has been updated.', array('@file' => $file->getFilename()))/*, 'File was updated with file upload.'*/);
+
     // Create a non-local file record.
     /** @var \Drupal\file\FileInterface $file2 */
     $file2 = File::create(array('type' => 'image'));
@@ -87,5 +97,6 @@ class FileEntityReplaceTest extends FileEntityTestBase {
     // Test that Upload widget does not appear for non-local file.
     $this->drupalGet('file/' . $file2->id() . '/edit');
     $this->assertNoFieldByName('files[replace_upload]');
+
   }
 }
