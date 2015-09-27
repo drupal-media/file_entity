@@ -31,6 +31,7 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
         'data' => array(array('value' => $file_data)),
       );
     }
+    debug($data);
     return $data;
   }
 

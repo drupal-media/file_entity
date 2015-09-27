@@ -29,7 +29,7 @@ class FileImageFormatter extends ImageFormatter {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
     $file = $items->getEntity();
 
