@@ -54,7 +54,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $this->drupalPostForm('file/add', $edit, t('Next'));
 
     // Check that the document file has been uploaded.
-    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Document', '%name' => $test_file->filename)), t('Document file uploaded.'));
+    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => $test_file->filename)), t('Document file uploaded.'));
 
     // Check that the file exists in the database.
     $file = $this->getFileByFilename($test_file->filename);
@@ -90,7 +90,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $this->drupalPostForm(NULL, $edit, t('Next'));
 
     // Check that the document file has been uploaded.
-    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Document', '%name' => $test_file->filename)), t('Document file uploaded.'));
+    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => $test_file->filename)), t('Document file uploaded.'));
 
     // Check that the file exists in the database.
     $file = $this->getFileByFilename($test_file->filename);

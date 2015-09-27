@@ -110,7 +110,7 @@ class FileEntityTypeTest extends FileEntityTestBase {
     $edit["{$field_name}[0][value]"] = $this->randomMachineName();
     $edit['filename[0][value]'] = $this->randomMachineName();
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image 2', '%name' => $edit['filename[0][value]'])));
+    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Image 2', '%name' => $edit['filename[0][value]'])));
 
     // Check that the file exists in the database.
     $file = $this->getFileByFilename($edit['filename[0][value]']);
@@ -164,7 +164,7 @@ class FileEntityTypeTest extends FileEntityTestBase {
     $edit["{$field_name}[0][value]"] = $this->randomMachineName();
     $edit['filename[0][value]'] = $this->randomMachineName();
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $edit['filename[0][value]'])));
+    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Image', '%name' => $edit['filename[0][value]'])));
 
     // Check that the file exists in the database.
     $file = $this->getFileByFilename($edit['filename[0][value]']);

@@ -635,7 +635,6 @@ function file_entity_entity_type_alter(&$entity_types) {
   $keys = $entity_types['file']->getKeys();
   $keys['bundle'] = 'type';
   $entity_types['file']
-    ->set('fieldable', TRUE)
     ->set('entity_keys', $keys)
     ->set('bundle_entity_type', 'file_type')
     ->set('admin_permission', 'administer files')
@@ -1069,7 +1068,7 @@ function template_preprocess_file(&$variables) {
   //if (variable_get('file_submitted_' . $file->type, FALSE)) { @TODO: What todo with this?
   if (FALSE) {
     $variables['display_submitted'] = TRUE;
-    $variables['submitted'] = t('Uploaded by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
+    $variables['submitted'] = t('Uploaded by @username on @datetime', array('@username' => $variables['name'], '@datetime' => $variables['date']));
     $variables['user_picture'] = theme_get_setting('toggle_file_user_picture') ? theme('user_picture', array('account' => $account)) : '';
   }
   else {
