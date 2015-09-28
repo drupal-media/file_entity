@@ -51,7 +51,7 @@ class FileEditableWidget extends FileWidget {
         '#value' => t('Edit'),
         '#submit' => [get_called_class(), 'submitUpdate'],
         '#ajax' => [
-          'callback' => [get_called_class(), 'ajaxEdit'],
+          'callback' => 'Drupal\file_entity\Controller\DialogFileController::edit',
         ],
       ];
     }
@@ -61,24 +61,6 @@ class FileEditableWidget extends FileWidget {
 
   public static function submitUpdate($form, FormStateInterface $form_state) {
     $form_state->setRebuild();
-  }
-
-  public static function ajaxEdit($form, FormStateInterface $form_state) {
-    $triggering_parents = $form_state->getTriggeringElement()['#parents'];
-    array_pop($triggering_parents);
-    $value = NestedArray::getValue($form_state->getValues(), $triggering_parents);
-    $fid = $value['fids'][0];
-    /** @var \Drupal\file\FileInterface $file */
-    $file = File::load($fid);
-    $file_edit_form_object = \Drupal::entityManager()->getFormObject('file', 'edit');
-    $file_edit_form_object->setEntity($file);
-    $file_edit_form = $file_edit_form_object->buildForm(array(), new FormState());
-
-    $response = new AjaxResponse();
-    $file_edit_form['#attached']['library'][] = 'core/drupal.dialog.ajax';
-    $response->setAttachments($file_edit_form['#attached']);
-    $response->addCommand(new OpenModalDialogCommand($file_edit_form['#title'], $file_edit_form));
-    return $response;
   }
 
 }
