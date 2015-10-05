@@ -41,12 +41,9 @@ class FileEditableWidget extends FileWidget {
   public static function process($element, FormStateInterface $form_state, $form) {
     $element = parent::process($element, $form_state, $form);
 
-    if (!$element['#files']) {
-      return $element;
-    }
-
     foreach ($element['#files'] as $fid => $file) {
       $element['edit_button'] = [
+        '#name' => "edit_$fid",
         '#type' => 'submit',
         '#value' => t('Edit'),
         '#submit' => [get_called_class(), 'submitUpdate'],

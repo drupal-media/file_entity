@@ -42,7 +42,7 @@ class DialogFileController extends ControllerBase {
     $file_edit_form_state = (new FormState())
       ->setFormObject($file_edit_form_object)
       ->disableRedirect();
-    $file_edit_form = $file_edit_form_object->buildForm(array(), $file_edit_form_state);
+    $file_edit_form = \Drupal::service('form_builder')->buildForm($file_edit_form_object, $file_edit_form_state);
 
     $response = new AjaxResponse();
     $file_edit_form['#attached']['library'][] = 'core/drupal.dialog.ajax';
