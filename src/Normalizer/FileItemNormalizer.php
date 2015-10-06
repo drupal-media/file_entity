@@ -43,7 +43,8 @@ class FileItemNormalizer extends EntityReferenceItemNormalizer {
     $field_uri = $this->linkManager->getRelationUri($entity->getEntityTypeId(), $entity->bundle(), $field_name);
 
     // Add any field-specific data.
-    $data['_embedded'][$field_uri][0] += $field_item->getValue();
+    $data['_embedded'][$field_uri][0] = $field_item->getValue();
+    unset($data['_embedded'][$field_uri][0]['target_id']);
 
     return $data;
   }
