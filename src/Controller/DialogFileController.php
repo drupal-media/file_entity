@@ -6,13 +6,12 @@
 
 namespace Drupal\file_entity\Controller;
 
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Form\FormState;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\file\Entity\File;
+use Drupal\file\FileInterface;
 
 /**
  * Controller for dialog requests.
@@ -20,35 +19,37 @@ use Drupal\file\Entity\File;
 class DialogFileController extends ControllerBase {
 
   /**
-   * Return Ajax dialog command for editing a file inline.
+   * Return an Ajax dialog command for editing a file inline.
    *
-   * @param array $form
-   *   The containing form structure.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The state of the containing form.
+   * @param \Drupal\file\FileInterface $file
+   *   The file being edited.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
-   *   An Ajax response for presenting a dialog for the edited file.
+   *   An Ajax response with a command for opening or closing the a dialog
+   *   containing the edit form.
    */
-  public function edit($form, FormStateInterface $form_state) {
-    $triggering_parents = $form_state->getTriggeringElement()['#parents'];
-    array_pop($triggering_parents);
-    $value = NestedArray::getValue($form_state->getValues(), $triggering_parents);
-    $fid = $value['fids'][0];
-    /** @var \Drupal\file\FileInterface $file */
-    $file = File::load($fid);
-    $file_edit_form_object = \Drupal::entityManager()->getFormObject('file', 'edit');
-    $file_edit_form_object->setEntity($file);
-    $file_edit_form_state = (new FormState())
-      ->setFormObject($file_edit_form_object)
+  public function inlineEdit(FileInterface $file) {
+    // Build the file edit form.
+    $form_object = $this->entityManager()->getFormObject('file', 'inline_edit');
+    $form_object->setEntity($file);
+    $form_state = (new FormState())
+      ->setFormObject($form_object)
       ->disableRedirect();
-    $file_edit_form = \Drupal::service('form_builder')->buildForm($file_edit_form_object, $file_edit_form_state);
+    // Building the form also submits.
+    $form = $this->formBuilder()->buildForm($form_object, $form_state);
 
-    $response = new AjaxResponse();
-    $file_edit_form['#attached']['library'][] = 'core/drupal.dialog.ajax';
-    $response->setAttachments($file_edit_form['#attached']);
-    $response->addCommand(new OpenModalDialogCommand($file_edit_form['#title'], $file_edit_form));
-    return $response;
+    // Return a response, depending on whether it's successfully submitted.
+    if (!$form_state->isExecuted()) {
+      // Return the form as a modal dialog.
+      $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
+      $title = $this->t('Edit file @file', ['@file' => $file->label()]);
+      $response = AjaxResponse::create()->addCommand(new OpenModalDialogCommand($title    , $form));
+      return $response;
+    }
+    else {
+      // Return command for closing the modal.
+      return AjaxResponse::create()->addCommand(new CloseModalDialogCommand());
+    }
   }
 
 }

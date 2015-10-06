@@ -113,6 +113,13 @@ entity.file.edit_form:
   options:
     _admin_route: TRUE
 
+entity.file.inline_edit_form:
+  path: /file/{file}/inline-edit
+  defaults:
+    _controller: '\Drupal\file_entity\Controller\DialogFileController::inlineEdit'
+  requirements:
+    _entity_access: 'file.update'
+
 entity.file.delete_form:
   path: /file/{file}/delete
   defaults:
