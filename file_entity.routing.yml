@@ -116,7 +116,7 @@ entity.file.edit_form:
 entity.file.inline_edit_form:
   path: /file/{file}/inline-edit
   defaults:
-    _controller: '\Drupal\file_entity\Controller\DialogFileController::inlineEdit'
+    _controller: '\Drupal\file_entity\Controller\FileController::inlineEdit'
   requirements:
     _entity_access: 'file.update'
 
