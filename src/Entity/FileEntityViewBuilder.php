@@ -21,8 +21,8 @@ class FileEntityViewBuilder extends EntityViewBuilder {
   /**
    * {@inheritdoc}
    */
-  protected function getBuildDefaults(EntityInterface $entity, $view_mode, $langcode) {
-    $build = parent::getBuildDefaults($entity, $view_mode, $langcode);
+  protected function getBuildDefaults(EntityInterface $entity, $view_mode) {
+    $build = parent::getBuildDefaults($entity, $view_mode);
 
     // We suppress file entity cache tags, because they are almost exclusively
     // embedded in other pages, except when viewed as a standalone page. To
