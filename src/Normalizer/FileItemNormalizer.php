@@ -23,8 +23,9 @@ class FileItemNormalizer extends EntityReferenceItemNormalizer {
    */
   protected function constructValue($data, $context) {
     $value = parent::constructValue($data, $context);
-    $value['display'] = $data['display'];
-    $value['description'] = $data['description'];
+    // Copy across any additional field-specific properties.
+    $value += $data;
+
     return $value;
   }
 
@@ -41,9 +42,10 @@ class FileItemNormalizer extends EntityReferenceItemNormalizer {
     $entity = $field_item->getEntity();
     $field_uri = $this->linkManager->getRelationUri($entity->getEntityTypeId(), $entity->bundle(), $field_name);
 
-    // Set file field-specific values.
-    $data['_embedded'][$field_uri][0]['display'] = $field_item->get('display')->getValue();
-    $data['_embedded'][$field_uri][0]['description'] = $field_item->get('description')->getValue();
+    // Add any field-specific data.
+    $data['_embedded'][$field_uri][0] += $field_item->getValue();
+
     return $data;
   }
+
 }
