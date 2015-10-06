@@ -25,6 +25,7 @@ class FileItemNormalizer extends EntityReferenceItemNormalizer {
     $value = parent::constructValue($data, $context);
     // Copy across any additional field-specific properties.
     $value += $data;
+    unset($value['_links'], $value['uuid']);
 
     return $value;
   }
@@ -43,7 +44,7 @@ class FileItemNormalizer extends EntityReferenceItemNormalizer {
     $field_uri = $this->linkManager->getRelationUri($entity->getEntityTypeId(), $entity->bundle(), $field_name);
 
     // Add any field-specific data.
-    $data['_embedded'][$field_uri][0] = $field_item->getValue();
+    $data['_embedded'][$field_uri][0] += $field_item->getValue();
     unset($data['_embedded'][$field_uri][0]['target_id']);
 
     return $data;
