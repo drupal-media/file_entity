@@ -57,12 +57,12 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
       $schemes = file_entity_get_public_and_private_stream_wrapper_names();
       if (isset($schemes['private'][file_uri_scheme($entity->getFileUri())])) {
         return AccessResult::allowedIfHasPermission($account, 'view private files')
-          ->orIf(AccessResult::allowedIf($account->isAuthenticated() && $is_owner)->cacheUntilEntityChanges($entity)
+          ->orIf(AccessResult::allowedIf($account->isAuthenticated() && $is_owner)->addCacheableDependency($entity)
             ->andIf(AccessResult::allowedIfHasPermission($account, 'view own private files')));
       }
       elseif ($entity->isPermanent()) {
         return AccessResult::allowedIfHasPermission($account, 'view files')
-          ->orIf(AccessResult::allowedIf($is_owner)->cacheUntilEntityChanges($entity)
+          ->orIf(AccessResult::allowedIf($is_owner)->addCacheableDependency($entity)
             ->andIf(AccessResult::allowedIfHasPermission($account, 'view own files')));
       }
     }
@@ -73,7 +73,7 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
       $permission_action = $operation == 'update' ? 'edit' : $operation;
       $type = $entity->get('type')->target_id;
       return AccessResult::allowedIfHasPermission($account, "$permission_action any $type files")
-        ->orIf(AccessResult::allowedIf($is_owner)->cacheUntilEntityChanges($entity)
+        ->orIf(AccessResult::allowedIf($is_owner)->addCacheableDependency($entity)
           ->andIf(AccessResult::allowedIfHasPermission($account, "$permission_action own $type files")));
     }
 
