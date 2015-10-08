@@ -22,10 +22,10 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  public function access(EntityInterface $entity, $operation, $langcode = LanguageInterface::LANGCODE_DEFAULT, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access(EntityInterface $entity, $operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
     $account = $this->prepareUser($account);
     $result = AccessResult::allowedIfHasPermission($account, 'bypass file access')
-      ->orIf(parent::access($entity, $operation, $langcode, $account, TRUE));
+      ->orIf(parent::access($entity, $operation, $account, TRUE));
     return $return_as_object ? $result : $result->isAllowed();
   }
 
@@ -49,7 +49,7 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     /** @var FileEntity $entity */
     $is_owner = $entity->getOwnerId() === $account->id();
 
@@ -57,12 +57,12 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
       $schemes = file_entity_get_public_and_private_stream_wrapper_names();
       if (isset($schemes['private'][file_uri_scheme($entity->getFileUri())])) {
         return AccessResult::allowedIfHasPermission($account, 'view private files')
-          ->orIf(AccessResult::allowedIf($account->isAuthenticated() && $is_owner)->cacheUntilEntityChanges($entity)
+          ->orIf(AccessResult::allowedIf($account->isAuthenticated() && $is_owner)->addCacheableDependency($entity)
             ->andIf(AccessResult::allowedIfHasPermission($account, 'view own private files')));
       }
       elseif ($entity->isPermanent()) {
         return AccessResult::allowedIfHasPermission($account, 'view files')
-          ->orIf(AccessResult::allowedIf($is_owner)->cacheUntilEntityChanges($entity)
+          ->orIf(AccessResult::allowedIf($is_owner)->addCacheableDependency($entity)
             ->andIf(AccessResult::allowedIfHasPermission($account, 'view own files')));
       }
     }
@@ -73,12 +73,12 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
       $permission_action = $operation == 'update' ? 'edit' : $operation;
       $type = $entity->get('type')->target_id;
       return AccessResult::allowedIfHasPermission($account, "$permission_action any $type files")
-        ->orIf(AccessResult::allowedIf($is_owner)->cacheUntilEntityChanges($entity)
+        ->orIf(AccessResult::allowedIf($is_owner)->addCacheableDependency($entity)
           ->andIf(AccessResult::allowedIfHasPermission($account, "$permission_action own $type files")));
     }
 
     // Fall back to the parent implementation so that file uploads work.
     // @todo Merge that in here somehow?
-    return parent::checkAccess($entity, $operation, $langcode, $account);
+    return parent::checkAccess($entity, $operation, $account);
   }
 }
