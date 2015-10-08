@@ -22,10 +22,10 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  public function access(EntityInterface $entity, $operation, $langcode = LanguageInterface::LANGCODE_DEFAULT, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access(EntityInterface $entity, $operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
     $account = $this->prepareUser($account);
     $result = AccessResult::allowedIfHasPermission($account, 'bypass file access')
-      ->orIf(parent::access($entity, $operation, $langcode, $account, TRUE));
+      ->orIf(parent::access($entity, $operation, $account, TRUE));
     return $return_as_object ? $result : $result->isAllowed();
   }
 
@@ -49,7 +49,7 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     /** @var FileEntity $entity */
     $is_owner = $entity->getOwnerId() === $account->id();
 
@@ -79,6 +79,6 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
 
     // Fall back to the parent implementation so that file uploads work.
     // @todo Merge that in here somehow?
-    return parent::checkAccess($entity, $operation, $langcode, $account);
+    return parent::checkAccess($entity, $operation, $account);
   }
 }
