@@ -6,7 +6,7 @@
  */
 
 namespace Drupal\file_entity\Tests;
-use Drupal\Core\Language\LanguageInterface;
+
 use Drupal\file\FileInterface;
 use Drupal\file_entity\FileEntityAccessControlHandler;
 
@@ -48,7 +48,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
         $expected,
         $op === 'create' ?
           $this->accessControlHandler->createAccess($file, $account) :
-          $this->accessControlHandler->access($file, $op, LanguageInterface::LANGCODE_DEFAULT, $account)
+          $this->accessControlHandler->access($file, $op, $account)
       );
     }
   }
