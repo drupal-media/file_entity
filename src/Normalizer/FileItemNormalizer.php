@@ -23,9 +23,11 @@ class FileItemNormalizer extends EntityReferenceItemNormalizer {
    */
   protected function constructValue($data, $context) {
     $value = parent::constructValue($data, $context);
-    // Copy across any additional field-specific properties.
-    $value += $data;
-    unset($value['_links'], $value['uuid']);
+    if ($value) {
+      // Copy across any additional field-specific properties.
+      $value += $data;
+      unset($value['_links'], $value['uuid']);
+    }
 
     return $value;
   }
