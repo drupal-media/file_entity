@@ -80,7 +80,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
     // Create a file.
     $file_name = $this->randomMachineName() . '.txt';
     file_put_contents("public://$file_name", $this->randomString());
-    $file = entity_create('file', array(
+    $file = File::create(array(
       'uri' => "public://$file_name",
     ));
     $file->save();
@@ -100,7 +100,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
     $file_field_instance->save();
 
     // Create a node referencing the file.
-    $node = entity_create('node', array(
+    $node = Node::create(array(
       'title' => 'A node with a file',
       'type' => $node_type->id(),
       'field_file' => array(
@@ -129,10 +129,10 @@ class FileEntityNormalizerTest extends KernelTestBase {
    */
   public function testFileSerialize() {
 
-    entity_create('file_type', array(
+    FileType::create(array(
       'id' => 'undefined',
     ))->save();
-    foreach ($this->getTestFiles('binary') as $file_obj) {
+    foreach ($this->getTestFiles() as $file_obj) {
       $file_contents = file_get_contents($file_obj->uri);
 
       // Create file entity.
@@ -242,4 +242,5 @@ class FileEntityNormalizerTest extends KernelTestBase {
     }
     return $files;
   }
+
 }
