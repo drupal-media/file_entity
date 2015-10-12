@@ -10,6 +10,8 @@ use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
+use Drupal\file_entity\Entity\FileType;
+use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\simpletest\KernelTestBase;
 use Drupal\system\Tests\Routing\MockRouteProvider;
@@ -32,6 +34,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
     'simpletest',
     'field',
     'file',
+    'image',
     'file_entity',
     'node',
     'serialization',
@@ -77,7 +80,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
     // Create a file.
     $file_name = $this->randomMachineName() . '.txt';
     file_put_contents("public://$file_name", $this->randomString());
-    $file = entity_create('file', array(
+    $file = File::create(array(
       'uri' => "public://$file_name",
     ));
     $file->save();
@@ -97,7 +100,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
     $file_field_instance->save();
 
     // Create a node referencing the file.
-    $node = entity_create('node', array(
+    $node = Node::create(array(
       'title' => 'A node with a file',
       'type' => $node_type->id(),
       'field_file' => array(
@@ -126,10 +129,10 @@ class FileEntityNormalizerTest extends KernelTestBase {
    */
   public function testFileSerialize() {
 
-    entity_create('file_type', array(
+    FileType::create(array(
       'id' => 'undefined',
     ))->save();
-    foreach ($this->getTestFiles('binary') as $file_obj) {
+    foreach ($this->getTestFiles() as $file_obj) {
       $file_contents = file_get_contents($file_obj->uri);
 
       // Create file entity.
@@ -167,6 +170,59 @@ class FileEntityNormalizerTest extends KernelTestBase {
     }
   }
 
+  /**
+   * Tests that image field is identical before and after de/serialization.
+   */
+  public function testImageFieldSerializePersist() {
+    // Create a node type.
+    $node_type = NodeType::create(array('type' => $this->randomMachineName()));
+    $node_type->save();
+
+    // Create a file.
+    $file_name = $this->randomMachineName() . '.jpg';
+    file_put_contents("public://$file_name", $this->randomString());
+    $image = File::create(array(
+      'uri' => "public://$file_name",
+    ));
+    $image->save();
+
+    // Attach a file field to the node type.
+    $image_field_storage = FieldStorageConfig::create(array(
+      'type' => 'image',
+      'entity_type' => 'node',
+      'field_name' => 'field_image',
+    ));
+    $image_field_storage->save();
+    $file_field_instance = FieldConfig::create(array(
+      'field_storage' => $image_field_storage,
+      'entity_type' => 'node',
+      'bundle' => $node_type->id(),
+    ));
+    $file_field_instance->save();
+
+    // Create a node referencing the image.
+    $node = Node::create(array(
+      'title' => 'A node with a image',
+      'type' => $node_type->id(),
+      'field_image' => array(
+        'target_id' => $image->id(),
+        'alt' => 'the image alternative',
+        'title' => 'the title',
+        'width' => 50,
+        'height' => 50,
+      ),
+      'status' => TRUE,
+    ));
+
+    // Export.
+    $serialized = $this->container->get('serializer')->serialize($node, 'hal_json');
+
+    // Import again.
+    $deserialized = $this->container->get('serializer')->deserialize($serialized, 'Drupal\node\Entity\Node', 'hal_json');
+
+    // Compare.
+    $this->assertEqual($node->toArray()['field_image'], $deserialized->toArray()['field_image'], "Image field persists.");
+  }
 
   /**
    * Create some test files like WebTestBase::drupalGetTestFiles().
@@ -186,4 +242,5 @@ class FileEntityNormalizerTest extends KernelTestBase {
     }
     return $files;
   }
+
 }
