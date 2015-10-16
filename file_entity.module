@@ -642,6 +642,7 @@ function file_entity_entity_type_alter(&$entity_types) {
     ->setHandlerClass('storage_schema', 'Drupal\file_entity\FileEntityStorageSchema')
     ->setFormClass('default', 'Drupal\file_entity\Form\FileEditForm')
     ->setFormClass('edit', 'Drupal\file_entity\Form\FileEditForm')
+    ->setFormClass('inline_edit', 'Drupal\file_entity\Form\FileInlineEditForm')
     ->setFormClass('delete', 'Drupal\Core\Entity\ContentEntityDeleteForm')
     ->setAccessClass('Drupal\file_entity\FileEntityAccessControlHandler')
     ->set('field_ui_base_route', 'entity.file_type.edit_form')
@@ -649,6 +650,7 @@ function file_entity_entity_type_alter(&$entity_types) {
     ->setLinkTemplate('collection', '/admin/content/files')
     ->setLinkTemplate('edit-form', '/file/{file}/edit')
     ->setLinkTemplate('delete-form', '/file/{file}/delete')
+    ->setLinkTemplate('inline-edit-form', '/file/{file}/inline-edit')
     ->setViewBuilderClass('Drupal\file_entity\Entity\FileEntityViewBuilder')
     ->setListBuilderClass('Drupal\Core\Entity\EntityListBuilder');
 
