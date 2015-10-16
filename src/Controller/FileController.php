@@ -118,7 +118,7 @@ class FileController extends ControllerBase {
       // Return the form as a modal dialog.
       $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
       $title = $this->t('Edit file @file', ['@file' => $file->label()]);
-      $response = AjaxResponse::create()->addCommand(new OpenModalDialogCommand($title, $form));
+      $response = AjaxResponse::create()->addCommand(new OpenModalDialogCommand($title, $form, ['width' => 800]));
       return $response;
     }
     else {
