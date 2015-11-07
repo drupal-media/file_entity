@@ -70,7 +70,7 @@ class FileEntityServicesTest extends RESTTestBase {
     $file_field_instance->save();
 
     // Create a file.
-    $file_uri = 'public://' . $this->randomMachineName();
+    $file_uri = 'public://' . $this->randomMachineName() . '.txt';
     file_put_contents($file_uri, 'This is some file contents');
     $file = File::create(array('uri' => $file_uri, 'status' => FILE_STATUS_PERMANENT, 'uid' => $account->id()));
     $file->save();
