@@ -34,11 +34,8 @@ function file_entity_hook_info() {
     'file_operations',
     'file_type_info',
     'file_type_info_alter',
-    'file_formatter_info',
-    'file_formatter_info_alter',
     'file_view',
     'file_view_alter',
-    'file_displays_alter',
     'file_type',
     'file_type_alter',
     'file_download_headers_alter',
@@ -371,190 +368,6 @@ function file_entity_metadata_form_file($file) {
 }
 
 /**
- * Implements hook_file_formatter_info().
- */
-function file_entity_file_formatter_info() {
-  $formatters = array();
-
-  // Allow file field formatters to be reused for displaying the file entity's
-  // file pseudo-field.
-  foreach (field_info_formatter_types() as $key => $formatter) {
-    if (array_intersect($formatter['field types'], array('file', 'image'))) {
-      $key = 'file_field_' . $key;
-      $formatters[$key] = array(
-        'label' => $formatter['label'],
-        'description' => !empty($formatter['description']) ? $formatter['description'] : '',
-        'view callback' => 'file_entity_file_formatter_file_field_view',
-      );
-      if (!empty($formatter['settings'])) {
-        $formatters[$key] += array(
-          'default settings' => $formatter['settings'],
-          'settings callback' => 'file_entity_file_formatter_file_field_settings',
-        );
-      }
-      if (!empty($formatter['file formatter'])) {
-        $formatters[$key] += $formatter['file formatter'];
-      }
-    }
-  }
-
-  // Add a simple file formatter for displaying an image in a chosen style.
-  if (\Drupal::moduleHandler()->moduleExists('image')) {
-    $formatters['file_image'] = array(
-      'label' => t('Image'),
-      'default settings' => array(
-        'image_style' => '',
-        'alt' => '[file:field_file_image_alt_text]',
-        'title' => '[file:field_file_image_title_text]'
-      ),
-      'view callback' => 'file_entity_file_formatter_file_image_view',
-      'settings callback' => 'file_entity_file_formatter_file_image_settings',
-      'hidden' => TRUE,
-      'mime types' => array('image/*'),
-    );
-  }
-
-  return $formatters;
-}
-
-/**
- * Implements hook_file_formatter_FORMATTER_view().
- *
- * This function provides a bridge to the field formatter API, so that file
- * field formatters can be reused for displaying the file entity's file
- * pseudo-field.
- */
-function file_entity_file_formatter_file_field_view($file, $display, $langcode) {
-  if (strpos($display['type'], 'file_field_') === 0) {
-    $field_formatter_type = substr($display['type'], strlen('file_field_'));
-    $field_formatter_info = field_info_formatter_types($field_formatter_type);
-    if (isset($field_formatter_info['module'])) {
-      // Set $display['type'] to what hook_field_formatter_*() expects.
-      $display['type'] = $field_formatter_type;
-
-      // Set $items to what file field formatters expect. See file_field_load(),
-      // and note that, here, $file is already a fully loaded entity.
-      $items = array((array) $file);
-
-      // Invoke hook_field_formatter_prepare_view() and
-      // hook_field_formatter_view(). Note that we are reusing field formatter
-      // functions, but we are not displaying a Field API field, so we set
-      // $field and $instance accordingly, and do not invoke
-      // hook_field_prepare_view(). This assumes that the formatter functions do
-      // not rely on $field or $instance. A module that implements formatter
-      // functions that rely on $field or $instance (and therefore, can only be
-      // used for real fields) can prevent this formatter from being used on the
-      // pseudo-field by removing it within hook_file_formatter_info_alter().
-      $field = $instance = NULL;
-      if (($function = ($field_formatter_info['module'] . '_field_formatter_prepare_view')) && function_exists($function)) {
-        $fid = $file->fid;
-        // hook_field_formatter_prepare_view() alters $items by reference.
-        $grouped_items = array($fid => &$items);
-        $function('file', array($fid => $file), $field, array($fid => $instance), $langcode, $grouped_items, array($fid => $display));
-      }
-      if (($function = ($field_formatter_info['module'] . '_field_formatter_view')) && function_exists($function)) {
-        $element = $function('file', $file, $field, $instance, $langcode, $items, $display);
-        // We passed the file as $items[0], so return the corresponding element.
-        if (isset($element[0])) {
-          return $element[0];
-        }
-      }
-    }
-  }
-}
-
-/**
- * Implements hook_file_formatter_FORMATTER_settings().
- *
- * This function provides a bridge to the field formatter API, so that file
- * field formatters can be reused for displaying the file entity's file
- * pseudo-field.
- */
-function file_entity_file_formatter_file_field_settings($form, &$form_state, $settings, $formatter_type, $file_type, $view_mode) {
-  if (strpos($formatter_type, 'file_field_') === 0) {
-    $field_formatter_type = substr($formatter_type, strlen('file_field_'));
-    $field_formatter_info = field_info_formatter_types($field_formatter_type);
-
-    // Invoke hook_field_formatter_settings_form(). We are reusing field
-    // formatter functions, but we are not working with a Field API field, so
-    // set $field accordingly. Unfortunately, the API is for $settings to be
-    // transfered via the $instance parameter, so we must mock it.
-    if (isset($field_formatter_info['module']) && ($function = ($field_formatter_info['module'] . '_field_formatter_settings_form')) && function_exists($function)) {
-      $field = NULL;
-      $mock_instance = array(
-        'display' => array(
-          $view_mode => array(
-            'type' => $field_formatter_type,
-            'settings' => $settings,
-          ),
-        ),
-        'entity_type' => 'file',
-        'bundle' => $file_type,
-      );
-      return $function($field, $mock_instance, $view_mode, $form, $form_state);
-    }
-  }
-}
-
-/**
- * Implements hook_file_formatter_FORMATTER_view().
- *
- * Returns a drupal_render() array to display an image of the chosen style.
- *
- * This formatter is only capable of displaying local images. If the passed in
- * file is either not local or not an image, nothing is returned, so that
- * file_view_file() can try another formatter.
- */
-function file_entity_file_formatter_file_image_view($file, $display, $langcode) {
-  // Prevent PHP notices when trying to read empty files.
-  // @see http://drupal.org/node/681042
-  if (!$file->filesize) {
-    return;
-  }
-
-  // Do not bother proceeding if this file does not have an image mime type.
-  if (file_entity_file_get_mimetype_type($file) != 'image') {
-    return;
-  }
-
-  if (file_entity_file_is_readable($file)) {
-    // We don't sanitize here.
-    // @see http://drupal.org/node/1553094#comment-6257382
-    // Theme function will take care of escaping.
-    if (!isset($file->metadata)) {
-      $file->metadata = array();
-    }
-    $file->metadata += array('width' => NULL, 'height' => NULL);
-    $replace_options = array(
-      'clear' => TRUE,
-      'sanitize' => FALSE,
-    );
-    if (!empty($display['settings']['image_style'])) {
-      $element = array(
-        '#theme' => 'image_style',
-        '#style_name' => $display['settings']['image_style'],
-        '#path' => $file->uri,
-        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->metadata['width'],
-        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->metadata['height'],
-        '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
-        '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
-      );
-    }
-    else {
-      $element = array(
-        '#theme' => 'image',
-        '#path' => $file->uri,
-        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->metadata['width'],
-        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->metadata['height'],
-        '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
-        '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
-      );
-    }
-    return $element;
-  }
-}
-
-/**
  * Check if a file entity is readable or not.
  *
  * @param object $file
@@ -567,76 +380,6 @@ function file_entity_file_is_readable($file) {
   $scheme = file_uri_scheme($file->uri);
   $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::READ);
   return !empty($wrappers[$scheme]);
-}
-
-/**
- * Implements hook_file_formatter_FORMATTER_settings().
- *
- * Returns form elements for configuring the 'file_image' formatter.
- */
-function file_entity_file_formatter_file_image_settings($form, &$form_state, $settings) {
-  $element = array();
-  $element['image_style'] = array(
-    '#title' => t('Image style'),
-    '#type' => 'select',
-    '#options' => image_style_options(FALSE),
-    '#default_value' => $settings['image_style'],
-    '#empty_option' => t('None (original image)'),
-  );
-
-  // For image files we allow the alt attribute (required in HTML).
-  $element['alt'] = array(
-    '#title' => t('Alt attribute'),
-    '#description' => t('The text to use as value for the <em>img</em> tag <em>alt</em> attribute.'),
-    '#type' => 'textfield',
-    '#default_value' => $settings['alt'],
-  );
-
-  // Allow the setting of the title attribute.
-  $element['title'] = array(
-    '#title' => t('Title attribute'),
-    '#description' => t('The text to use as value for the <em>img</em> tag <em>title</em> attribute.'),
-    '#type' => 'textfield',
-    '#default_value' => $settings['title'],
-  );
-
-  if (\Drupal::moduleHandler()->moduleExists('token')) {
-    $element['alt']['#description'] .= t('This field supports tokens.');
-    $element['title']['#description'] .= t('This field supports tokens.');
-    $element['tokens'] = array(
-      '#theme' => 'token_tree',
-      '#token_types' => array('file'),
-      '#dialog' => TRUE,
-    );
-  }
-
-  return $element;
-}
-
-/**
- * Menu access callback for the 'view mode file display settings' pages.
- *
- * Based on _field_ui_view_mode_menu_access(), but the Field UI module might not
- * be enabled.
- */
-function _file_entity_view_mode_menu_access($file_type, $view_mode, $access_callback) {
-  // Deny access if the view mode isn't configured to use custom display
-  // settings.
-  $view_mode_settings = field_view_mode_settings('file', $file_type->type);
-  $visibility = ($view_mode == 'default') || !empty($view_mode_settings[$view_mode]['custom_settings']);
-  if (!$visibility) {
-    return FALSE;
-  }
-
-  // Otherwise, continue to an $access_callback check.
-  $args = array_slice(func_get_args(), 3);
-  $callback = empty($access_callback) ? 0 : trim($access_callback);
-  if (is_numeric($callback)) {
-    return (bool) $callback;
-  }
-  elseif (function_exists($access_callback)) {
-    return call_user_func_array($access_callback, $args);
-  }
 }
 
 /**
@@ -812,18 +555,6 @@ function file_entity_view_mode_label($view_mode, $default = FALSE) {
 function file_entity_get_stream_wrapper($scheme) {
   $wrappers = file_get_stream_wrappers();
   return isset($wrappers[$scheme]) ? $wrappers[$scheme] : FALSE;
-}
-
-/**
- * Implements hook_ctools_plugin_api().
- */
-function file_entity_ctools_plugin_api($owner, $api) {
-  if ($owner == 'file_entity' && $api == 'file_type') {
-    return array('version' => 1);
-  }
-  if ($owner == 'file_entity' && $api == 'file_default_displays') {
-    return array('version' => 1);
-  }
 }
 
 /**
@@ -1095,40 +826,6 @@ function file_entity_file_operations() {
 }
 
 /**
- * Clear the field cache for any entities referencing a specific file.
- *
- * @param object $file
- *   A file object.
- */
-function file_entity_invalidate_field_caches($file) {
-  $entity_types = &drupal_static(__FUNCTION__);
-
-  // Gather the list of entity types which support field caching.
-  if (!isset($entity_types)) {
-    $entity_types = array();
-    foreach (entity_get_info() as $entity_type => $entity_info) {
-      if (!empty($entity_info['fieldable']) && !empty($entity_info['field cache'])) {
-        $entity_types[] = $entity_type;
-      }
-    }
-  }
-
-  // If no entity types support field caching, then there is no work to be done.
-  if (empty($entity_types)) {
-    return;
-  }
-
-  $records = db_query("SELECT DISTINCT type, id FROM {file_usage} WHERE fid = :fid AND type IN (:types) AND id > 0", array(':fid' => $file->fid, ':types' => $entity_types))->fetchAll();
-  if (!empty($records)) {
-    $cids = array();
-    foreach ($records as $record) {
-      $cids[] = 'field:' . $record->type . ':' . $record->id;
-    }
-    cache_clear_all($cids, 'cache_field');
-  }
-}
-
-/**
  * Check if a file entity is considered local or not.
  *
  * @param object $file
@@ -1163,17 +860,6 @@ function file_entity_file_is_writeable(FileInterface $file) {
  * @name pathauto_file Pathauto integration for the core file module.
  * @{
  */
-
-/**
- * Implements hook_form_FORM_ID_alter() on behalf of pathauto.module.
- *
- * Add the Pathauto settings to the file form.
- */
-function pathauto_form_file_entity_edit_alter(&$form, &$form_state, $form_id) {
-  $file = $form_state['file'];
-  $langcode = pathauto_entity_language('file', $file);
-  pathauto_field_attach_form('file', $file, $form, $form_state, $langcode);
-}
 
 /**
  * Implements hook_file_operations() on behalf of pathauto.module.
