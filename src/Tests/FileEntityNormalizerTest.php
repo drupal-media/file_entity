@@ -113,8 +113,6 @@ class FileEntityNormalizerTest extends KernelTestBase {
 
     // Export.
     $serialized = $this->container->get('serializer')->serialize($node, 'hal_json');
-    debug($serialized);
-    debug(json_decode($serialized));
 
     // Import again.
     $deserialized = $this->container->get('serializer')->deserialize($serialized, 'Drupal\node\Entity\Node', 'hal_json');

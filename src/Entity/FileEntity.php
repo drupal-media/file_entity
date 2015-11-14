@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\file\Entity\File;
+use Drupal\file\FileInterface;
 
 /**
  * Replace for the core file entity class.
@@ -94,8 +95,139 @@ class FileEntity extends File {
     }
 
     // Fetch image dimensions.
-    module_load_include('inc', 'file_entity', 'file_entity.file');
-    file_entity_metadata_fetch_image_dimensions($this);
+    $this->fetchImageDimensions();
+  }
+
+  /**
+   * Fetch the dimensions of an image and store them in the file metadata array.
+   */
+  protected function fetchImageDimensions() {
+    // Prevent PHP notices when trying to read empty files.
+    // @see http://drupal.org/node/681042
+    if (!$this->getSize()) {
+      return;
+    }
+
+    // Do not bother proceeding if this file does not have an image mime type.
+    if ($this->getMimeTypeType() != 'image') {
+      return;
+    }
+
+    // We have a non-empty image file.
+    $image = \Drupal::service('image.factory')->get($this->getFileUri());
+    if ($image) {
+      $this->metadata['width'] = $image->getWidth();
+      $this->metadata['height'] = $image->getHeight();
+    }
+    else {
+      // Fallback to NULL values.
+      $this->metadata['width'] = NULL;
+      $this->metadata['height'] = NULL;
+    }
+  }
+
+  /**
+   * Returns the first part of the mimetype of the file.
+   *
+   * @return string
+   *   The mimetype.
+   */
+  public function getMimeTypeType() {
+    list($type, $subtype) = explode('/', $this->getMimeType(), 2);
+    return $type;
+  }
+
+  /**
+   * Implements hook_file_insert().
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+    // Save file metadata.
+    if (!empty($this->metadata)) {
+    if ($update) {
+      db_delete('file_metadata')->condition('fid', $this->id())->execute();
+    }
+      $query = db_insert('file_metadata')->fields(array('fid', 'name', 'value'));
+      foreach ($this->metadata as $name => $value) {
+        $query->values(array(
+          'fid' => $this->id(),
+          'name' => $name,
+          'value' => serialize($value),
+        ));
+      }
+      $query->execute();
+    }
+
+    if ($update) {
+      if (\Drupal::moduleHandler()->moduleExists('image') && $this->getMimeTypeType() == 'image' && $this->getSize()) {
+        // If the image dimensions have changed, update any image field references
+        // to this file and flush image style derivatives.
+        if (isset($this->original->metadata['width']) && ($this->metadata['width'] != $this->original->metadata['width'] || $this->metadata['height'] != $this->original->metadata['height'])) {
+          $this->updateImageFieldDimensions();
+        }
+
+        // Flush image style derivatives whenever an image is updated.
+        image_path_flush($this->getFileUri());
+      }
+    }
+
+  }
+
+  /**
+   * Updates the image dimensions stored in any image fields for a file.
+   *
+   * @see http://drupal.org/node/1448124
+   */
+  protected function updateImageFieldDimensions() {
+    // Prevent PHP notices when trying to read empty files.
+    // @see http://drupal.org/node/681042
+    if (!$this->getSize()) {
+      return;
+    }
+
+    // Do not bother proceeding if this file does not have an image mime type.
+    if ($this->getMimeTypeType() != 'image') {
+      return;
+    }
+
+    // Find all image field enabled on the site.
+    $image_fields = \Drupal::service('entity_field.manager')->getFieldMapByFieldType('image');
+    foreach ($image_fields as $entity_type_id => $field_names) {
+      foreach (array_keys($field_names) as $image_field) {
+        $ids = \Drupal::entityQuery($entity_type_id)
+          ->condition($image_field . '.fid', $this->id())
+          ->execute();
+
+        $entities = \Drupal::entityTypeManager()
+          ->getStorage($entity_type_id)
+          ->load($ids);
+          /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+        foreach ($entities as $entity) {
+          foreach (array_keys($entity->getTranslationLanguages()) as $langcode) {
+            $translation = $entity->getTranslation($langcode);
+            foreach ($translation->$image_field as $item) {
+              if ($item->target_id == $this->id()) {
+                $item->width  = $this->metadata['width'];
+                $item->height  = $this->metadata['height'];
+              }
+            }
+          }
+
+          // Save the updated field column values.
+          $entity->save();
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function preDelete(EntityStorageInterface $storage, array $entities) {
+    // Remove file metadata.
+    db_delete('file_metadata')
+      ->condition('fid', array_keys($entities), 'IN')
+      ->execute();
   }
 
   /**

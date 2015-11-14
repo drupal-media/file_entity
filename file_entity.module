@@ -266,14 +266,6 @@ function file_entity_theme() {
       'render element' => 'elements',
       'template' => 'file',
     ),
-    'file_entity_file_type_overview' => array(
-      'variables' => array('label' => NULL, 'description' => NULL),
-      'file' => 'file_entity.admin.inc',
-    ),
-    'file_entity_file_display_order' => array(
-      'render element' => 'element',
-      'file' => 'file_entity.admin.inc',
-    ),
     'file_entity_file_link' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL),
       'file' => 'file_entity.theme.inc',
@@ -990,11 +982,6 @@ function file_entity_download_url($file, $options = array()) {
   return $url;
 }
 
-function file_entity_file_get_mimetype_type(FileInterface $file) {
-  list($type, $subtype) = explode('/', $file->getMimeType(), 2);
-  return $type;
-}
-
 /**
  * Implements hook_admin_menu_map().
  */
@@ -1034,34 +1021,6 @@ function file_entity_get_download_token(File $file) {
     "file/{$file->id()}/download:" . $file->getFileUri(),
     \Drupal::service('private_key')->get() . \Drupal\Core\Site\Settings::getHashSalt()
   ), 0, 8);
-}
-
-/**
- * Find all fields that are of a certain field type.
- *
- * @param string $field_type
- *   A field type.
- *
- * @return array
- *   An array of field names that match the type $field_type.
- */
-function _file_entity_get_fields_by_type($field_type) {
-  $return = array();
-  if (function_exists('field_info_field_map')) {
-    foreach (field_info_field_map() as $field_name => $field) {
-      if ($field['type'] == $field_type) {
-        $return[$field_name] = $field_name;
-      }
-    }
-  }
-  else {
-    foreach (field_info_fields() as $field_name => $field) {
-      if ($field['type'] == $field_type) {
-        $return[$field_name] = $field_name;
-      }
-    }
-  }
-  return $return;
 }
 
 /**
