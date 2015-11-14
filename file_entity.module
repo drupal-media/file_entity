@@ -10,6 +10,7 @@ use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -17,14 +18,9 @@ use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileType;
 
 /**
- * As part of extending Drupal core's file entity API, this module adds some
- * functions to the 'file' namespace. For organization, those are kept in the
- * 'file_entity.file_api.inc' file.
+ * The {file_managed}.type value when the file type has not yet been determined.
  */
-require_once dirname(__FILE__) . '/file_entity.file_api.inc';
-
-// @todo Remove when http://drupal.org/node/977052 is fixed.
-require_once dirname(__FILE__) . '/file_entity.field.inc';
+define('FILE_TYPE_NONE', 'undefined');
 
 /**
  * Implements hook_hook_info().
@@ -75,15 +71,11 @@ function file_entity_hook_info_alter(&$info) {
 /**
  * Implements hook_help().
  */
-function file_entity_help($path, $arg) {
-  switch ($path) {
-    case 'admin/structure/file-types':
+function file_entity_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_match) {
+    case 'entity.file_type.collection':
       $output = '<p>' . t('When a file is uploaded to this website, it is assigned one of the following types, based on what kind of file it is.') . '</p>';
       return $output;
-    case 'admin/structure/file-types/manage/%/display/preview':
-    case 'admin/structure/file-types/manage/%/file-display/preview':
-      drupal_set_message(t('Some modules rely on the Preview view mode to function correctly. Changing these settings may break parts of your site.'), 'warning');
-      break;
   }
 }
 
@@ -91,19 +83,6 @@ function file_entity_help($path, $arg) {
  * Implements hook_menu().
  */
 function file_entity_menu() {
-//   File Configuration
-//   @todo Move this back to admin/config/media/file-types in Drupal 8 if
-//   MENU_MAX_DEPTH is increased to a value higher than 9.
-  $items['admin/structure/file-types/manage/%file_type'] = array(
-    'title' => 'Manage file types',
-    'description' => 'Manage settings for the type of files used on your site.',
-  );
-
-  $items['file/add/upload/file'] = array(
-    'title' => 'File',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
   $items['file/add/upload/archive'] = array(
     'title' => 'Archive',
     'page callback' => 'drupal_get_form',
@@ -114,97 +93,8 @@ function file_entity_menu() {
     'weight' => -5,
   );
 
-  // Attach a "Manage file display" tab to each file type in the same way that
-  // Field UI attaches "Manage fields" and "Manage display" tabs. Note that
-  // Field UI does not have to be enabled; we're just using the same IA pattern
-  // here for attaching the "Manage file display" page.
-  $bundles = \Drupal::entityManager()->getBundleInfo('file');
-  foreach ($bundles as $file_type => $bundle_info) {
-    if (isset($bundle_info['admin'])) {
-      // Get the base path and access.
-      $path = $bundle_info['admin']['path'];
-      $access = array_intersect_key($bundle_info['admin'], array('access callback' => NULL, 'access argument' => NULL));
-      $access += array(
-        'access callback' => 'user_access',
-        'access arguments' => array('administer file types'),
-      );
-
-      // The file type must be passed to the page callbacks. It might be
-      // configured as a wildcard (multiple file types sharing the same menu
-      // router path).
-      $file_type_argument = isset($bundle_info['admin']['bundle argument']) ? $bundle_info['admin']['bundle argument'] : $file_type;
-
-      $items[$path] = array(
-        'title' => 'Edit file type',
-        'title callback' => 'file_entity_type_get_name',
-        'title arguments' => array(4),
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('file_entity_file_type_form', $file_type_argument),
-        'file' => 'file_entity.admin.inc',
-      ) + $access;
-
-      // Add the 'File type settings' tab.
-      $items["$path/edit"] = array(
-        'title' => 'Edit',
-        'type' => MENU_DEFAULT_LOCAL_TASK,
-      );
-
-      // Add the 'Manage file display' tab.
-      $items["$path/file-display"] = array(
-        'title' => 'Manage file display',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('file_entity_file_display_form', $file_type_argument, 'default'),
-        'type' => MENU_LOCAL_TASK,
-        'weight' => 3,
-        'file' => 'file_entity.admin.inc',
-      ) + $access;
-
-      // Add a secondary tab for each view mode.
-      $weight = 0;
-      $view_modes = array('default' => array('label' => t('Default'))) + $entity_info['view modes'];
-      foreach ($view_modes as $view_mode => $view_mode_info) {
-        $items["$path/file-display/$view_mode"] = array(
-          'title' => $view_mode_info['label'],
-          'page arguments' => array('file_entity_file_display_form', $file_type_argument, $view_mode),
-          'type' => ($view_mode == 'default' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
-          'weight' => ($view_mode == 'default' ? -10 : $weight++),
-          'file' => 'file_entity.admin.inc',
-          // View modes for which the 'custom settings' flag isn't TRUE are
-          // disabled via this access callback. This needs to extend, rather
-          // than override normal $access rules.
-          'access callback' => '_file_entity_view_mode_menu_access',
-          'access arguments' => array_merge(array($file_type_argument, $view_mode, $access['access callback']), $access['access arguments']),
-        );
-      }
-    }
-  }
-
   // Optional devel module integration
   if (\Drupal::moduleHandler()->moduleExists('devel')) {
-    $items['file/%file/devel'] = array(
-      'title' => 'Devel',
-      'page callback' => 'devel_load_object',
-      'page arguments' => array('file', 1),
-      'access arguments' => array('access devel information'),
-      'type' => MENU_LOCAL_TASK,
-      'file' => 'devel.pages.inc',
-      'file path' => drupal_get_path('module', 'devel'),
-      'weight' => 100,
-    );
-    $items['file/%file/devel/load'] = array(
-      'title' => 'Load',
-      'type' => MENU_DEFAULT_LOCAL_TASK,
-    );
-    $items['file/%file/devel/render'] = array(
-      'title' => 'Render',
-      'page callback' => 'devel_render_object',
-      'page arguments' => array('file', 1),
-      'access arguments' => array('access devel information'),
-      'file' => 'devel.pages.inc',
-      'file path' => drupal_get_path('module', 'devel'),
-      'type' => MENU_LOCAL_TASK,
-      'weight' => 100,
-    );
     if (\Drupal::moduleHandler()->moduleExists('token')) {
       $items['file/%file/devel/token'] = array(
         'title' => 'Tokens',
@@ -220,28 +110,6 @@ function file_entity_menu() {
   }
 
   return $items;
-}
-
-/**
- * Gather the rankings from the the hook_ranking implementations.
- *
- * @param $query
- *   A query object that has been extended with the Search DB Extender.
- */
-function _file_entity_rankings(SelectQueryExtender $query) {
-  if ($ranking = \Drupal::moduleHandler()->invokeAll('file_ranking')) {
-    $tables = &$query->getTables();
-    foreach ($ranking as $rank => $values) {
-      if ($file_rank = \Drupal::config('file_entity.settings')->get('rank_' . $rank, 0)) {
-        // If the table defined in the ranking isn't already joined, then add it.
-        if (isset($values['join']) && !isset($tables[$values['join']['alias']])) {
-          $query->addJoin($values['join']['type'], $values['join']['table'], $values['join']['alias'], $values['join']['on']);
-        }
-        $arguments = isset($values['arguments']) ? $values['arguments'] : array();
-        $query->addScore($values['score'], $arguments, $file_rank);
-      }
-    }
-  }
 }
 
 /**
@@ -350,16 +218,6 @@ function file_entity_entity_type_alter(&$entity_types) {
 }
 
 /**
- * Entity API callback to get the form of a file entity.
- */
-function file_entity_metadata_form_file($file) {
-  // Pre-populate the form-state with the right form include.
-  $form_state['build_info']['args'] = array($file);
-  form_load_include($form_state, 'inc', 'file_entity', 'file_entity.pages');
-  return drupal_build_form('file_entity_edit', $form_state);
-}
-
-/**
  * Check if a file entity is readable or not.
  *
  * @param object $file
@@ -372,20 +230,6 @@ function file_entity_file_is_readable($file) {
   $scheme = file_uri_scheme($file->uri);
   $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::READ);
   return !empty($wrappers[$scheme]);
-}
-
-/**
- * Implements hook_modules_enabled().
- */
-function file_entity_modules_enabled($modules) {
-  file_info_cache_clear();
-}
-
-/**
- * Implements hook_modules_disabled().
- */
-function file_entity_modules_disabled($modules) {
-  file_info_cache_clear();
 }
 
 /**
@@ -1118,4 +962,58 @@ function file_entity_file_load($files) {
   foreach ($results as $result) {
     $files[$result->fid]->metadata[$result->name] = unserialize($result->value);
   }
+}
+
+/**
+ * Determines file type for a given file.
+ *
+ * @param \Drupal\file\FileInterface $file
+ *   File object.
+ *
+ * @return string
+ *   Machine name of file type that should be used for given file.
+ */
+function file_get_type(FileInterface $file) {
+  $types = \Drupal::moduleHandler()->invokeAll('file_type', array($file));
+  \Drupal::moduleHandler()->alter('file_type', $types, $file);
+
+  return empty($types) ? NULL : reset($types);
+}
+
+/**
+ * Returns a file object which can be passed to file_save().
+ *
+ * @param string $uri
+ *   A string containing the URI, path, or filename.
+ * @param bool $use_existing
+ *   (Optional) If TRUE and there's an existing file in the {file_managed}
+ *   table with the passed in URI, then that file object is returned.
+ *   Otherwise, a new file object is returned. Default is TRUE.
+ *
+ * @return FileInterface|bool
+ *   A file object, or FALSE on error.
+ *
+ * @todo This should probably be named
+ *   file_load_by_uri($uri, $create_if_not_exists).
+ * @todo Remove this function when http://drupal.org/node/685818 is fixed.
+ */
+function file_uri_to_object($uri, $use_existing = TRUE) {
+  $file = FALSE;
+  $uri = file_stream_wrapper_uri_normalize($uri);
+
+  if ($use_existing) {
+    // We should always attempt to re-use a file if possible.
+    $files = entity_load_multiple_by_properties('file', array('uri' => $uri));
+    $file = !empty($files) ? reset($files) : FALSE;
+  }
+
+  if (empty($file)) {
+    $file = File::create(array(
+      'uid' => \Drupal::currentUser()->id(),
+      'uri' => $uri,
+      'status' => FILE_STATUS_PERMANENT,
+    ));
+  }
+
+  return $file;
 }
