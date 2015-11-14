@@ -218,21 +218,6 @@ function file_entity_entity_type_alter(&$entity_types) {
 }
 
 /**
- * Check if a file entity is readable or not.
- *
- * @param object $file
- *   A file entity object from file_load().
- *
- * @return boolean
- *   TRUE if the file is using a readable stream wrapper, or FALSE otherwise.
- */
-function file_entity_file_is_readable($file) {
-  $scheme = file_uri_scheme($file->uri);
-  $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::READ);
-  return !empty($wrappers[$scheme]);
-}
-
-/**
  * Returns whether the current page is the full page view of the passed-in file.
  *
  * @param $file
@@ -342,21 +327,6 @@ function file_entity_theme_suggestions_file_alter(array &$suggestions, array $va
 }
 
 /**
- * Returns the file type name of the passed file or file type string.
- *
- * @param $file
- *   A file object or string that indicates the file type to return.
- *
- * @return
- *   The file type name or FALSE if the file type is not found.
- */
-function file_entity_type_get_name(FileInterface $file) {
-  $type = is_object($file) ? $file->type : $file;
-  $info = entity_get_info('file');
-  return isset($info['bundles'][$type]['label']) ? $info['bundles'][$type]['label'] : FALSE;
-}
-
-/**
  * Returns a list of available file type names.
  *
  * @return
@@ -378,19 +348,6 @@ function file_entity_type_get_names() {
 function file_entity_view_mode_label($view_mode, $default = FALSE) {
   $labels = \Drupal::entityManager()->getViewModeOptions('file');
   return isset($labels[$view_mode]) ? $labels[$view_mode] : $default;
-}
-
-/**
- * Return a specific stream wrapper's registry information.
- *
- * @param $scheme
- *   A URI scheme, a stream is referenced as "scheme://target".
- *
- * @see file_get_stream_wrappers()
- */
-function file_entity_get_stream_wrapper($scheme) {
-  $wrappers = file_get_stream_wrappers();
-  return isset($wrappers[$scheme]) ? $wrappers[$scheme] : FALSE;
 }
 
 /**
@@ -638,28 +595,6 @@ function file_entity_file_download($uri) {
  * @} End of "defgroup file_entity_access".
  */
 
-/**
- * Implements hook_file_operations().
- */
-function file_entity_file_operations() {
-  $operations = array(
-    'permanent' => array(
-      'label' => t('Indicate that the selected files are permanent and should not be deleted'),
-      'callback' => 'file_entity_mass_update',
-      'callback arguments' => array('updates' => array('status' => FILE_STATUS_PERMANENT)),
-    ),
-    'temporary' => array(
-      'label' => t('Indicate that the selected files are temporary and should be removed during cron runs'),
-      'callback' => 'file_entity_mass_update',
-      'callback arguments' => array('updates' => array('status' => 0)),
-    ),
-    'delete' => array(
-      'label' => t('Delete selected files'),
-      'callback' => NULL,
-    ),
-  );
-  return $operations;
-}
 
 /**
  * Check if a file entity is considered local or not.
@@ -697,79 +632,6 @@ function file_entity_file_is_writeable(FileInterface $file) {
  * @{
  */
 
-/**
- * Implements hook_file_operations() on behalf of pathauto.module.
- */
-function pathauto_file_operations() {
-  $operations['pathauto_update_alias'] = array(
-    'label' => t('Update URL alias'),
-    'callback' => 'pathauto_file_update_alias_multiple',
-    'callback arguments' => array('bulkupdate', array('message' => TRUE)),
-  );
-  return $operations;
-}
-
-/**
- * Update action wrapper for pathauto_file_update_alias().
- */
-function pathauto_file_update_action($file, $context = array()) {
-  pathauto_file_update_alias($file, 'bulkupdate', array('message' => TRUE));
-}
-
-/**
- * @} End of "name pathauto_file".
- */
-
-/**
- * Implements hook_form_FORM_ID_alter() for file_entity_edit() on behalf of path.module.
- */
-function path_form_file_entity_edit_alter(&$form, $form_state) {
-  // Make sure this does not show up on the delete confirmation form.
-  if (empty($form_state['confirm_delete'])) {
-    $file = $form_state['file'];
-    $langcode = function_exists('entity_language') ? entity_language('file', $file) : NULL;
-    $langcode = !empty($langcode) ? $langcode : LANGUAGE_NONE;
-    $conditions = array('source' => 'file/' . $file->fid, 'language' => $langcode);
-    $path = (isset($file->fid) ? path_load($conditions) : array());
-    if ($path === FALSE) {
-      $path = array();
-    }
-    $path += array(
-      'pid' => NULL,
-      'source' => isset($file->fid) ? 'file/' . $file->fid : NULL,
-      'alias' => '',
-      'language' => $langcode,
-    );
-    $form['path'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('URL path settings'),
-      '#collapsible' => TRUE,
-      '#collapsed' => empty($path['alias']),
-      '#group' => 'additional_settings',
-      '#attributes' => array(
-        'class' => array('path-form'),
-      ),
-      '#attached' => array(
-        'js' => array(drupal_get_path('module', 'path') . '/path.js'),
-      ),
-      '#access' => user_access('create url aliases') || user_access('administer url aliases'),
-      '#weight' => 30,
-      '#tree' => TRUE,
-      '#element_validate' => array('path_form_element_validate'),
-    );
-    $form['path']['alias'] = array(
-      '#type' => 'textfield',
-      '#title' => t('URL alias'),
-      '#default_value' => $path['alias'],
-      '#maxlength' => 255,
-      '#description' => t('Optionally specify an alternative URL by which this file can be accessed. For example, type "about" when writing an about page. Use a relative path and don\'t add a trailing slash or the URL alias won\'t work.'),
-    );
-    $form['path']['pid'] = array('#type' => 'value', '#value' => $path['pid']);
-    $form['path']['source'] = array('#type' => 'value', '#value' => $path['source']);
-    $form['path']['language'] = array('#type' => 'value', '#value' => $path['language']);
-  }
-}
-
 // @todo move
 function file_entity_entity_base_field_info(EntityTypeInterface $entity_type) {
   // @todo: Make this configurable and/or remove if
@@ -788,6 +650,10 @@ function file_entity_entity_base_field_info(EntityTypeInterface $entity_type) {
     return $fields;
   }
 }
+
+/**
+ * @} End of "name pathauto_file".
+ */
 
 /**
  * Checks if pattern(s) match mimetype(s).

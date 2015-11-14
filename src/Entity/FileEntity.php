@@ -11,6 +11,7 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 
@@ -308,6 +309,18 @@ class FileEntity extends File {
     ));
 
     return $fields;
+  }
+
+  /**
+   * Check if a file entity is readable or not.
+   *
+   * @return bool
+   *   TRUE if the file is using a readable stream wrapper, or FALSE otherwise.
+   */
+  function isReadable() {
+    $scheme = file_uri_scheme($this->getFileUri());
+    $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::READ);
+    return !empty($wrappers[$scheme]);
   }
 
   /**
