@@ -90,13 +90,6 @@ function file_entity_file_delete($file) {
   // Remove file metadata.
   db_delete('file_metadata')->condition('fid', $file->id())->execute();
 
-  // Remove this file from the search index if needed.
-  // This code is implemented in file entity module rather than in search
-  // module because file entity is implementing search module's API, not the
-  // other way around.
-  if (\Drupal::moduleHandler()->moduleExists('search')) {
-    //search_reindex($file->id(), 'file');
-  }
 }
 
 /**
