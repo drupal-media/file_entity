@@ -224,6 +224,7 @@ class FileEntity extends File {
    * {@inheritdoc}
    */
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
+    parent::preDelete($storage, $entities);
     // Remove file metadata.
     db_delete('file_metadata')
       ->condition('fid', array_keys($entities), 'IN')
