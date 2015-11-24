@@ -14,11 +14,33 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
+use Drupal\file_entity\FileEntityInterface;
 
 /**
  * Replace for the core file entity class.
  */
-class FileEntity extends File {
+class FileEntity extends File implements FileEntityInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMetadata($property) {
+    return $this->metadata[$property];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMetadata($property, $value) {
+    $this->metadata[$property] = $value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAllMetadata() {
+    return $this->metadata;
+  }
 
   /**
    * {@inheritdoc}
@@ -117,13 +139,13 @@ class FileEntity extends File {
     // We have a non-empty image file.
     $image = \Drupal::service('image.factory')->get($this->getFileUri());
     if ($image) {
-      $this->metadata['width'] = $image->getWidth();
-      $this->metadata['height'] = $image->getHeight();
+      $this->setMetadata('width', $image->getWidth());
+      $this->setMetadata('height', $image->getHeight());
     }
     else {
       // Fallback to NULL values.
-      $this->metadata['width'] = NULL;
-      $this->metadata['height'] = NULL;
+      $this->setMetadata('width', NULL);
+      $this->setMetadata('height', NULL);
     }
   }
 
@@ -144,12 +166,12 @@ class FileEntity extends File {
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
     // Save file metadata.
-    if (!empty($this->metadata)) {
+    if (!empty($this->getAllMetadata())) {
     if ($update) {
       db_delete('file_metadata')->condition('fid', $this->id())->execute();
     }
       $query = db_insert('file_metadata')->fields(array('fid', 'name', 'value'));
-      foreach ($this->metadata as $name => $value) {
+      foreach ($this->getAllMetadata() as $name => $value) {
         $query->values(array(
           'fid' => $this->id(),
           'name' => $name,
@@ -163,7 +185,7 @@ class FileEntity extends File {
       if (\Drupal::moduleHandler()->moduleExists('image') && $this->getMimeTypeType() == 'image' && $this->getSize()) {
         // If the image dimensions have changed, update any image field references
         // to this file and flush image style derivatives.
-        if (isset($this->original->metadata['width']) && ($this->metadata['width'] != $this->original->metadata['width'] || $this->metadata['height'] != $this->original->metadata['height'])) {
+        if (isset($this->original->metadata['width']) && ($this->getMetadata('width') != $this->original->metadata['width'] || $this->getMetadata('height') != $this->original->metadata['height'])) {
           $this->updateImageFieldDimensions();
         }
 
@@ -208,8 +230,8 @@ class FileEntity extends File {
             $translation = $entity->getTranslation($langcode);
             foreach ($translation->$image_field as $item) {
               if ($item->target_id == $this->id()) {
-                $item->width  = $this->metadata['width'];
-                $item->height  = $this->metadata['height'];
+                $item->width  = $this->getMetadata('width');
+                $item->height  = $this->getMetadata('height');
               }
             }
           }
