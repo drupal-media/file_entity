@@ -22,6 +22,17 @@ interface FileEntityInterface {
   public function getMetadata($property);
 
   /**
+   * Returns whether or not metadata property exists.
+   *
+   * @param string $property
+   *   A metadata property for the file.
+   *
+   * @return bool
+   *   Returns TRUE if metadata property is set.
+   */
+  public function hasMetadata($property);
+
+  /**
    * Set the metadata property for this file.
    *
    * @param string $property

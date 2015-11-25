@@ -60,27 +60,23 @@ class FileEntityUnitTest extends FileEntityTestBase {
     // Files have been saved as part of setup (in FileEntityTestHelper::setUpFiles).
     foreach ($this->files['image'] as $file) {
       $files[$file->id()] = $file->getAllMetadata();
-      $height = $file->getMetadata('height');
-      $width = $file->getMetadata('width');
       $this->assertTrue(
-        isset($height),
+        $file->hasMetadata('height'),
         'Image height retrieved on file save for an image file.'
       );
       $this->assertTrue(
-        isset($width),
+        $file->hasMetadata('width'),
         'Image width retrieved on file save for an image file.'
       );
     }
     foreach ($this->files['text'] as $file) {
       $text_fids[] = $file->id();
-      $height = $file->getMetadata('height');
-      $width = $file->getMetadata('width');
       $this->assertFalse(
-        isset($height),
+        $file->hasMetadata('height'),
         'No image height retrieved on file save for an text file.'
       );
       $this->assertFalse(
-        isset($width),
+        $file->hasMetadata('width'),
         'No image width retrieved on file save for an text file.'
       );
     }
@@ -89,36 +85,32 @@ class FileEntityUnitTest extends FileEntityTestBase {
     // Clear the cache and load fresh files objects to test file_load behavior.
     \Drupal::entityManager()->getStorage('file')->resetCache();
     foreach (file_load_multiple(array_keys($files)) as $file) {
-      $height = $file->getMetadata('height');
-      $width = $file->getMetadata('width');
       $this->assertTrue(
-        isset($height),
+        $file->hasMetadata('height'),
         'Image dimensions retrieved on file load for an image file.'
       );
       $this->assertTrue(
-        isset($width),
+        $file->hasMetadata('width'),
         'Image dimensions retrieved on file load for an image file.'
       );
       $this->assertEqual(
-        $height,
+        $file->getMetadata('height'),
         $files[$file->id()]['height'],
         'Loaded image height is equal to saved image height.'
       );
       $this->assertEqual(
-        $width,
+        $file->getMetadata('width'),
         $files[$file->id()]['width'],
         'Loaded image width is equal to saved image width.'
       );
     }
     foreach (file_load_multiple($text_fids) as $file) {
-      $height = $file->getMetadata('height');
-      $width = $file->getMetadata('width');
       $this->assertFalse(
-        isset($height),
+        $file->hasMetadata('height'),
         'No image height retrieved on file load for an text file.'
       );
       $this->assertFalse(
-        isset($width),
+        $file->hasMetadata('width'),
         'No image width retrieved on file load for an text file.'
       );
     }

@@ -25,7 +25,14 @@ class FileEntity extends File implements FileEntityInterface {
    * {@inheritdoc}
    */
   public function getMetadata($property) {
-    return $this->metadata[$property];
+    return isset($this->metadata[$property]) ? $this->metadata[$property] : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasMetadata($property) {
+    return isset($this->metadata[$property]);
   }
 
   /**
@@ -142,11 +149,6 @@ class FileEntity extends File implements FileEntityInterface {
       $this->setMetadata('width', $image->getWidth());
       $this->setMetadata('height', $image->getHeight());
     }
-    else {
-      // Fallback to NULL values.
-      $this->setMetadata('width', NULL);
-      $this->setMetadata('height', NULL);
-    }
   }
 
   /**
@@ -166,7 +168,7 @@ class FileEntity extends File implements FileEntityInterface {
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
     // Save file metadata.
-    if (!empty($this->getAllMetadata())) {
+    if (!empty($this->metadata)) {
     if ($update) {
       db_delete('file_metadata')->condition('fid', $this->id())->execute();
     }
@@ -185,7 +187,7 @@ class FileEntity extends File implements FileEntityInterface {
       if (\Drupal::moduleHandler()->moduleExists('image') && $this->getMimeTypeType() == 'image' && $this->getSize()) {
         // If the image dimensions have changed, update any image field references
         // to this file and flush image style derivatives.
-        if (isset($this->original->metadata['width']) && ($this->getMetadata('width') != $this->original->metadata['width'] || $this->getMetadata('height') != $this->original->metadata['height'])) {
+        if ($this->original->getMetadata('width') && ($this->getMetadata('width') != $this->original->getMetadata('width') || $this->getMetadata('height') != $this->original->getMetadata('height'))) {
           $this->updateImageFieldDimensions();
         }
 
