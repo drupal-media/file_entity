@@ -643,7 +643,7 @@ function file_entity_entity_base_field_info(EntityTypeInterface $entity_type) {
       ->setLabel(t('URL alias'))
       ->setTranslatable(TRUE)
       ->setDisplayOptions('form', array(
-        'type' => 'pathauto',
+        'type' => 'path',
         'weight' => 30,
       ))
       ->setDisplayConfigurable('form', TRUE);
