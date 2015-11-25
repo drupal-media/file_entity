@@ -64,3 +64,7 @@ action.configuration.file_permanent_action:
 action.configuration.file_temporary_action:
   type: action_configuration_default
   label: 'Set file to temporary configuration'
+
+field.widget.settings.file_editable:
+  type: field.widget.settings.file_generic
+  label: 'File format settings'
