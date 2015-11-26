@@ -144,3 +144,14 @@ file_entity.settings:
     _title: 'File settings'
   requirements:
     _permission: 'administer files'
+
+file_entity.file_add_archive_form:
+  path: /file/add/upload/archive
+  defaults:
+    _form: '\Drupal\file_entity\Form\FileAddArchiveForm'
+    _title: 'Add files'
+  requirements:
+    _permission: 'administer files'
+  options:
+    _admin_route: TRUE
+
