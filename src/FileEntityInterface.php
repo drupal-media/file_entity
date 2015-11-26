@@ -10,11 +10,12 @@ namespace Drupal\file_entity;
  * File entity interface.
  */
 interface FileEntityInterface {
+
   /**
-   * Get the metadata property value for the given property.
+   * Gets the metadata property value.
    *
    * @param string $property
-   *   A metadata property for the file.
+   *   A metadata property key.
    *
    * @return int|null
    *   A metadata property value.
@@ -22,10 +23,10 @@ interface FileEntityInterface {
   public function getMetadata($property);
 
   /**
-   * Returns whether or not metadata property exists.
+   * Determines whether or not metadata property exists.
    *
    * @param string $property
-   *   A metadata property for the file.
+   *   A metadata property key.
    *
    * @return bool
    *   Returns TRUE if metadata property is set.
@@ -33,19 +34,18 @@ interface FileEntityInterface {
   public function hasMetadata($property);
 
   /**
-   * Set the metadata property for this file.
+   * Sets the metadata property.
    *
    * @param string $property
-   *   A metadata property for the file.
+   *   A metadata property key.
    *
    * @param int|null $value
-   *   A metadata property value for the given property.
-   *
+   *   A metadata property value.
    */
   public function setMetadata($property, $value);
 
   /**
-   * Get all metadata properties for the file.
+   * Gets all metadata properties.
    *
    * @return array
    *   An array of metadata properties.
