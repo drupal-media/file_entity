@@ -11,7 +11,10 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
+use Drupal\Core\Url;
+use Drupal\Component\Utility\Crypt;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\file_entity\FileEntityInterface;
@@ -261,7 +264,7 @@ class FileEntity extends File implements FileEntityInterface {
    */
   public function updateBundle($type = NULL) {
     if (!$type) {
-      $type = file_get_type($this);
+      $type = $this->getType();
 
       if (!$type) {
         return;
@@ -336,7 +339,7 @@ class FileEntity extends File implements FileEntityInterface {
   }
 
   /**
-   * Check if a file entity is readable or not.
+   * Checks if a file entity is readable or not.
    *
    * @return bool
    *   TRUE if the file is using a readable stream wrapper, or FALSE otherwise.
@@ -345,6 +348,95 @@ class FileEntity extends File implements FileEntityInterface {
     $scheme = file_uri_scheme($this->getFileUri());
     $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::READ);
     return !empty($wrappers[$scheme]);
+  }
+
+  /**
+   * Checks if a file entity is writable or not.
+   *
+   * @return bool
+   *   TRUE if the file is using a visible and writable stream wrapper,
+   *   or FALSE otherwise.
+   */
+  public function isWritable() {
+    $scheme = file_uri_scheme($this->getFileUri());
+    $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::WRITE_VISIBLE);
+    return !empty($wrappers[$scheme]);
+  }
+
+  /**
+   * Checks whether the current page is the full page view of the file.
+   *
+   * @return bool
+   *   TRUE if current page is the full page view of the file,
+   *   or FALSE otherwise.
+   */
+  public function isPage() {
+    $page_file = \Drupal::routeMatch()->getParameter('file');
+    return !empty($page_file) && $page_file->id() == $this->id();
+  }
+
+  /**
+   * Checks if a file entity is considered local or not.
+   *
+   * @return bool
+   *   TRUE if the file is using a local stream wrapper, or FALSE otherwise.
+   */
+  public function isLocal() {
+    $scheme = file_uri_scheme($this->uri);
+    $wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::LOCAL);
+    return !empty($wrappers[$scheme]) && empty($wrappers[$scheme]['remote']);
+  }
+
+  /**
+   * Returns a Url for a file download.
+   *
+   * @param array $options
+   *   (optional) Options for the URL object.
+   *
+   * @return \Drupal\Core\Url
+   *   An Url object for the download url.
+   */
+  public function downloadUrl($options = array()) {
+    $url = new Url('file_entity.file_download', array('file' => $this->id()), $options);
+    if (!\Drupal::config('file_entity.settings')->get('allow_insecure_download')) {
+      $url->setOption('query', array('token' => $this->getDownloadToken()));
+    }
+    return $url;
+  }
+
+  /**
+   * Generates a token to protect a file download URL.
+   *
+   * This prevents unauthorized crawling of all file download URLs since the
+   * {file_managed}.fid column is an auto-incrementing serial field and is easy
+   * to guess or attempt many at once. This can be costly both in CPU time
+   * and bandwidth.
+   *
+   * @see image_style_path_token()
+   *
+   * @return string
+   *   An eight-character token which can be used to protect file downloads
+   *   against denial-of-service attacks.
+   */
+  public function getDownloadToken() {
+    // Return the first eight characters.
+    return substr(Crypt::hmacBase64(
+      "file/{$this->id()}/download:" . $this->getFileUri(),
+      \Drupal::service('private_key')->get() . Settings::getHashSalt()
+    ), 0, 8);
+  }
+
+  /**
+   * Determines file type for a given file.
+   *
+   * @return string
+   *   Machine name of file type that should be used for given file.
+   */
+  public function getType() {
+    $types = \Drupal::moduleHandler()->invokeAll('file_type', array($this));
+    \Drupal::moduleHandler()->alter('file_type', $types, $this);
+
+    return empty($types) ? NULL : reset($types);
   }
 
   /**
