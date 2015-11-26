@@ -44,7 +44,7 @@ class FileEditForm extends ContentEntityForm {
       ));
 
       // Add a 'replace this file' upload field if the file is writeable.
-      if (file_entity_file_is_writeable($file)) {
+      if ($file->isWritable()) {
         // Set up replacement file validation.
         $replacement_options = array();
         // Replacement file must have the same extension as the original file.

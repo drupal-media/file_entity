@@ -335,7 +335,7 @@ class FileAddForm extends FormBase {
           // Check if we can skip step 3.
           $schemes = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::WRITE_VISIBLE);
 
-          if (!file_entity_file_is_writeable($file)) {
+          if (!$file->isWritable()) {
             // The file is read-only (remote) and must use its provided scheme.
             $current_step += ($trigger == 'edit-previous') ? -1 : 1;
             $form_state->set('scheme', file_uri_scheme($file->getFileUri()));
