@@ -6,10 +6,12 @@
 
 namespace Drupal\file_entity;
 
+use Drupal\file\FileInterface;
+
 /**
  * File entity interface.
  */
-interface FileEntityInterface {
+interface FileEntityInterface extends FileInterface {
 
   /**
    * Gets the metadata property value.
