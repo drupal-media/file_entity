@@ -264,7 +264,7 @@ class FileEntity extends File implements FileEntityInterface {
    */
   public function updateBundle($type = NULL) {
     if (!$type) {
-      $type = $this->getType();
+      $type = $this->determineType();
 
       if (!$type) {
         return;
@@ -432,7 +432,7 @@ class FileEntity extends File implements FileEntityInterface {
    * @return string
    *   Machine name of file type that should be used for given file.
    */
-  public function getType() {
+  protected function determineType() {
     $types = \Drupal::moduleHandler()->invokeAll('file_type', array($this));
     \Drupal::moduleHandler()->alter('file_type', $types, $this);
 
