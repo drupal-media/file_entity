@@ -37,13 +37,6 @@ class FileController extends ControllerBase {
   }
 
   /**
-   * Archive
-   */
-  public function FileAddUploadArchive() {
-
-  }
-
-  /**
    * Usage
    *
    * @param $file

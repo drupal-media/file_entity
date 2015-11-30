@@ -83,16 +83,6 @@ function file_entity_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_menu().
  */
 function file_entity_menu() {
-  $items['file/add/upload/archive'] = array(
-    'title' => 'Archive',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('file_entity_upload_archive_form'),
-    'access arguments' => array('administer files'),
-    'file' => 'file_entity.pages.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => -5,
-  );
-
   // Optional devel module integration
   if (\Drupal::moduleHandler()->moduleExists('devel')) {
     if (\Drupal::moduleHandler()->moduleExists('token')) {

@@ -12,13 +12,14 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Utility\Bytes;
 use Drupal\file\Entity\File;
+use Drupal\file_entity\UploadValidatorsTrait;
 
 /**
- * Class FileAddArchiveForm.
- *
- * @package Drupal\file_entity\Form
+ * Form controller for archive type forms.
  */
 class FileAddArchiveForm extends FormBase {
+
+  use UploadValidatorsTrait;
 
   /**
    * {@inheritdoc}
@@ -31,25 +32,36 @@ class FileAddArchiveForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $validators = $this->getUploadValidators($form_state->get('options'));
+    $options = [
+      'file_extensions' => archiver_get_extensions(),
+    ];
+    $options = $form_state->get('options') ? $form_state->get('options') : $options;
+    $validators = $this->getUploadValidators($options);
 
     $form['upload'] = array(
       '#type' => 'managed_file',
       '#title' => $this->t('Upload an archive file'),
-      '#upload_location' => NULL,
+      '#upload_location' => 'public://',
       '#progress_indicator' => 'bar',
       '#default_value' => $form_state->has('file') ? array($form_state->get('file')->id()) : NULL,
       '#required' => TRUE,
-      '#description' => 'Files must be less than <strong>' . format_size($validators['file_validate_size'][0]) . '</strong><br> Allowed file types: <strong>' . $validators['file_validate_extensions'][0] . '</strong>',
+      '#description' => $this->t('Files must be less than <strong>' . format_size($validators['file_validate_size'][0]) . '</strong><br> Allowed file types: <strong>' . $validators['file_validate_extensions'][0] . '</strong>'),
       '#upload_validators' => $validators,
     );
 
     $form['pattern'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Pattern'),
-      '#description' => $this->t('Only files matching this pattern will be imported. For example, to import all jpg and gif files, the pattern would be <em>*.jpg|*.gif</em>. Use <em>.*</em> to extract all files in the archive.'),
+      '#description' => $this->t('Only files matching this pattern will be imported. For example, to import all jpg and gif files, the pattern would be <strong>.*jpg|.*gif</strong>. Use <strong>.*</strong> to extract all files in the archive.'),
       '#default_value' => '.*',
       '#required' => TRUE,
+    );
+
+    $form['remove_archive'] = array(
+      '#type' => 'checkbox',
+      '#title' => $this->t('Remove archive'),
+      '#description' => $this->t('Removes archive after extraction.'),
+      '#default_value' => FALSE,
     );
 
     $form['actions'] = array('#type' => 'actions');
@@ -91,62 +103,28 @@ class FileAddArchiveForm extends FormBase {
             ]);
             $file->save();
           }
+          $all_files = file_scan_directory($extract_dir, '/.*/');
+          // Get all files that don't match the pattern so we can remove them.
+          $remainig_files = array_diff_key($all_files, $files);
+          foreach ($remainig_files as $file) {
+            drupal_unlink($file->uri);
+          }
         }
         drupal_set_message($this->t('Extracted %file and added @count new files.', array('%file' => $archive->getFilename(), '@count' => count($files))));
+        if ($form_state->getValue('remove_archive')) {
+          drupal_set_message($this->t('Removed archive.'));
+          $archive->delete();
+        }
+        else {
+          $archive->setPermanent();
+          $archive->save();
+        }
       }
       else {
-        throw new \Exception(t('Cannot extract %file, not a valid archive.', array('%file' => $archive->getFileUri())));
+        $form_state->setErrorByName('', $this->t('Cannot extract %file, not a valid archive.', array('%file' => $archive->getFileUri())));
       }
     }
     $this->redirect('entity.file.collection')->send();
-  }
-
-  /**
-   * Retrieves the upload validators for a file.
-   *
-   * @param array $options
-   *   (optional) An array of options for file validation.
-   *
-   * @return array
-   *   An array suitable for passing to file_save_upload() or for a managed_file
-   *   or upload element's '#upload_validators' property.
-   */
-  public function getUploadValidators(array $options = array()) {
-    // Set up file upload validators.
-    $validators = array();
-
-    // Validate file extensions. If there are no file extensions in $params and
-    // there are no Media defaults, there is no file extension validation.
-    if (!empty($options['file_extensions'])) {
-      $validators['file_validate_extensions'] = array($options['file_extensions']);
-    }
-    else {
-      $validators['file_validate_extensions'] = array(archiver_get_extensions());
-    }
-
-    // Cap the upload size according to the system or user defined limit.
-    $max_filesize = file_upload_max_size();
-    $user_max_filesize = Bytes::toInt(\Drupal::config('file_entity.settings')
-      ->get('max_filesize'));
-
-    // If the user defined a size limit, use the smaller of the two.
-    if (!empty($user_max_filesize)) {
-      $max_filesize = min($max_filesize, $user_max_filesize);
-    }
-
-    if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
-      $max_filesize = Bytes::toInt($options['max_filesize']);
-    }
-
-    // There is always a file size limit due to the PHP server limit.
-    $validators['file_validate_size'] = array($max_filesize);
-
-    // Add other custom upload validators from options.
-    if (!empty($options['upload_validators'])) {
-      $validators += $options['upload_validators'];
-    }
-
-    return $validators;
   }
 
 }
