@@ -134,17 +134,8 @@ function file_entity_theme() {
     'file_entity_audio' => array(
       'variables' => array( 'files' => array(), 'audio_attributes' => NULL),
     ),
-    'file_entity_file_video' => array(
-      'variables' => array(
-        'files' => array(),
-        'controls' => TRUE,
-        'autoplay' => FALSE,
-        'loop' => FALSE,
-        'muted' => FALSE,
-        'width' => NULL,
-        'height' => NULL,
-      ),
-      'file' => 'file_entity.theme.inc',
+    'file_entity_video' => array(
+      'variables' => array( 'files' => array(), 'video_attributes' => NULL),
     ),
   );
 }
