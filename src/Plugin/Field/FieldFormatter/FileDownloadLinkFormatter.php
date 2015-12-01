@@ -158,7 +158,7 @@ class FileDownloadLinkFormatter extends FileFormatterBase implements ContainerFa
       $link_text = $this->token->replace($this->getSetting('text'), $token_data);
       // Set options as per anchor format described at
       // http://microformats.org/wiki/file-format-examples
-      $download_url = file_entity_download_url($file, array('attributes' => array('type' => $mime_type . '; length=' . $file->getSize())));
+      $download_url = $file->downloadUrl(array('attributes' => array('type' => $mime_type . '; length=' . $file->getSize())));
       $elements[$delta] = array(
         '#theme' => 'file_entity_download_link',
         '#file' => $file,
