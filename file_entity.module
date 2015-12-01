@@ -139,8 +139,7 @@ function file_entity_theme() {
       'file' => 'file_entity.theme.inc',
     ),
     'file_entity_download_link' => array(
-      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'text' => NULL),
-      'file' => 'file_entity.theme.inc',
+      'variables' => array('file' => NULL, 'download_link' => NULL, 'file_size' => NULL, 'attributes' => NULL),
     ),
     'file_entity_file_audio' => array(
       'variables' => array(
