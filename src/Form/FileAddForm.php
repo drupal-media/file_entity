@@ -7,7 +7,6 @@
 
 namespace Drupal\file_entity\Form;
 
-use Drupal\Component\Utility\Bytes;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormBase;

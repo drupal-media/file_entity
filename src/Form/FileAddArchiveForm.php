@@ -10,7 +10,6 @@ namespace Drupal\file_entity\Form;
 use Drupal\Core\Entity\Entity;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Component\Utility\Bytes;
 use Drupal\file\Entity\File;
 use Drupal\file_entity\UploadValidatorsTrait;
 
@@ -45,7 +44,7 @@ class FileAddArchiveForm extends FormBase {
       '#progress_indicator' => 'bar',
       '#default_value' => $form_state->has('file') ? array($form_state->get('file')->id()) : NULL,
       '#required' => TRUE,
-      '#description' => $this->t('Files must be less than <strong>' . format_size($validators['file_validate_size'][0]) . '</strong><br> Allowed file types: <strong>' . $validators['file_validate_extensions'][0] . '</strong>'),
+      '#description' => $this->t('Files must be less than <strong>%valid_size</strong><br> Allowed file types: <strong>%valid_extension</strong>', array('%valid_size' => format_size($validators['file_validate_size'][0]), '%valid_extension' => $validators['file_validate_extensions'][0])),
       '#upload_validators' => $validators,
     );
 
@@ -76,13 +75,6 @@ class FileAddArchiveForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     if ($archive = File::load($form_state->getValue('upload')[0])) {
       if ($archiver = archiver_get_archiver($archive->getFileUri())) {
@@ -90,7 +82,7 @@ class FileAddArchiveForm extends FormBase {
         $extract_dir = file_default_scheme() . '://' . pathinfo($archive->getFilename(), PATHINFO_FILENAME);
         $extract_dir = file_destination($extract_dir, FILE_EXISTS_RENAME);
         if (!file_prepare_directory($extract_dir, FILE_MODIFY_PERMISSIONS | FILE_CREATE_DIRECTORY)) {
-          throw new \Exception(t('Unable to prepar, e directory %dir for extraction.', array('%dir' => $extract_dir)));
+          throw new \Exception(t('Unable to prepare, the directory %dir for extraction.', array('%dir' => $extract_dir)));
         }
         $archiver->extract($extract_dir);
         $pattern = '/' . $form_state->getValue('pattern') . '/';
@@ -112,7 +104,7 @@ class FileAddArchiveForm extends FormBase {
         }
         drupal_set_message($this->t('Extracted %file and added @count new files.', array('%file' => $archive->getFilename(), '@count' => count($files))));
         if ($form_state->getValue('remove_archive')) {
-          drupal_set_message($this->t('Removed archive.'));
+          drupal_set_message($this->t('Archive %name was removed from the system.', array('%name' => $archive->getFilename())));
           $archive->delete();
         }
         else {
