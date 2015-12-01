@@ -46,7 +46,7 @@ function theme_file_entity_download_link($variables) {
   $file = $variables['file'];
   $icon_directory = $variables['icon_directory'];
 
-  $uri = file_entity_download_url($file)->toString();
+  $uri = $file->downloadUrl()->toString();
   $icon = theme('file_icon', array('file' => $file, 'icon_directory' => $icon_directory));
 
   // Set options as per anchor format described at
