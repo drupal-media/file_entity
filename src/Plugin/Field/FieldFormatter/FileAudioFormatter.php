@@ -8,10 +8,14 @@
 namespace Drupal\file_entity\Plugin\Field\FieldFormatter;
 
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Template\Attribute;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\file\Plugin\Field\FieldFormatter\FileFormatterBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'file_audio' formatter.
@@ -24,7 +28,57 @@ use Drupal\file\Plugin\Field\FieldFormatter\FileFormatterBase;
  *   }
  * )
  */
-class FileAudioFormatter extends FileFormatterBase {
+class FileAudioFormatter extends FileFormatterBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * The renderer service.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
+   * Constructs a FileAudioFormatter instance.
+   *
+   * @param string $plugin_id
+   *   The plugin_id for the formatter.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The definition of the field to which the formatter is associated.
+   * @param array $settings
+   *   The formatter settings.
+   * @param string $label
+   *   The formatter label display setting.
+   * @param string $view_mode
+   *   The view mode.
+   * @param array $third_party_settings
+   *   Any third party settings settings.
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param Drupal\Core\Render\RendererInterface $renderer
+   *   The rendered service
+   */
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, RendererInterface $renderer) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
+    $this->renderer = $renderer;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $plugin_id,
+      $plugin_definition,
+      $configuration['field_definition'],
+      $configuration['settings'],
+      $configuration['label'],
+      $configuration['view_mode'],
+      $configuration['third_party_settings'],
+      $container->get('renderer')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -61,8 +115,8 @@ class FileAudioFormatter extends FileFormatterBase {
       '#title' => t('Display of multiple files'),
       '#type' => 'radios',
       '#options' => array(
-        'tags' => t('Use multiple @tag tags, each with a single source', array('@tag' => '<audio>')),
-        'sources' => t('Use multiple sources within a single @tag tag', array('@tag' => '<audio>')),
+        'tags' => t('Use multiple @tag tags, each with a single source.', array('@tag' => '<audio>')),
+        'sources' => t('Use multiple sources within a single @tag tag.', array('@tag' => '<audio>')),
       ),
       '#default_value' => $this->getSetting('multiple_file_behavior'),
     );
@@ -92,7 +146,7 @@ class FileAudioFormatter extends FileFormatterBase {
     // Because we can have the files grouped in a single audio tag, we do a
     // grouping in case the multiple file behavior is not 'tags'.
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
-      if ($file->bundle() == 'audio') {
+      if ($file->getMimeTypeType() == 'audio') {
         $source_attributes = new Attribute();
         $source_attributes->setAttribute('src', file_create_url($file->getFileUri()));
         $source_attributes->setAttribute('type', $file->getMimeType());
@@ -113,21 +167,14 @@ class FileAudioFormatter extends FileFormatterBase {
         }
       }
       foreach ($source_files as $delta => $files) {
-        // The cache tags for each element should be the combination of all the
-        // cache tags, from all the files.
-        $cache_tags = array();
-        foreach ($files as $file) {
-          $cache_tags = array_merge($cache_tags, $file['file']->getCacheTags());
-        }
         $elements[$delta] = array(
           '#theme' => 'file_entity_audio',
-          '#audio_attributes' => $audio_attributes,
+          '#attributes' => $audio_attributes,
           '#files' => $files,
-          '#cache' => array(
-            // We may have duplicate cache tags, so only use the unique ones.
-            'tags' => array_unique($cache_tags),
-          ),
         );
+        foreach ($files as $file) {
+          $this->renderer->addCacheableDependency($elements[$delta], $file['file']);
+        }
       }
     }
 
