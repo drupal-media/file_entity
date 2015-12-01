@@ -38,46 +38,6 @@ function theme_file_entity_file_link($variables) {
 }
 
 /**
- * Returns HTML for displaying an HTML5 <audio> tag.
- *
- * @param array $variables
- *   An associative array containing:
- *   - file: Associative array of file data, which must include "uri".
- *   - controls: Boolean indicating whether or not controls should be displayed.
- *   - autoplay: Boolean indicating whether or not the audio should start
- *     playing automatically.
- *   - loop: Boolean indicating whether or not the audio should loop.
- *
- * @ingroup themeable
- */
-function theme_file_entity_file_audio($variables) {
-  $files = $variables['files'];
-  $output = '';
-
-  $audio_attributes = array();
-  if ($variables['controls']) {
-    $audio_attributes['controls'] = 'controls';
-  }
-  if ($variables['autoplay']) {
-    $audio_attributes['autoplay'] = 'autoplay';
-  }
-  if ($variables['loop']) {
-    $audio_attributes['loop'] = 'loop';
-  }
-
-  $output .= '<audio' . drupal_attributes($audio_attributes) . '>';
-  foreach ($files as $delta => $file) {
-    $source_attributes = array(
-      'src' => file_create_url($file['uri']),
-      'type' => $file['filemime'],
-    );
-    $output .= '<source' . drupal_attributes($source_attributes) . ' />';
-  }
-  $output .= '</audio>';
-  return $output;
-}
-
-/**
  * Returns HTML for displaying an HTML5 <video> tag.
  *
  * @param array $variables
