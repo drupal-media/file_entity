@@ -51,6 +51,7 @@ trait UploadValidatorsTrait {
     $validators['file_validate_size'] = array($max_filesize);
 
     // Add image validators.
+    $options += array('min_resolution' => 0, 'max_resolution' => 0);
     if ($options['min_resolution'] || $options['max_resolution']) {
       $validators['file_validate_image_resolution'] = array(
         $options['max_resolution'],
