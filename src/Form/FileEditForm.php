@@ -14,11 +14,14 @@ use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\file_entity\Entity\FileEntity;
 use Drupal\file_entity\Entity\FileType;
+use Drupal\file_entity\UploadValidatorsTrait;
 
 /**
  * Form controller for file type forms.
  */
 class FileEditForm extends ContentEntityForm {
+
+  use UploadValidatorsTrait;
 
   /**
    * {@inheritdoc}
@@ -50,7 +53,7 @@ class FileEditForm extends ContentEntityForm {
         $form['replace_upload'] = array(
           '#type' => 'managed_file',
           '#title' => $this->t('Replace file'),
-          '#upload_validators' => FileAddForm::getUploadValidators($replacement_options),
+          '#upload_validators' => $this->getUploadValidators($replacement_options),
         );
 
         $file_upload_help = array(
