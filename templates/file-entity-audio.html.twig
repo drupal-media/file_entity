@@ -4,7 +4,7 @@
 * Default theme implementation to display the file entity as an audio tag.
 *
 * Available variables:
-* - audio_attributes: An array of HTML attributes, intended to be added to the
+* - attributes: An array of HTML attributes, intended to be added to the
 *   audio tag.
 * - files: And array of files to be added as sources for the audio tag. Each
 *   element is an array with the following elements:
@@ -16,7 +16,7 @@
 */
 #}
 
-<audio {{ audio_attributes }}>
+<audio {{ attributes }}>
   {% for file in files %}
     <source {{ file.source_attributes }} />
   {% endfor %}

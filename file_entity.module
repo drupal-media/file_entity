@@ -139,13 +139,13 @@ function file_entity_theme() {
       'file' => 'file_entity.theme.inc',
     ),
     'file_entity_download_link' => array(
-      'variables' => array('file' => NULL, 'download_link' => NULL, 'file_size' => NULL, 'attributes' => NULL),
+      'variables' => array('file' => NULL, 'download_link' => NULL, 'icon' => '', 'file_size' => NULL, 'attributes' => NULL),
     ),
     'file_entity_audio' => array(
-      'variables' => array( 'files' => array(), 'audio_attributes' => NULL),
+      'variables' => array( 'files' => array(), 'attributes' => NULL),
     ),
     'file_entity_video' => array(
-      'variables' => array( 'files' => array(), 'video_attributes' => NULL),
+      'variables' => array( 'files' => array(), 'attributes' => NULL),
     ),
   );
 }
