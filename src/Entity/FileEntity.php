@@ -8,6 +8,7 @@
 namespace Drupal\file_entity\Entity;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -228,24 +229,35 @@ class FileEntity extends File implements FileEntityInterface {
 
         $entities = \Drupal::entityTypeManager()
           ->getStorage($entity_type_id)
-          ->load($ids);
-          /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-        foreach ($entities as $entity) {
-          foreach (array_keys($entity->getTranslationLanguages()) as $langcode) {
-            $translation = $entity->getTranslation($langcode);
-            foreach ($translation->$image_field as $item) {
-              if ($item->target_id == $this->id()) {
-                $item->width  = $this->getMetadata('width');
-                $item->height  = $this->getMetadata('height');
-              }
-            }
-          }
+          ->loadMultiple($ids);
 
-          // Save the updated field column values.
-          $entity->save();
+        foreach ($entities as $entity) {
+          $this->updateImageFieldDimensionsByEntity($entity, $image_field);
         }
       }
     }
+  }
+
+  /**
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *    The entity to be updated.
+   * @param string $image_field
+   *    The field to be updated.
+   */
+  protected function updateImageFieldDimensionsByEntity(ContentEntityInterface $entity, $image_field) {
+    foreach (array_keys($entity->getTranslationLanguages()) as $langcode) {
+      $translation = $entity->getTranslation($langcode);
+
+      foreach ($translation->$image_field as $item) {
+        if ($item->target_id == $this->id()) {
+          $item->width = $this->getMetadata('width');
+          $item->height = $this->getMetadata('height');
+        }
+      }
+    }
+
+    // Save the updated field column values.
+    $entity->save();
   }
 
   /**
