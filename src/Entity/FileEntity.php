@@ -239,6 +239,8 @@ class FileEntity extends File implements FileEntityInterface {
   }
 
   /**
+   * Update the image dimensions on the given image field on the given entity.
+   *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *    The entity to be updated.
    * @param string $image_field
