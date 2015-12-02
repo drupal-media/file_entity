@@ -23,6 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @FieldFormatter(
  *   id = "file_audio",
  *   label = @Translation("Audio"),
+ *   description = @Translation("Render the file using an HTML5 audio tag."),
  *   field_types = {
  *     "file"
  *   }

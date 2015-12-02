@@ -26,6 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @FieldFormatter(
  *   id = "file_download_link",
  *   label = @Translation("Download link"),
+ *   description = @Translation("Displays a link that will force the browser to download the file."),
  *   field_types = {
  *     "file",
  *     "image"
