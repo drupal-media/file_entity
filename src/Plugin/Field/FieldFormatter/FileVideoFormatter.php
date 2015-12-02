@@ -23,6 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @FieldFormatter(
  *   id = "file_video",
  *   label = @Translation("Video"),
+ *   description = @Translation("Render the file using an HTML5 video tag."),
  *   field_types = {
  *     "file"
  *   }
