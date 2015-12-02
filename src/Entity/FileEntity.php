@@ -223,7 +223,7 @@ class FileEntity extends File implements FileEntityInterface {
     foreach ($image_fields as $entity_type_id => $field_names) {
       foreach (array_keys($field_names) as $image_field) {
         $ids = \Drupal::entityQuery($entity_type_id)
-          ->condition($image_field . '.fid', $this->id())
+          ->condition($image_field . '.target_id', $this->id())
           ->execute();
 
         $entities = \Drupal::entityTypeManager()
