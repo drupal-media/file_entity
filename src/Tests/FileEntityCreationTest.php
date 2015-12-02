@@ -147,9 +147,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     file_unmanaged_save_data($this->randomString(), 'temporary://test_png.png');
     file_unmanaged_save_data($this->randomString(), 'temporary://test_jpg.jpg');
 
-    $archive_uri = file_unmanaged_save_data(NULL, 'temporary://archive.tar.gz');
-
-    $archive_path = file_directory_temp() . '/' . file_uri_target($archive_uri);
+    $archive_path = file_directory_temp() . '/archive.tar.gz';
     $archiver = new Tar($archive_path);
     $archiver->add('test_text.txt test_png.png test_jpg.jpg');
 
