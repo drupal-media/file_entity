@@ -168,18 +168,13 @@ class FileEntityCreationTest extends FileEntityTestBase {
 
     $this->assertText('Extracted archive.tar.gz and added 1 new files.');
 
-    // Files that match the pattern can be found in the database.
     $this->assertTrue($file = !empty($file_storage->loadByProperties(['filename' => 'test_jpg.jpg'])), "File that matches the pattern can be found in the database.");
-    // Files that match the pattern should be permanent.
     $this->assertTrue($file ? $this->getFileByFilename('test_jpg.jpg')->isPermanent() : FALSE, "File that matches the pattern is permanent.");
-    // Files that don't match the pattern are not in the database.
     $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'test_png.png'])), "File that doesn't match the pattern is not in the database.");
     $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'test_text.txt'])), "File that doesn't match the pattern is not in the database.");
-    // Archive is removed since we checked the remove_archive checkbox.
     $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'archive.tar.gz'])), "Archive is removed since we checked the remove_archive checkbox.");
 
     $all_files = file_scan_directory('public://', '/.*/');
-    // Only files that match the pattern are in the public directory.
     $this->assertTrue(array_key_exists('public://archive.tar/' . $jpg_file_path, $all_files), "File that matches the pattern is in the public directory.");
     $this->assertFalse(array_key_exists('public://archive.tar/' . $png_file_path, $all_files), "File that doesn't match the pattern is removed from the public directory.");
     $this->assertFalse(array_key_exists('public://archive.tar/' . $text_file_path, $all_files), "File that doesn't match the pattern is removed from the public directory.");
@@ -196,9 +191,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $this->drupalGet('admin/content/files/archive');
     $this->drupalPostForm(NULL, $edit, t('Submit'));
 
-    // Archive is in the database since value for remove_checkbox is FALSE.
     $this->assertTrue($file = !empty($file_storage->loadByProperties(['filename' => 'archive2.tar.gz'])), "Archive is in the database since value for remove_checkbox is FALSE.");
-    // Check if the archive is set to permanent.
     $this->assertTrue($file ? $this->getFileByFilename('archive2.tar.gz')->isPermanent() : FALSE, "Archive is permanent since value for remove_checkbox is FALSE.");
 
     $all_files = file_scan_directory('public://', '/.*/');
