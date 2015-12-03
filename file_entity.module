@@ -80,29 +80,6 @@ function file_entity_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Implements hook_menu().
- */
-function file_entity_menu() {
-  // Optional devel module integration
-  if (\Drupal::moduleHandler()->moduleExists('devel')) {
-    if (\Drupal::moduleHandler()->moduleExists('token')) {
-      $items['file/%file/devel/token'] = array(
-        'title' => 'Tokens',
-        'page callback' => 'token_devel_token_object',
-        'page arguments' => array('file', 1),
-        'access arguments' => array('access devel information'),
-        'type' => MENU_LOCAL_TASK,
-        'file' => 'token.pages.inc',
-        'file path' => drupal_get_path('module', 'token'),
-        'weight' => 5,
-      );
-    }
-  }
-
-  return $items;
-}
-
-/**
  * Implements hook_action_info_alter().
  */
 function file_entity_action_info_alter(&$actions) {
