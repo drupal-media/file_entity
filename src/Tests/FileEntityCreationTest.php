@@ -169,21 +169,21 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $this->assertText('Extracted archive.tar.gz and added 1 new files.');
 
     // Files that match the pattern can be found in the database.
-    $this->assertTrue($file = !empty($file_storage->loadByProperties(['filename' => 'test_jpg.jpg'])));
+    $this->assertTrue($file = !empty($file_storage->loadByProperties(['filename' => 'test_jpg.jpg'])), "File that matches the pattern can be found in the database.");
     // Files that match the pattern should be permanent.
-    $this->assertTrue($file ? $this->getFileByFilename('test_jpg.jpg')->isPermanent() : FALSE);
+    $this->assertTrue($file ? $this->getFileByFilename('test_jpg.jpg')->isPermanent() : FALSE, "File that matches the pattern is permanent.");
     // Files that don't match the pattern are not in the database.
-    $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'test_png.png'])));
-    $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'test_text.txt'])));
+    $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'test_png.png'])), "File that doesn't match the pattern is not in the database.");
+    $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'test_text.txt'])), "File that doesn't match the pattern is not in the database.");
     // Archive is removed since we checked the remove_archive checkbox.
-    $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'archive.tar.gz'])));
+    $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'archive.tar.gz'])), "Archive is removed since we checked the remove_archive checkbox.");
 
     $all_files = file_scan_directory('public://', '/.*/');
     // Only files that match the pattern are in the public directory.
-    $this->assertTrue(array_key_exists('public://archive.tar/' . $jpg_file_path, $all_files));
-    $this->assertFalse(array_key_exists('public://archive.tar/' . $png_file_path, $all_files));
-    $this->assertFalse(array_key_exists('public://archive.tar/' . $text_file_path, $all_files));
-    $this->assertFalse(array_key_exists('public://archive.tar.gz', $all_files));
+    $this->assertTrue(array_key_exists('public://archive.tar/' . $jpg_file_path, $all_files), "File that matches the pattern is in the public directory.");
+    $this->assertFalse(array_key_exists('public://archive.tar/' . $png_file_path, $all_files), "File that doesn't match the pattern is removed from the public directory.");
+    $this->assertFalse(array_key_exists('public://archive.tar/' . $text_file_path, $all_files), "File that doesn't match the pattern is removed from the public directory.");
+    $this->assertFalse(array_key_exists('public://archive.tar.gz', $all_files), "Archive is removed from the public directory since we checked the remove_archive checkbox.");
 
     $archive_path = file_directory_temp() . '/archive2.tar.gz';
     $archiver = new Tar($archive_path);
@@ -197,12 +197,12 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $this->drupalPostForm(NULL, $edit, t('Submit'));
 
     // Archive is in the database since value for remove_checkbox is FALSE.
-    $this->assertTrue($file = !empty($file_storage->loadByProperties(['filename' => 'archive2.tar.gz'])));
+    $this->assertTrue($file = !empty($file_storage->loadByProperties(['filename' => 'archive2.tar.gz'])), "Archive is in the database since value for remove_checkbox is FALSE.");
     // Check if the archive is set to permanent.
-    $this->assertTrue($file ? $this->getFileByFilename('archive2.tar.gz')->isPermanent() : FALSE);
+    $this->assertTrue($file ? $this->getFileByFilename('archive2.tar.gz')->isPermanent() : FALSE, "Archive is permanent since value for remove_checkbox is FALSE.");
 
     $all_files = file_scan_directory('public://', '/.*/');
-    $this->assertTrue(array_key_exists('public://archive2.tar.gz', $all_files));
+    $this->assertTrue(array_key_exists('public://archive2.tar.gz', $all_files), "Archive is in the public directory since value for remove_checkbox is FALSE.");
   }
 
 }

@@ -136,7 +136,7 @@ file_entity.settings:
     _permission: 'administer files'
 
 file_entity.file_add_archive_form:
-  path: admin/content/files/archive
+  path: /admin/content/files/archive
   defaults:
     _form: '\Drupal\file_entity\Form\FileAddArchiveForm'
     _title: 'Upload archive'
