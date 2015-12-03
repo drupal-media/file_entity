@@ -142,14 +142,21 @@ class FileEntityCreationTest extends FileEntityTestBase {
    * Test archive upload.
    */
   public function testArchiveUpload() {
+    $file_storage = \Drupal::service('entity.manager')->getStorage('file');
     // Create files for the archive.
     file_unmanaged_save_data($this->randomString(), 'temporary://test_text.txt');
     file_unmanaged_save_data($this->randomString(), 'temporary://test_png.png');
     file_unmanaged_save_data($this->randomString(), 'temporary://test_jpg.jpg');
 
+    $text_file_path = file_directory_temp() . '/test_text.txt';
+    $png_file_path = file_directory_temp() . '/test_png.png';
+    $jpg_file_path = file_directory_temp() . '/test_jpg.jpg';
+
     $archive_path = file_directory_temp() . '/archive.tar.gz';
     $archiver = new Tar($archive_path);
-    $archiver->add('test_text.txt test_png.png test_jpg.jpg');
+    $archiver->add($text_file_path);
+    $archiver->add($png_file_path);
+    $archiver->add($jpg_file_path);
 
     $edit = [
       'files[upload]' => $archive_path,
@@ -161,23 +168,27 @@ class FileEntityCreationTest extends FileEntityTestBase {
 
     $this->assertText('Extracted archive.tar.gz and added 1 new files.');
 
-    // File that match the pattern can be found in the database.
-    $this->assertEqual('test_jpg.jpg', $this->getFileByFilename('test_jpg.jpg')->getFilename());
+    // Files that match the pattern can be found in the database.
+    $this->assertTrue($file = !empty($file_storage->loadByProperties(['filename' => 'test_jpg.jpg'])));
+    // Files that match the pattern should be permanent.
+    $this->assertTrue($file ? $this->getFileByFilename('test_jpg.jpg')->isPermanent() : FALSE);
     // Files that don't match the pattern are not in the database.
-    $this->assertFalse($this->getFileByFilename('test_png.png'));
-    $this->assertFalse($this->getFileByFilename('test_text.txt'));
+    $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'test_png.png'])));
+    $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'test_text.txt'])));
     // Archive is removed since we checked the remove_archive checkbox.
-    $this->assertFalse($this->getFileByFilename('archive.tar.gz'));
+    $this->assertFalse(!empty($file_storage->loadByProperties(['filename' => 'archive.tar.gz'])));
 
     $all_files = file_scan_directory('public://', '/.*/');
     // Only files that match the pattern are in the public directory.
-    $this->assertTrue(array_key_exists('public://archive.tar/test_jpg.jpg', $all_files));
-    $this->assertFalse(array_key_exists('public://archive.tar/test_png.png', $all_files));
-    $this->assertFalse(array_key_exists('public://archive.tar/test_text.txt', $all_files));
+    $this->assertTrue(array_key_exists('public://archive.tar/' . $jpg_file_path, $all_files));
+    $this->assertFalse(array_key_exists('public://archive.tar/' . $png_file_path, $all_files));
+    $this->assertFalse(array_key_exists('public://archive.tar/' . $text_file_path, $all_files));
     $this->assertFalse(array_key_exists('public://archive.tar.gz', $all_files));
 
-    $archive_uri = file_unmanaged_save_data(NULL, 'temporary://archive2.tar.gz');
-    $archive_path = file_directory_temp() . '/' . file_uri_target($archive_uri);
+    $archive_path = file_directory_temp() . '/archive2.tar.gz';
+    $archiver = new Tar($archive_path);
+    $archiver->add($text_file_path);
+
     $edit = [
       'files[upload]' => $archive_path,
       'remove_archive' => FALSE,
@@ -186,7 +197,9 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $this->drupalPostForm(NULL, $edit, t('Submit'));
 
     // Archive is in the database since value for remove_checkbox is FALSE.
-    $this->assertEqual('archive2.tar.gz', $this->getFileByFilename('archive2.tar.gz')->getFilename());
+    $this->assertTrue($file = !empty($file_storage->loadByProperties(['filename' => 'archive2.tar.gz'])));
+    // Check if the archive is set to permanent.
+    $this->assertTrue($file ? $this->getFileByFilename('archive2.tar.gz')->isPermanent() : FALSE);
 
     $all_files = file_scan_directory('public://', '/.*/');
     $this->assertTrue(array_key_exists('public://archive2.tar.gz', $all_files));
