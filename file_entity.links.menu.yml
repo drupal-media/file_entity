@@ -1,3 +1,9 @@
+entity.file.collection:
+  title: Files
+  route_name: entity.file.collection
+  parent: system.admin_content
+  description: 'Manage files for your site.'
+
 file_entity.types:
   title: 'File types'
   description: 'Manage settings for the type of files used on your site.'
