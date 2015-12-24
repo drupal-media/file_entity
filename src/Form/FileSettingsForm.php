@@ -63,9 +63,8 @@ class FileSettingsForm extends FormBase {
     // Provide default token values.
     if (\Drupal::moduleHandler()->moduleExists('token')) {
       $form['token_help'] = array(
-        '#theme' => 'token_tree',
+        '#theme' => 'token_tree_link',
         '#token_types' => array('file'),
-        '#dialog' => TRUE,
       );
       $form['file_entity_alt']['#description'] .= t('This field supports tokens.');
       $form['file_entity_title']['#description'] .= t('This field supports tokens.');

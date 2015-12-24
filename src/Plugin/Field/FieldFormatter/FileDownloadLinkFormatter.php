@@ -120,9 +120,8 @@ class FileDownloadLinkFormatter extends FileFormatterBase implements ContainerFa
         $token_types[] = $form['#entity_type'];
       }
       $element['token_tree_link'] = array(
-        '#theme' => 'token_tree',
+        '#theme' => 'token_tree_link',
         '#token_types' => $token_types,
-        '#dialog' => TRUE,
       );
     }
 
