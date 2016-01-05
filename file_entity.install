@@ -59,11 +59,6 @@ function file_entity_install() {
     user_role_grant_permissions($rid, array('view files'));
   }
 
-  // Configure default pathauto variables if it is currently installed.
-  if (\Drupal::moduleHandler()->moduleExists('pathauto')) {
-    \Drupal::configFactory()->getEditable('pathauto.pattern')->set('patterns.file.default', 'files/[file:name]')->save();
-  }
-
   // Classify existing files according to the currently defined file types.
   // Queue all files to be classified during cron runs using the Queue API.
   $queue = \Drupal::queue('file_entity_type_determine');
