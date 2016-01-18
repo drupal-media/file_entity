@@ -50,8 +50,16 @@ function file_entity_schema() {
  * Implements hook_install().
  */
 function file_entity_install() {
-  $type_storage_definition = \Drupal::entityManager()->getFieldStorageDefinitions('file')['type'];
-  \Drupal::entityManager()->getStorage('file')->onFieldStorageDefinitionCreate($type_storage_definition);
+  /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager */
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $type_storage_definition = $entity_field_manager->getFieldStorageDefinitions('file')['type'];
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('type', 'file', 'file_entity', $type_storage_definition);
+
+  // If the pathauto module already exists, update the entity schema.
+  if (\Drupal::moduleHandler()->moduleExists('pathauto')) {
+    $path_storage_definition = $entity_field_manager->getFieldStorageDefinitions('file')['path'];
+    \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('path', 'file', 'file_entity', $path_storage_definition);
+  }
 
   // Set permissions.
   $roles = user_roles();
