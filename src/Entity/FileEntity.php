@@ -325,10 +325,12 @@ class FileEntity extends File implements FileEntityInterface {
       ))
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['uid']->setDisplayOptions('view', array(
-      'type' => 'uri_link',
-      'weight' => 1,
-    ))
+    $fields['uid']
+      ->setDisplayOptions('view', array(
+        'type' => 'uri_link',
+        'weight' => 1,
+      ))
+      ->setDisplayConfigurable('view', TRUE)
       ->setDisplayOptions('form', array(
         'type' => 'entity_reference_autocomplete',
         'weight' => -1,
@@ -340,14 +342,18 @@ class FileEntity extends File implements FileEntityInterface {
         )
       ));
 
-    $fields['filemime']->setDisplayOptions('view', array(
-      'type' => 'string',
-      'weight' => 2,
-    ));
-    $fields['filesize']->setDisplayOptions('view', array(
-      'type' => 'file_size',
-      'weight' => 3,
-    ));
+    $fields['filemime']
+      ->setDisplayOptions('view', array(
+        'type' => 'string',
+        'weight' => 2,
+      ))
+      ->setDisplayConfigurable('view', TRUE);
+    $fields['filesize']
+      ->setDisplayOptions('view', array(
+        'type' => 'file_size',
+        'weight' => 3,
+      ))
+      ->setDisplayConfigurable('view', TRUE);
 
     return $fields;
   }
