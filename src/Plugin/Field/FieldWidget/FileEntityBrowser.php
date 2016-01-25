@@ -7,7 +7,6 @@
 namespace Drupal\file_entity\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\SortArray;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -41,8 +40,6 @@ class FileEntityBrowser extends EntityReference {
    */
   protected $items;
 
-
-
   /**
    * {@inheritdoc}
    */
@@ -61,7 +58,6 @@ class FileEntityBrowser extends EntityReference {
     $element['field_widget_display']['#access'] = FALSE;
     $element['field_widget_display_settings']['#access'] = FALSE;
 
-
     $element['view_mode'] = [
       '#title' => t('File view mode'),
       '#type' => 'select',
@@ -70,7 +66,6 @@ class FileEntityBrowser extends EntityReference {
     ];
 
     return $element;
-
   }
 
   /**
