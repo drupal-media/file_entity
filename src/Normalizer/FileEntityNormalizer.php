@@ -41,7 +41,7 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
     // Avoid 'data' being treated as a field.
     $file_data = $data['data'][0]['value'];
     unset($data['data']);
-    if ( strpos($file_data, 'http') === 0 ) {
+    if ( filter_var($file_data, FILTER_VALIDATE_URL) ) {
       // Get the remote file contents.
       $file_contents = file_get_contents($file_data);
       $file_data = base64_encode($file_contents);
