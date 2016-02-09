@@ -5,14 +5,15 @@
  */
 
 namespace Drupal\file_entity\Form;
-use Drupal\Core\Form\FormBase;
+
+use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Class FileSettingsForm
  * @package Drupal\file_entity\Form
  */
-class FileSettingsForm extends FormBase {
+class FileSettingsForm extends ConfigFormBase {
 
   /**
    * Returns a unique string identifying the form.
@@ -22,6 +23,15 @@ class FileSettingsForm extends FormBase {
    */
   public function getFormId() {
     return 'file_settings';
+  }
+  
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames() {
+    return [
+      'file_entity.settings',
+    ];
   }
 
   /**
