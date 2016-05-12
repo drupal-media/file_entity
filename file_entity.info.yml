@@ -9,3 +9,5 @@ dependencies:
   - views
   - image
 configure: file_entity.settings
+test_dependencies:
+  - pathauto

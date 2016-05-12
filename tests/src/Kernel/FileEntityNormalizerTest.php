@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Contains \Drupal\file_entity\Tests\FileEntityNormalizerTest.
+ * Contains \Drupal\Tests\file_entity\Kernel\FileEntityNormalizerTest.
  */
 
-namespace Drupal\file_entity\Tests;
+namespace Drupal\Tests\file_entity\Kernel;
 
 use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\field\Entity\FieldConfig;
@@ -13,7 +13,7 @@ use Drupal\file\Entity\File;
 use Drupal\file_entity\Entity\FileType;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\simpletest\KernelTestBase;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\system\Tests\Routing\MockRouteProvider;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -44,13 +44,6 @@ class FileEntityNormalizerTest extends KernelTestBase {
     'hal',
     'system',
   );
-
-  /**
-   * Disable strict schema checking until schema is updated.
-   *
-   * @todo Update schema and remove this.
-   */
-  protected $strictConfigSchema = FALSE;
 
   /**
    * {@inheritdoc}
