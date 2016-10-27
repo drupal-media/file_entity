@@ -422,18 +422,6 @@ function file_entity_get_public_and_private_stream_wrapper_names($flag = StreamW
   return $wrappers;
 }
 
-
-/**
- * Implements hook_file_load().
- */
-function file_entity_file_load($files) {
-  // Load and unserialize metadata.
-  $results = db_query("SELECT * FROM {file_metadata} WHERE fid IN (:fids[])", array(':fids[]' => array_keys($files)));
-  foreach ($results as $result) {
-    $files[$result->fid]->metadata[$result->name] = unserialize($result->value);
-  }
-}
-
 /**
  * Returns a file object which can be passed to file_save().
  *
