@@ -459,3 +459,25 @@ function file_uri_to_object($uri, $use_existing = TRUE) {
 
   return $file;
 }
+
+/**
+ * Implements hook_preprocess_responsive_image_formatter().
+ */
+function file_entity_preprocess_responsive_image_formatter(&$variables) {
+  if (empty($variables['responsive_image']['#width']) || empty($variables['responsive_image']['#height'])) {
+    foreach (['width', 'height'] as $key) {
+      $variables['responsive_image']["#$key"] = $variables['item']->entity->getMetadata($key);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_image_formatter().
+ */
+function file_entity_preprocess_image_formatter(&$variables) {
+  if (empty($variables['image']['#width']) || empty($variables['image']['#height'])) {
+    foreach (['width', 'height'] as $key) {
+      $variables['image']["#$key"] = $variables['item']->entity->getMetadata($key);
+    }
+  }
+}
