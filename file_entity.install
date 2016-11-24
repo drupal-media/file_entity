@@ -4,6 +4,7 @@
  * @file
  * Install, update and uninstall functions for the file_entity module.
  */
+
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\views\Entity\View;
 
@@ -50,9 +51,8 @@ function file_entity_schema() {
  * Implements hook_install().
  */
 function file_entity_install() {
-  $type_storage_definition = \Drupal::entityManager()->getFieldStorageDefinitions('file')['type'];
-  \Drupal::entityManager()->getStorage('file')->onFieldStorageDefinitionCreate($type_storage_definition);
-
+  $type_storage_definition = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('file')['type'];
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('type', 'file', 'file_entity', $type_storage_definition);
   // Set permissions.
   $roles = user_roles();
   foreach ($roles as $rid => $role) {
@@ -88,6 +88,7 @@ function file_entity_uninstall() {
   // Remove the added column to the core {file_managed} table.
   db_drop_field('file_managed', 'type');
 }
+
 /**
  * Update existing bogus entries for File types Document.
  */
