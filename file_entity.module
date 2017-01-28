@@ -5,16 +5,15 @@
  * Extends Drupal file entities to be fieldable and viewable.
  */
 
-use Drupal\Component\Utility\Html;
-use Drupal\Core\Database\Query\SelectInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
-use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
+use Drupal\file_entity\Entity\FileEntity;
 use Drupal\file_entity\Entity\FileType;
 
 /**
@@ -190,6 +189,23 @@ function file_entity_entity_type_alter(&$entity_types) {
 
   // Enable Metatag support.
   //$entity_types['file']['metatags'] = TRUE;
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function file_entity_entity_operation(EntityInterface $entity) {
+  $operations = [];
+
+  if ($entity instanceof FileEntity && $entity->access('download')) {
+    $operations['download'] = array(
+      'title' => t('Download'),
+      'weight' => 100,
+      'url' => $entity->downloadUrl(),
+    );
+  }
+
+  return $operations;
 }
 
 /**
