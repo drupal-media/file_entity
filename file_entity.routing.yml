@@ -57,6 +57,15 @@ entity.file.add_form:
   options:
     _admin_route: TRUE
 
+entity.file.collection:
+  path: /admin/content/files
+  defaults:
+    _entity_list: 'file'
+    _title: 'Files'
+  requirements:
+    _permission: 'administer files'
+
+
 file_entity.file_add_upload:
   path: /file/add/upload
   defaults:
