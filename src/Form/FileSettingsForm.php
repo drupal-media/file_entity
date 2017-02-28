@@ -20,6 +20,15 @@ class FileSettingsForm extends ConfigFormBase {
   public function getFormId() {
     return 'file_settings';
   }
+  
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames() {
+    return [
+      'file_entity.settings',
+    ];
+  }
 
   /**
    * {@inheritdoc}
