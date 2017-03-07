@@ -320,30 +320,6 @@ function file_entity_file_download($uri) {
 }
 
 /**
- * @name pathauto_file Pathauto integration for the core file module.
- * @{
- */
-
-// @todo move
-function file_entity_entity_base_field_info(EntityTypeInterface $entity_type) {
-  // @todo: Make this configurable and/or remove if
-  //   https://drupal.org/node/476294 is resolved.
-  if (\Drupal::moduleHandler()->moduleExists('pathauto') && $entity_type->id() == 'file') {
-    $fields = array();
-    $fields['path'] = BaseFieldDefinition::create('path')
-      ->setCustomStorage(TRUE)
-      ->setLabel(t('URL alias'))
-      ->setTranslatable(TRUE)
-      ->setDisplayOptions('form', array(
-        'type' => 'path',
-        'weight' => 30,
-      ))
-      ->setDisplayConfigurable('form', TRUE);
-    return $fields;
-  }
-}
-
-/**
  * @} End of "name pathauto_file".
  */
 
