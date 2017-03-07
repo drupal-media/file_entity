@@ -97,6 +97,33 @@ class FileEntityReplaceTest extends FileEntityTestBase {
     // Test that Upload widget does not appear for non-local file.
     $this->drupalGet('file/' . $file2->id() . '/edit');
     $this->assertNoFieldByName('files[replace_upload]');
+  }
 
+  public function testReplaceImageFile() {
+    // Select the first image test file to use.
+    $original = $this->files['image'][1];
+    $this->assertEqual($original->getFilename(), 'image-test-transparent-indexed.gif');
+
+    // Create a user with file edit permissions.
+    $user = $this->drupalCreateUser(array('bypass file access'));
+    $this->drupalLogin($user);
+
+    // Get the next text file to use as a replacement.
+    $replacement = $this->files['image'][4];
+    $this->assertEqual($replacement->getFilename(), 'image-test-no-transparency.gif');
+
+    // Test that the file saves when uploading a replacement file.
+    $edit = array();
+    $edit['files[replace_upload]'] = drupal_realpath($replacement->getFileUri());
+    $this->drupalPostForm('file/' . $original->id() . '/edit', $edit, t('Save'));
+    $this->assertText(t('@file has been updated.', array('@file' => $original->getFilename()))/*, 'File was updated with file upload.'*/);
+
+    // Re-load the file from the database.
+    /** @var \Drupal\file\FileInterface $file */
+    $file = File::load($original->id());
+
+    // Test how file properties changed after the file has been replaced.
+    $this->assertNotEqual($file->getSize(), $original->getSize(), 'Updated file size changed from previous file.');
+    $this->assertEqual($file->getSize(), $replacement->getSize(), 'Updated file size does match the new file.');
   }
 }
